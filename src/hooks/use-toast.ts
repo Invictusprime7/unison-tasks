@@ -1,4 +1,5 @@
 import * as React from "react";
+import { toast as sonnerToast } from "@/components/ui/sonner";
 
 import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
 
@@ -143,6 +144,16 @@ function toast({ ...props }: Toast) {
       toast: { ...props, id },
     });
   const dismiss = () => dispatch({ type: "DISMISS_TOAST", toastId: id });
+
+  // Also show Sonner toast as UI renderer
+  try {
+    const title = typeof props.title === "string" ? props.title : props.title ? "Notification" : "";
+    const description = typeof props.description === "string" ? props.description : undefined;
+    if (title || description) {
+      // @ts-ignore sonner accepts message and options
+      sonnerToast(title || description || "", description ? { description } : undefined);
+    }
+  } catch {}
 
   dispatch({
     type: "ADD_TOAST",

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { CheckSquare } from "lucide-react";
+import { CheckSquare, ArrowLeft } from "lucide-react";
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -94,6 +94,14 @@ const Auth = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-accent/10 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate("/")}
+            className="absolute left-4 top-4"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
           <div className="flex justify-center mb-4">
             <CheckSquare className="h-12 w-12 text-primary" />
           </div>

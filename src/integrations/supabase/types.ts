@@ -104,6 +104,83 @@ export type Database = {
           },
         ]
       }
+      file_versions: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          file_id: string
+          id: string
+          size: number
+          storage_path: string
+          version_number: number
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          file_id: string
+          id?: string
+          size: number
+          storage_path: string
+          version_number: number
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          file_id?: string
+          id?: string
+          size?: number
+          storage_path?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_versions_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      files: {
+        Row: {
+          created_at: string | null
+          folder_path: string | null
+          id: string
+          is_favorite: boolean | null
+          mime_type: string
+          name: string
+          size: number
+          storage_path: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          folder_path?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          mime_type: string
+          name: string
+          size: number
+          storage_path: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          folder_path?: string | null
+          id?: string
+          is_favorite?: boolean | null
+          mime_type?: string
+          name?: string
+          size?: number
+          storage_path?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -198,6 +275,50 @@ export type Database = {
             columns: ["owner_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_files: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          file_id: string
+          id: string
+          is_public: boolean | null
+          permission: string
+          public_token: string | null
+          shared_by: string
+          shared_with: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          file_id: string
+          id?: string
+          is_public?: boolean | null
+          permission?: string
+          public_token?: string | null
+          shared_by: string
+          shared_with?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          file_id?: string
+          id?: string
+          is_public?: boolean | null
+          permission?: string
+          public_token?: string | null
+          shared_by?: string
+          shared_with?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_files_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
             referencedColumns: ["id"]
           },
         ]

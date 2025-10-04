@@ -42,13 +42,15 @@ const FileUploadDialog = ({
 
     setUploading(true);
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+    const userId = user?.id || null;
 
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
         const fileExt = file.name.split(".").pop();
-        const filePath = `${user.id}/${Date.now()}-${file.name}`;
+        const filePath = userId 
+          ? `${userId}/${Date.now()}-${file.name}`
+          : `anonymous/${Date.now()}-${file.name}`;
 
         // Upload to storage
         const { error: uploadError } = await supabase.storage
@@ -59,7 +61,7 @@ const FileUploadDialog = ({
 
         // Save metadata
         const { error: dbError } = await supabase.from("files").insert({
-          user_id: user.id,
+          user_id: userId,
           name: file.name,
           size: file.size,
           mime_type: file.type,

@@ -52,13 +52,15 @@ const Files = () => {
       ? `/${folderName}` 
       : `${currentFolder}/${folderName}`;
 
+    const { data: { user } } = await supabase.auth.getUser();
+
     const { error } = await supabase.from("files").insert({
       name: folderName,
       size: 0,
       mime_type: "folder",
       storage_path: "",
       folder_path: currentFolder,
-      user_id: (await supabase.auth.getUser()).data.user?.id,
+      user_id: user?.id || null,
     });
 
     if (error) {

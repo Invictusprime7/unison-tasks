@@ -11,11 +11,13 @@ import { useToast } from "@/hooks/use-toast";
 import { ImageEditor } from "@/components/creatives/ImageEditor";
 import { DesignStudio } from "@/components/creatives/DesignStudio";
 import { VideoEditor } from "@/components/creatives/VideoEditor";
+import { CreativeTaskSelector } from "@/components/creatives/CreativeTaskSelector";
 
 const Creatives = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectorOpen, setSelectorOpen] = useState(false);
 
   const { data: creativeTasks, isLoading } = useQuery({
     queryKey: ["creative-tasks", searchQuery],
@@ -77,7 +79,7 @@ const Creatives = () => {
                 <Home className="h-4 w-4 mr-2" />
                 Home
               </Button>
-              <Button onClick={() => navigate("/dashboard")}>
+              <Button onClick={() => setSelectorOpen(true)}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Creative Task
               </Button>
@@ -275,6 +277,8 @@ const Creatives = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      <CreativeTaskSelector open={selectorOpen} onOpenChange={setSelectorOpen} />
     </div>
   );
 };

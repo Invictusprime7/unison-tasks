@@ -4,8 +4,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Search, Sparkles, Layout, Palette, Globe } from "lucide-react";
+import { ArrowLeft, Search, Sparkles, Layout, Palette, Globe, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { TemplateEditor } from "./TemplateEditor";
 
 interface WebDesignKitProps {
   open: boolean;
@@ -15,6 +17,13 @@ interface WebDesignKitProps {
 
 export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [generating, setGenerating] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [currentTemplate, setCurrentTemplate] = useState<{
+    name: string;
+    aesthetic: string;
+    code: string;
+  } | null>(null);
 
   const templateCategories = {
     google: [
@@ -37,10 +46,62 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
     ],
   };
 
-  const handleTemplateSelect = (templateName: string, source: string) => {
-    toast.success(`Selected: ${templateName} from ${source}`);
-    onOpenChange(false);
+  const handleTemplateSelect = async (
+    templateName: string,
+    aesthetic: string,
+    source: string,
+    isAI: boolean
+  ) => {
+    if (!isAI) {
+      toast.success(`Selected: ${templateName} from ${source}`);
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-template", {
+        body: { templateName, aesthetic, source },
+      });
+
+      if (error) throw error;
+
+      if (data.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      setCurrentTemplate({
+        name: templateName,
+        aesthetic: aesthetic,
+        code: data.code,
+      });
+      setEditorOpen(true);
+      toast.success("Template generated successfully!");
+    } catch (error) {
+      console.error("Error generating template:", error);
+      toast.error("Failed to generate template. Please try again.");
+    } finally {
+      setGenerating(false);
+    }
   };
+
+  const handleEditorBack = () => {
+    setEditorOpen(false);
+    setCurrentTemplate(null);
+  };
+
+  if (editorOpen && currentTemplate) {
+    return (
+      <TemplateEditor
+        open={open}
+        onOpenChange={onOpenChange}
+        templateName={currentTemplate.name}
+        aesthetic={currentTemplate.aesthetic}
+        generatedCode={currentTemplate.code}
+        onBack={handleEditorBack}
+      />
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -100,7 +161,9 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
                   <CardContent>
                     <Button
                       className="w-full"
-                      onClick={() => handleTemplateSelect(template.name, "Google")}
+                      onClick={() =>
+                        handleTemplateSelect(template.name, template.aesthetic, "Google", false)
+                      }
                     >
                       Use Template
                     </Button>
@@ -122,7 +185,9 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
                   <CardContent>
                     <Button
                       className="w-full"
-                      onClick={() => handleTemplateSelect(template.name, "Canva")}
+                      onClick={() =>
+                        handleTemplateSelect(template.name, template.aesthetic, "Canva", false)
+                      }
                     >
                       Use Template
                     </Button>
@@ -155,9 +220,19 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
                   <CardContent>
                     <Button
                       className="w-full"
-                      onClick={() => handleTemplateSelect(template.name, "AI")}
+                      onClick={() =>
+                        handleTemplateSelect(template.name, template.aesthetic, "AI", true)
+                      }
+                      disabled={generating}
                     >
-                      Generate & Use
+                      {generating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating...
+                        </>
+                      ) : (
+                        "Generate & Use"
+                      )}
                     </Button>
                   </CardContent>
                 </Card>

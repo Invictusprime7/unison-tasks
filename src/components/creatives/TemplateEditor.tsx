@@ -1,10 +1,8 @@
-import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { Copy, Download, Eye, Code, ArrowLeft } from "lucide-react";
+import { Download, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import { SandpackProvider, SandpackLayout, SandpackCodeEditor, SandpackPreview } from "@codesandbox/sandpack-react";
 
 interface TemplateEditorProps {
   open: boolean;
@@ -23,16 +21,8 @@ export const TemplateEditor = ({
   generatedCode,
   onBack,
 }: TemplateEditorProps) => {
-  const [code, setCode] = useState(generatedCode);
-  const [activeTab, setActiveTab] = useState<"code" | "preview">("code");
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(code);
-    toast.success("Code copied to clipboard!");
-  };
-
   const handleDownload = () => {
-    const blob = new Blob([code], { type: "text/plain" });
+    const blob = new Blob([generatedCode], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -59,10 +49,6 @@ export const TemplateEditor = ({
               </div>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleCopy}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy
-              </Button>
               <Button variant="outline" size="sm" onClick={handleDownload}>
                 <Download className="h-4 w-4 mr-2" />
                 Download
@@ -71,45 +57,27 @@ export const TemplateEditor = ({
           </div>
         </DialogHeader>
 
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as "code" | "preview")}
-          className="flex-1 flex flex-col overflow-hidden"
-        >
-          <TabsList className="grid w-full grid-cols-2 flex-shrink-0">
-            <TabsTrigger value="code">
-              <Code className="h-4 w-4 mr-2" />
-              Code Editor
-            </TabsTrigger>
-            <TabsTrigger value="preview">
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="code" className="flex-1 overflow-hidden mt-4">
-            <Textarea
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="w-full h-full font-mono text-sm resize-none"
-              placeholder="Generated code will appear here..."
-            />
-          </TabsContent>
-
-          <TabsContent value="preview" className="flex-1 overflow-auto mt-4">
-            <div className="bg-background border rounded-lg p-8 min-h-full">
-              <div className="mb-4 p-4 bg-muted rounded border">
-                <p className="text-sm text-muted-foreground">
-                  <strong>Preview Note:</strong> The generated React component code can be
-                  copied and used directly in your project. Full interactive preview coming soon.
-                </p>
-              </div>
-              <pre className="whitespace-pre-wrap text-sm bg-muted/50 p-4 rounded border">
-                {code}
-              </pre>
-            </div>
-          </TabsContent>
-        </Tabs>
+        <div className="flex-1 overflow-hidden">
+          <SandpackProvider
+            template="react-ts"
+            theme="dark"
+            files={{
+              "/App.tsx": generatedCode,
+            }}
+          >
+            <SandpackLayout style={{ height: "100%", borderRadius: "0.5rem" }}>
+              <SandpackCodeEditor 
+                style={{ height: "100%" }}
+                showLineNumbers
+              />
+              <SandpackPreview 
+                style={{ height: "100%" }}
+                showOpenInCodeSandbox
+                showRefreshButton
+              />
+            </SandpackLayout>
+          </SandpackProvider>
+        </div>
       </DialogContent>
     </Dialog>
   );

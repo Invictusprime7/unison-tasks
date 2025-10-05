@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { Settings, Users, FolderKanban, Search, Plus, BarChart3 } from "lucide-react";
+import { Settings, Users, FolderKanban, Search, Plus, BarChart3, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { CreateProjectDialog } from "@/components/CreateProjectDialog";
@@ -103,10 +103,16 @@ const Manage = () => {
                 Overview and manage your projects and team
               </p>
             </div>
-            <Button onClick={() => setCreateDialogOpen(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Project
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => navigate("/")}>
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
+              <Button onClick={() => setCreateDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                New Project
+              </Button>
+            </div>
           </div>
         </div>
       </div>

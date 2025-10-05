@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { TasksList } from "@/components/TasksList";
 import { CreateTaskDialog } from "@/components/CreateTaskDialog";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Home } from "lucide-react";
 import { User } from "@supabase/supabase-js";
 
 interface Project {
@@ -79,17 +79,28 @@ const Project = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4 mb-2">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={() => navigate(-1)}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-4">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => navigate(-1)}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              <h1 className="text-2xl font-bold">{project.name}</h1>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/")}
               className="gap-2"
             >
-              <ArrowLeft className="h-4 w-4" />
-              Back
+              <Home className="h-4 w-4" />
+              Home
             </Button>
-            <h1 className="text-2xl font-bold">{project.name}</h1>
           </div>
           {project.description && (
             <p className="text-muted-foreground ml-12">{project.description}</p>

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Sparkles, Image, FileText, Video, Cloud } from "lucide-react";
+import { Plus, Search, Sparkles, Image, FileText, Video, Cloud, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ImageEditor } from "@/components/creatives/ImageEditor";
@@ -76,10 +76,16 @@ const Creatives = () => {
                 Manage your creative projects and ideas
               </p>
             </div>
-            <Button onClick={() => navigate("/dashboard")}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Creative Task
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => navigate("/")}>
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
+              <Button onClick={() => navigate("/dashboard")}>
+                <Plus className="h-4 w-4 mr-2" />
+                New Creative Task
+              </Button>
+            </div>
           </div>
         </div>
       </div>

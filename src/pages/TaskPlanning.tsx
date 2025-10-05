@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar } from "@/components/ui/calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarIcon, Plus, TrendingUp, Clock, ListTodo } from "lucide-react";
+import { CalendarIcon, Plus, TrendingUp, Clock, ListTodo, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
 
@@ -84,10 +84,16 @@ const TaskPlanning = () => {
                 Plan and schedule your tasks effectively
               </p>
             </div>
-            <Button onClick={() => navigate("/dashboard")}>
-              <Plus className="h-4 w-4 mr-2" />
-              New Task
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => navigate("/")}>
+                <Home className="h-4 w-4 mr-2" />
+                Home
+              </Button>
+              <Button onClick={() => navigate("/dashboard")}>
+                <Plus className="h-4 w-4 mr-2" />
+                New Task
+              </Button>
+            </div>
           </div>
         </div>
       </div>

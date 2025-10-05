@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Upload, FolderPlus, Search, Grid, List, Star } from "lucide-react";
+import { Upload, FolderPlus, Search, Grid, List, Star, Home } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import FileUploadDialog from "@/components/files/FileUploadDialog";
 import FileGrid from "@/components/files/FileGrid";
@@ -13,6 +14,7 @@ import ShareDialog from "@/components/files/ShareDialog";
 import FilePreviewDialog from "@/components/files/FilePreviewDialog";
 
 const Files = () => {
+  const navigate = useNavigate();
   const [currentFolder, setCurrentFolder] = useState("/");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -113,8 +115,20 @@ const Files = () => {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-4xl font-bold">File Manager</h1>
+          <h1 
+            className="text-4xl font-bold cursor-pointer hover:text-primary transition-colors"
+            onClick={() => navigate("/")}
+          >
+            File Manager
+          </h1>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={() => navigate("/")}
+            >
+              <Home className="h-4 w-4 mr-2" />
+              Home
+            </Button>
             <Button
               variant={viewMode === "grid" ? "default" : "outline"}
               size="icon"

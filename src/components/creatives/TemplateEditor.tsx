@@ -89,60 +89,60 @@ export const TemplateEditor = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[95vw] max-h-[95vh] h-[95vh] overflow-hidden flex flex-col">
+      <DialogContent className="max-w-[100vw] sm:max-w-[95vw] max-h-[100vh] sm:max-h-[95vh] h-[100vh] sm:h-[95vh] overflow-hidden flex flex-col p-2 sm:p-6">
         <DialogHeader className="flex-shrink-0">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={onBack}>
+              <Button variant="ghost" size="icon" onClick={onBack} className="h-8 w-8 sm:h-10 sm:w-10">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
-                <DialogTitle className="text-2xl">{templateName}</DialogTitle>
-                <p className="text-sm text-muted-foreground">{aesthetic}</p>
+                <DialogTitle className="text-lg sm:text-2xl">{templateName}</DialogTitle>
+                <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">{aesthetic}</p>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleCopyCode}>
-                <Copy className="h-4 w-4 mr-2" />
-                Copy Code
+            <div className="flex gap-1 sm:gap-2 flex-wrap">
+              <Button variant="outline" size="sm" onClick={handleCopyCode} className="text-xs sm:text-sm h-8 sm:h-9">
+                <Copy className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Copy Code</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleRefreshPreview}>
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
+              <Button variant="outline" size="sm" onClick={handleRefreshPreview} className="text-xs sm:text-sm h-8 sm:h-9">
+                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Refresh</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleDownload}>
-                <Download className="h-4 w-4 mr-2" />
-                Download
+              <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs sm:text-sm h-8 sm:h-9">
+                <Download className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Download</span>
               </Button>
             </div>
           </div>
         </DialogHeader>
 
         <Tabs defaultValue="preview" className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="flex-shrink-0">
-            <TabsTrigger value="preview" className="gap-2">
-              <Eye className="h-4 w-4" />
+          <TabsList className="flex-shrink-0 w-full sm:w-auto">
+            <TabsTrigger value="preview" className="gap-1 sm:gap-2 flex-1 sm:flex-none text-xs sm:text-sm">
+              <Eye className="h-3 w-3 sm:h-4 sm:w-4" />
               Preview
             </TabsTrigger>
-            <TabsTrigger value="code" className="gap-2">
-              <Code className="h-4 w-4" />
+            <TabsTrigger value="code" className="gap-1 sm:gap-2 flex-1 sm:flex-none text-xs sm:text-sm">
+              <Code className="h-3 w-3 sm:h-4 sm:w-4" />
               Code
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="preview" className="flex-1 mt-4 overflow-hidden">
+          <TabsContent value="preview" className="flex-1 mt-2 sm:mt-4 overflow-hidden">
             <div className="h-full border rounded-lg overflow-hidden bg-white shadow-lg">
               <iframe
                 ref={iframeRef}
                 className="w-full h-full"
                 title="Template Preview"
                 sandbox="allow-scripts allow-same-origin allow-forms"
-                style={{ border: 'none' }}
+                style={{ border: 'none', minHeight: '300px' }}
               />
             </div>
           </TabsContent>
 
-          <TabsContent value="code" className="flex-1 mt-4 overflow-hidden">
+          <TabsContent value="code" className="flex-1 mt-2 sm:mt-4 overflow-hidden">
             <div className="h-full border rounded-lg overflow-hidden bg-[#1e1e1e] relative">
               {!isEditing ? (
                 <>
@@ -151,9 +151,10 @@ export const TemplateEditor = ({
                       size="sm" 
                       variant="secondary"
                       onClick={() => setIsEditing(true)}
+                      className="text-xs h-7 sm:h-8"
                     >
-                      <Code className="h-3 w-3 mr-1" />
-                      Edit
+                      <Code className="h-3 w-3 sm:mr-1" />
+                      <span className="hidden sm:inline">Edit</span>
                     </Button>
                   </div>
                   <SyntaxHighlighter
@@ -162,9 +163,10 @@ export const TemplateEditor = ({
                     customStyle={{
                       margin: 0,
                       height: '100%',
-                      fontSize: '13px',
+                      fontSize: '11px',
                       lineHeight: '1.5',
                     }}
+                    className="sm:text-sm"
                     showLineNumbers
                     wrapLines
                   >
@@ -178,15 +180,16 @@ export const TemplateEditor = ({
                       size="sm" 
                       variant="secondary"
                       onClick={() => setIsEditing(false)}
+                      className="text-xs h-7 sm:h-8"
                     >
-                      <Eye className="h-3 w-3 mr-1" />
-                      Preview
+                      <Eye className="h-3 w-3 sm:mr-1" />
+                      <span className="hidden sm:inline">Preview</span>
                     </Button>
                   </div>
                   <textarea
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
-                    className="w-full h-full p-4 font-mono text-sm bg-[#1e1e1e] text-slate-50 resize-none focus:outline-none"
+                    className="w-full h-full p-2 sm:p-4 font-mono text-xs sm:text-sm bg-[#1e1e1e] text-slate-50 resize-none focus:outline-none"
                     spellCheck={false}
                   />
                 </>

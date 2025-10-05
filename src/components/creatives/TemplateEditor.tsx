@@ -33,13 +33,25 @@ export const TemplateEditor = ({
   }, [generatedCode]);
 
   useEffect(() => {
-    if (iframeRef.current) {
+    if (iframeRef.current && code) {
       const iframe = iframeRef.current;
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (iframeDoc) {
-        iframeDoc.open();
-        iframeDoc.write(code);
-        iframeDoc.close();
+      
+      // Wait for iframe to be ready
+      const updateIframe = () => {
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+        if (iframeDoc) {
+          iframeDoc.open();
+          iframeDoc.write(code);
+          iframeDoc.close();
+        }
+      };
+
+      // If iframe is already loaded, update immediately
+      if (iframe.contentDocument?.readyState === 'complete') {
+        updateIframe();
+      } else {
+        // Otherwise wait for load
+        iframe.onload = updateIframe;
       }
     }
   }, [code]);
@@ -119,12 +131,13 @@ export const TemplateEditor = ({
           </TabsList>
           
           <TabsContent value="preview" className="flex-1 mt-4 overflow-hidden">
-            <div className="h-full border rounded-lg overflow-hidden bg-white">
+            <div className="h-full border rounded-lg overflow-hidden bg-white shadow-lg">
               <iframe
                 ref={iframeRef}
                 className="w-full h-full"
                 title="Template Preview"
-                sandbox="allow-scripts"
+                sandbox="allow-scripts allow-same-origin allow-forms"
+                style={{ border: 'none' }}
               />
             </div>
           </TabsContent>

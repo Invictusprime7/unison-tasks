@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Sparkles, Image, FileText, Video } from "lucide-react";
+import { Plus, Search, Sparkles, Image, FileText, Video, Cloud } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { ImageEditor } from "@/components/creatives/ImageEditor";
+import { DesignStudio } from "@/components/creatives/DesignStudio";
+import { VideoEditor } from "@/components/creatives/VideoEditor";
 
 const Creatives = () => {
   const navigate = useNavigate();
@@ -82,6 +85,26 @@ const Creatives = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
+        {/* Content Cloud Section */}
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <Cloud className="h-6 w-6 text-primary" />
+              Content Cloud
+            </CardTitle>
+            <CardDescription>
+              Access professional content creation tools with AI-powered features
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <ImageEditor />
+              <DesignStudio />
+              <VideoEditor />
+            </div>
+          </CardContent>
+        </Card>
+
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input

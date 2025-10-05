@@ -1,8 +1,9 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, ArrowLeft } from "lucide-react";
+import { Download, ArrowLeft, Code, Eye } from "lucide-react";
 import { toast } from "sonner";
-import { SandpackProvider, SandpackLayout, SandpackCodeEditor, SandpackPreview } from "@codesandbox/sandpack-react";
+import { useState, useEffect, useRef } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TemplateEditorProps {
   open: boolean;
@@ -21,12 +22,31 @@ export const TemplateEditor = ({
   generatedCode,
   onBack,
 }: TemplateEditorProps) => {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [code, setCode] = useState(generatedCode);
+
+  useEffect(() => {
+    setCode(generatedCode);
+  }, [generatedCode]);
+
+  useEffect(() => {
+    if (iframeRef.current) {
+      const iframe = iframeRef.current;
+      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (iframeDoc) {
+        iframeDoc.open();
+        iframeDoc.write(code);
+        iframeDoc.close();
+      }
+    }
+  }, [code]);
+
   const handleDownload = () => {
-    const blob = new Blob([generatedCode], { type: "text/plain" });
+    const blob = new Blob([code], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${templateName.toLowerCase().replace(/\s+/g, "-")}.tsx`;
+    a.download = `${templateName.toLowerCase().replace(/\s+/g, "-")}.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -57,27 +77,40 @@ export const TemplateEditor = ({
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-hidden">
-          <SandpackProvider
-            template="react-ts"
-            theme="dark"
-            files={{
-              "/App.tsx": generatedCode,
-            }}
-          >
-            <SandpackLayout style={{ height: "100%", borderRadius: "0.5rem" }}>
-              <SandpackCodeEditor 
-                style={{ height: "100%" }}
-                showLineNumbers
+        <Tabs defaultValue="preview" className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="flex-shrink-0">
+            <TabsTrigger value="preview" className="gap-2">
+              <Eye className="h-4 w-4" />
+              Preview
+            </TabsTrigger>
+            <TabsTrigger value="code" className="gap-2">
+              <Code className="h-4 w-4" />
+              Code
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="preview" className="flex-1 mt-4 overflow-hidden">
+            <div className="h-full border rounded-lg overflow-hidden bg-white">
+              <iframe
+                ref={iframeRef}
+                className="w-full h-full"
+                title="Template Preview"
+                sandbox="allow-scripts"
               />
-              <SandpackPreview 
-                style={{ height: "100%" }}
-                showOpenInCodeSandbox
-                showRefreshButton
+            </div>
+          </TabsContent>
+
+          <TabsContent value="code" className="flex-1 mt-4 overflow-hidden">
+            <div className="h-full border rounded-lg overflow-hidden">
+              <textarea
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="w-full h-full p-4 font-mono text-sm bg-slate-950 text-slate-50 resize-none focus:outline-none"
+                spellCheck={false}
               />
-            </SandpackLayout>
-          </SandpackProvider>
-        </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

@@ -18,28 +18,34 @@ serve(async (req) => {
       throw new Error('LOVABLE_API_KEY is not configured');
     }
 
-    const systemPrompt = `You are an expert web designer and developer. Generate complete, production-ready React component code based on the template request. 
+    const systemPrompt = `You are an expert web designer and developer. Generate complete, production-ready HTML and CSS code based on the template request. 
     
 Rules:
-- Use modern React with TypeScript
-- Use Tailwind CSS for styling with semantic design tokens
-- Include all necessary imports
-- Make it responsive and accessible
-- Use proper component structure
-- Include interactive elements where appropriate
+- Use modern HTML5 semantic elements
+- Use embedded CSS in <style> tags for all styling
+- Make it fully responsive with media queries
+- Include beautiful modern design with gradients, shadows, and animations
+- Use proper accessibility attributes
+- Include interactive elements with CSS transitions and hover effects
 - Follow the aesthetic and style requested
-- Generate complete, copy-paste ready code`;
+- Generate complete, self-contained HTML that works standalone
+- Use modern CSS features like flexbox, grid, custom properties
+- Include beautiful typography and spacing`;
 
-    const userPrompt = `Generate a complete React component for a "${templateName}" with ${aesthetic} aesthetic from ${source}.
+    const userPrompt = `Generate a complete HTML page for a "${templateName}" with ${aesthetic} aesthetic from ${source}.
     
-The component should be:
-- Fully functional and interactive
+The page should be:
+- A complete HTML document with <!DOCTYPE html>, <head>, and <body>
+- Fully styled with embedded CSS in <style> tags
+- Fully functional and interactive with CSS animations
 - Beautifully styled with the ${aesthetic} aesthetic
-- Responsive across all devices
+- Responsive across all devices with media queries
 - Include sample content that demonstrates the design
-- Use modern UI patterns and best practices
+- Use modern design patterns and best practices
+- Include smooth transitions and hover effects
+- Use semantic HTML5 elements
 
-Return ONLY the complete React component code, nothing else.`;
+Return ONLY the complete HTML code with embedded CSS, nothing else. Make it production-ready and visually stunning.`;
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

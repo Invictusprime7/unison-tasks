@@ -55,7 +55,12 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Unison Tasks</h1>
+          <h1 
+            className="text-2xl font-bold cursor-pointer hover:text-primary transition-colors" 
+            onClick={() => navigate("/")}
+          >
+            Unison Tasks
+          </h1>
           <div className="flex items-center gap-4">
             <Button onClick={() => setCreateDialogOpen(true)}>
               <Plus className="h-4 w-4 mr-2" />

@@ -44,7 +44,7 @@ export const CreativeTaskSelector = ({ open, onOpenChange }: CreativeTaskSelecto
     },
   ];
 
-  if (selectedTask === "web-design-kit") {
+  if (selectedTask) {
     return (
       <WebDesignKit
         open={open}

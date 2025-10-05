@@ -13,6 +13,25 @@ export default {
       },
     },
     extend: {
+      fontSize: {
+        // Responsive font sizes using clamp()
+        'xs': ['clamp(0.75rem, 2vw, 0.875rem)', { lineHeight: '1rem' }],
+        'sm': ['clamp(0.875rem, 2.2vw, 1rem)', { lineHeight: '1.25rem' }],
+        'base': ['clamp(1rem, 2.5vw, 1.125rem)', { lineHeight: '1.5rem' }],
+        'lg': ['clamp(1.125rem, 3vw, 1.25rem)', { lineHeight: '1.75rem' }],
+        'xl': ['clamp(1.25rem, 3.5vw, 1.5rem)', { lineHeight: '1.75rem' }],
+        '2xl': ['clamp(1.5rem, 4vw, 2rem)', { lineHeight: '2rem' }],
+        '3xl': ['clamp(1.875rem, 5vw, 2.5rem)', { lineHeight: '2.25rem' }],
+        '4xl': ['clamp(2.25rem, 6vw, 3rem)', { lineHeight: '2.5rem' }],
+        '5xl': ['clamp(3rem, 7vw, 4rem)', { lineHeight: '1' }],
+      },
+      spacing: {
+        // Add safe area spacing for mobile devices (notches, home indicators)
+        'safe-top': 'env(safe-area-inset-top)',
+        'safe-bottom': 'env(safe-area-inset-bottom)',
+        'safe-left': 'env(safe-area-inset-left)',
+        'safe-right': 'env(safe-area-inset-right)',
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

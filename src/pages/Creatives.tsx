@@ -21,10 +21,6 @@ const Creatives = () => {
     queryKey: ["creative-tasks", searchQuery],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-        return [];
-      }
 
       let query = supabase
         .from("tasks")

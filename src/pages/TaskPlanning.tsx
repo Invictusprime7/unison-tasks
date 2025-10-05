@@ -18,10 +18,6 @@ const TaskPlanning = () => {
     queryKey: ["planning-tasks"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/auth");
-        return [];
-      }
 
       const { data, error } = await supabase
         .from("tasks")

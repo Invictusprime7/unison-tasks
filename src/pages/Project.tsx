@@ -24,20 +24,14 @@ const Project = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null);
-      if (!session) {
-        navigate("/auth");
-      }
     });
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
-      if (!session) {
-        navigate("/auth");
-      }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -117,15 +111,15 @@ const Project = () => {
           </Button>
         </div>
 
-        {id && user && <TasksList projectId={id} userId={user.id} />}
+        {id && <TasksList projectId={id} userId={user?.id || ""} />}
       </main>
 
-      {id && user && (
+      {id && (
         <CreateTaskDialog
           open={createDialogOpen}
           onOpenChange={setCreateDialogOpen}
           projectId={id}
-          userId={user.id}
+          userId={user?.id || ""}
         />
       )}
     </div>

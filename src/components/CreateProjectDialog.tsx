@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import {
   Dialog,
@@ -21,6 +22,7 @@ interface CreateProjectDialogProps {
 
 export const CreateProjectDialog = ({ open, onOpenChange, userId }: CreateProjectDialogProps) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -50,10 +52,11 @@ export const CreateProjectDialog = ({ open, onOpenChange, userId }: CreateProjec
     } else {
       toast({
         title: "Success",
-        description: "Project created successfully!",
+        description: "Project created! Opening creative tools...",
       });
       onOpenChange(false);
       (e.target as HTMLFormElement).reset();
+      navigate("/creatives");
     }
   };
 

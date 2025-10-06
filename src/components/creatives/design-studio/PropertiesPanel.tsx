@@ -25,9 +25,19 @@ export const PropertiesPanel = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground text-center py-8">
             Select an object to edit its properties
           </p>
+          <div className="text-xs text-muted-foreground mt-4 space-y-2 p-4 bg-muted/20 rounded-lg">
+            <p>💡 <strong>WYSIWYG Tips:</strong></p>
+            <ul className="list-disc list-inside space-y-1 ml-2">
+              <li>Double-click text to edit inline</li>
+              <li>Drag corners to resize</li>
+              <li>Use toolbar colors for quick changes</li>
+              <li>Press Delete to remove objects</li>
+              <li>Ctrl+D to duplicate</li>
+            </ul>
+          </div>
         </CardContent>
       </Card>
     );

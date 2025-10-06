@@ -14,6 +14,10 @@ import {
   Move,
   RotateCw,
   Palette,
+  Save,
+  FolderOpen,
+  History,
+  BookmarkPlus,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,6 +39,11 @@ interface CanvasToolbarProps {
   onFillColorChange: (color: string) => void;
   strokeColor: string;
   onStrokeColorChange: (color: string) => void;
+  onSaveTemplate: () => void;
+  onOpenTemplates: () => void;
+  onShowVersionHistory: () => void;
+  onSaveVersion: () => void;
+  hasTemplate: boolean;
 }
 
 export const CanvasToolbar = ({
@@ -54,6 +63,11 @@ export const CanvasToolbar = ({
   onFillColorChange,
   strokeColor,
   onStrokeColorChange,
+  onSaveTemplate,
+  onOpenTemplates,
+  onShowVersionHistory,
+  onSaveVersion,
+  hasTemplate,
 }: CanvasToolbarProps) => {
   return (
     <div className="border-b bg-card p-4">
@@ -174,6 +188,32 @@ export const CanvasToolbar = ({
               className="h-8 w-12 cursor-pointer p-1"
             />
           </div>
+        </div>
+
+        <Separator orientation="vertical" className="h-8" />
+
+        {/* Template Actions */}
+        <div className="flex gap-1">
+          <Button variant="outline" size="sm" onClick={onOpenTemplates}>
+            <FolderOpen className="h-4 w-4 mr-2" />
+            Templates
+          </Button>
+          <Button variant="outline" size="sm" onClick={onSaveTemplate}>
+            <Save className="h-4 w-4 mr-2" />
+            Save as Template
+          </Button>
+          {hasTemplate && (
+            <>
+              <Button variant="outline" size="sm" onClick={onSaveVersion}>
+                <BookmarkPlus className="h-4 w-4 mr-2" />
+                Save Version
+              </Button>
+              <Button variant="outline" size="sm" onClick={onShowVersionHistory}>
+                <History className="h-4 w-4 mr-2" />
+                History
+              </Button>
+            </>
+          )}
         </div>
 
         <Separator orientation="vertical" className="h-8" />

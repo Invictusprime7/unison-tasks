@@ -56,6 +56,42 @@ export type Database = {
           },
         ]
       }
+      design_templates: {
+        Row: {
+          canvas_data: Json
+          created_at: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          name: string
+          thumbnail_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canvas_data: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canvas_data?: Json
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          name?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       file_attachments: {
         Row: {
           created_at: string | null
@@ -383,6 +419,41 @@ export type Database = {
             columns: ["project_id"]
             isOneToOne: false
             referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_versions: {
+        Row: {
+          canvas_data: Json
+          created_at: string
+          created_by: string
+          id: string
+          template_id: string
+          version_number: number
+        }
+        Insert: {
+          canvas_data: Json
+          created_at?: string
+          created_by: string
+          id?: string
+          template_id: string
+          version_number: number
+        }
+        Update: {
+          canvas_data?: Json
+          created_at?: string
+          created_by?: string
+          id?: string
+          template_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_versions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "design_templates"
             referencedColumns: ["id"]
           },
         ]

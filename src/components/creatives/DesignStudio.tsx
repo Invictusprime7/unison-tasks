@@ -4,6 +4,10 @@ import { useToast } from "@/hooks/use-toast";
 import { CanvasToolbar } from "./design-studio/CanvasToolbar";
 import { PropertiesPanel } from "./design-studio/PropertiesPanel";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { TemplateLibrary } from "./design-studio/TemplateLibrary";
+import { SaveTemplateDialog } from "./design-studio/SaveTemplateDialog";
+import { VersionHistory } from "./design-studio/VersionHistory";
+import { supabase } from "@/integrations/supabase/client";
 
 export const DesignStudio = () => {
   const { toast } = useToast();
@@ -15,6 +19,10 @@ export const DesignStudio = () => {
   const [fillColor, setFillColor] = useState("#3b82f6");
   const [strokeColor, setStrokeColor] = useState("#1e40af");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null);
 
   // Initialize canvas
   useEffect(() => {
@@ -293,6 +301,60 @@ export const DesignStudio = () => {
     setSelectedObject({ ...selectedObject });
   };
 
+  const getCanvasData = () => {
+    if (!fabricCanvas) return null;
+    return fabricCanvas.toJSON();
+  };
+
+  const loadCanvasData = (canvasData: any) => {
+    if (!fabricCanvas) return;
+    fabricCanvas.loadFromJSON(canvasData, () => {
+      fabricCanvas.renderAll();
+      toast({ title: "Template loaded successfully" });
+    });
+  };
+
+  const saveAsTemplate = () => {
+    setShowSaveDialog(true);
+  };
+
+  const handleTemplateLoad = (canvasData: any) => {
+    loadCanvasData(canvasData);
+  };
+
+  const handleVersionRestore = (canvasData: any) => {
+    loadCanvasData(canvasData);
+  };
+
+  // Auto-save current state for version control
+  const saveVersion = async () => {
+    if (!fabricCanvas || !currentTemplateId) return;
+    
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const canvasData = getCanvasData();
+    
+    // Get latest version number
+    const { data: versions } = await supabase
+      .from("template_versions")
+      .select("version_number")
+      .eq("template_id", currentTemplateId)
+      .order("version_number", { ascending: false })
+      .limit(1);
+
+    const nextVersion = versions && versions.length > 0 ? versions[0].version_number + 1 : 1;
+
+    await supabase.from("template_versions").insert({
+      template_id: currentTemplateId,
+      version_number: nextVersion,
+      canvas_data: canvasData,
+      created_by: user.id,
+    });
+
+    toast({ title: "Version saved" });
+  };
+
   return (
     <div className="h-full flex flex-col">
       <input
@@ -320,6 +382,11 @@ export const DesignStudio = () => {
         onFillColorChange={setFillColor}
         strokeColor={strokeColor}
         onStrokeColorChange={setStrokeColor}
+        onSaveTemplate={saveAsTemplate}
+        onOpenTemplates={() => setShowTemplateLibrary(true)}
+        onShowVersionHistory={() => setShowVersionHistory(true)}
+        onSaveVersion={saveVersion}
+        hasTemplate={!!currentTemplateId}
       />
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
@@ -351,6 +418,25 @@ export const DesignStudio = () => {
           />
         </ResizablePanel>
       </ResizablePanelGroup>
+
+      <TemplateLibrary
+        open={showTemplateLibrary}
+        onOpenChange={setShowTemplateLibrary}
+        onLoadTemplate={handleTemplateLoad}
+      />
+
+      <SaveTemplateDialog
+        open={showSaveDialog}
+        onOpenChange={setShowSaveDialog}
+        canvasData={getCanvasData()}
+      />
+
+      <VersionHistory
+        open={showVersionHistory}
+        onOpenChange={setShowVersionHistory}
+        templateId={currentTemplateId}
+        onRestoreVersion={handleVersionRestore}
+      />
     </div>
   );
 };

@@ -78,23 +78,31 @@ export const DesignStudio = () => {
           };
           reader.readAsDataURL(file);
         }
-      } else if (e.dataTransfer?.getData("text/plain")) {
-        const imageUrl = e.dataTransfer.getData("text/plain");
-        if (imageUrl.startsWith("http") || imageUrl.startsWith("data:image")) {
-          FabricImage.fromURL(imageUrl).then((img) => {
-            img.scale(0.5);
-            img.set({
-              left: e.offsetX,
-              top: e.offsetY,
-            });
-            canvas.add(img);
-            canvas.renderAll();
-            toast({
-              title: "Image added",
-              description: "Image has been added to the canvas",
-            });
+      }
+      
+      // Handle URL drops (from file browser)
+      const imageUrl = e.dataTransfer?.getData("text/plain");
+      if (imageUrl && (imageUrl.startsWith("http") || imageUrl.startsWith("data:image"))) {
+        FabricImage.fromURL(imageUrl, { crossOrigin: "anonymous" }).then((img) => {
+          img.scale(0.5);
+          img.set({
+            left: e.offsetX,
+            top: e.offsetY,
           });
-        }
+          canvas.add(img);
+          canvas.renderAll();
+          toast({
+            title: "Image added",
+            description: "Image has been added to the canvas",
+          });
+        }).catch((error) => {
+          console.error("Error loading image:", error);
+          toast({
+            title: "Error",
+            description: "Failed to load image. Make sure the file storage bucket is public.",
+            variant: "destructive",
+          });
+        });
       }
     };
 

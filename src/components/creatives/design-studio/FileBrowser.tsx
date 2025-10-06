@@ -40,10 +40,10 @@ export const FileBrowser = ({ open, onOpenChange }: FileBrowserProps) => {
     if (file.mime_type !== "folder") {
       const { data } = await supabase.storage
         .from("user-files")
-        .createSignedUrl(file.storage_path, 3600);
+        .getPublicUrl(file.storage_path);
 
-      if (data?.signedUrl) {
-        e.dataTransfer.setData("text/uri-list", data.signedUrl);
+      if (data?.publicUrl) {
+        e.dataTransfer.setData("text/plain", data.publicUrl);
         e.dataTransfer.effectAllowed = "copy";
       }
     }

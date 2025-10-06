@@ -8,6 +8,7 @@ import { ArrowLeft, Search, Sparkles, Layout, Palette, Globe, Loader2 } from "lu
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateEditor } from "./TemplateEditor";
+import DesignKitSection from "./design-studio/DesignKitSection";
 
 interface WebDesignKitProps {
   open: boolean;
@@ -24,6 +25,8 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
     aesthetic: string;
     code: string;
   } | null>(null);
+
+  const [selectedVariant, setSelectedVariant] = useState<"hero" | "features" | "pricing">("hero");
 
   const templateCategories = {
     google: [
@@ -122,6 +125,80 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
             </div>
           </div>
         </DialogHeader>
+
+        {/* Live Preview Section */}
+        <div className="my-6 border rounded-lg overflow-hidden bg-background">
+          <div className="p-4 bg-muted border-b flex items-center justify-between">
+            <h3 className="font-semibold text-sm">Live Preview</h3>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant={selectedVariant === "hero" ? "default" : "outline"}
+                onClick={() => setSelectedVariant("hero")}
+              >
+                Hero
+              </Button>
+              <Button
+                size="sm"
+                variant={selectedVariant === "features" ? "default" : "outline"}
+                onClick={() => setSelectedVariant("features")}
+              >
+                Features
+              </Button>
+              <Button
+                size="sm"
+                variant={selectedVariant === "features" ? "default" : "outline"}
+                onClick={() => setSelectedVariant("pricing")}
+              >
+                Pricing
+              </Button>
+            </div>
+          </div>
+          <div className="p-0">
+            <DesignKitSection
+              variant={selectedVariant}
+              title={
+                selectedVariant === "hero"
+                  ? "Design anything, fast."
+                  : selectedVariant === "features"
+                  ? "Everything you need"
+                  : "Simple pricing"
+              }
+              subtitle={
+                selectedVariant === "hero"
+                  ? "Drop-in, brandable, accessible."
+                  : selectedVariant === "features"
+                  ? "Production-ready building blocks"
+                  : "Pick a plan"
+              }
+              description={selectedVariant === "hero" ? "NEW" : undefined}
+              cta={selectedVariant === "hero" ? { label: "Get Started", onClick: () => toast.info("CTA clicked!") } : undefined}
+              media={
+                selectedVariant === "hero"
+                  ? { kind: "image", src: "https://picsum.photos/720/480" }
+                  : undefined
+              }
+              features={
+                selectedVariant === "features"
+                  ? [
+                      { icon: "⚡", title: "Fast", description: "Optimized rendering" },
+                      { icon: "🎨", title: "Brandable", description: "Design tokens + themes" },
+                      { icon: "♿", title: "Accessible", description: "Semantics-first" },
+                    ]
+                  : undefined
+              }
+              tiers={
+                selectedVariant === "pricing"
+                  ? [
+                      { name: "Starter", price: "$0", features: ["1 project", "Community"], cta: { label: "Choose" } },
+                      { name: "Pro", price: "$19/mo", features: ["Unlimited projects", "Priority support"], cta: { label: "Try Pro" } },
+                      { name: "Team", price: "$49/mo", features: ["Collaboration", "SSO"], cta: { label: "Contact Sales" } },
+                    ]
+                  : undefined
+              }
+            />
+          </div>
+        </div>
 
         <div className="relative mt-4">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

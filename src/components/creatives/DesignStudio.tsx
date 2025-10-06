@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { CanvasToolbar } from "./design-studio/CanvasToolbar";
 import { PropertiesPanel } from "./design-studio/PropertiesPanel";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { TemplateLibrary } from "./design-studio/TemplateLibrary";
 import { SaveTemplateDialog } from "./design-studio/SaveTemplateDialog";
 import { VersionHistory } from "./design-studio/VersionHistory";
@@ -451,10 +452,12 @@ export const DesignStudio = forwardRef((props, ref) => {
         <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-          <PropertiesPanel
-            selectedObject={selectedObject}
-            onPropertyChange={handlePropertyChange}
-          />
+          <ScrollArea className="h-full">
+            <PropertiesPanel
+              selectedObject={selectedObject}
+              onPropertyChange={handlePropertyChange}
+            />
+          </ScrollArea>
         </ResizablePanel>
       </ResizablePanelGroup>
 

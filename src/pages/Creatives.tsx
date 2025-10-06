@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,26 +18,6 @@ const Creatives = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectorOpen, setSelectorOpen] = useState(false);
-
-  useEffect(() => {
-    // Set up auth listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
-        toast({ title: "Please sign in", description: "You need to be logged in to use Creatives." });
-        navigate("/auth");
-      }
-    });
-
-    // Then check existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session) {
-        toast({ title: "Please sign in", description: "You need to be logged in to use Creatives." });
-        navigate("/auth");
-      }
-    });
-
-    return () => { subscription.unsubscribe(); };
-  }, [navigate, toast]);
 
   const { data: creativeTasks, isLoading } = useQuery({
     queryKey: ["creative-tasks", searchQuery],

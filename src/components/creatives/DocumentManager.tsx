@@ -22,13 +22,9 @@ export const DocumentManager = () => {
   const { data: documents, isLoading, refetch } = useQuery({
     queryKey: ["documents"],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
       const { data, error } = await supabase
         .from("documents")
         .select("*")
-        .eq("user_id", user.id)
         .order("updated_at", { ascending: false });
 
       if (error) throw error;
@@ -43,17 +39,15 @@ export const DocumentManager = () => {
     }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      // Create the document
+      // Create the document without requiring authentication
       const { data: doc, error: docError } = await supabase
         .from("documents")
-        .insert({
-          title: newDocTitle,
-          type: newDocType,
-          user_id: user.id,
-        })
+        .insert([
+          {
+            title: newDocTitle,
+            type: newDocType,
+          },
+        ])
         .select()
         .single();
 

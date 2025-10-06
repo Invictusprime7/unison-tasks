@@ -98,7 +98,13 @@ export const DocumentManager = () => {
       // Navigate to the document in the studio
       navigate(`/design-studio/${doc.id}`);
     } catch (error: any) {
-      toast({ title: "Error", description: error.message, variant: "destructive" });
+      const msg = error?.message || "Something went wrong";
+      if (msg.toLowerCase().includes("not authenticated")) {
+        toast({ title: "Please sign in", description: "Log in to create a document." });
+        navigate("/auth");
+      } else {
+        toast({ title: "Error", description: msg, variant: "destructive" });
+      }
     }
   };
 

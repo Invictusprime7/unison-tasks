@@ -5,11 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Search, Sparkles, Image, FileText, Video, Cloud, Home } from "lucide-react";
+import { Plus, Search, Sparkles, Image, FileText, Video, Cloud, Home, Maximize2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { ImageEditor } from "@/components/creatives/ImageEditor";
-import { DesignStudio } from "@/components/creatives/DesignStudio";
 import { VideoEditor } from "@/components/creatives/VideoEditor";
 import { CreativeTaskSelector } from "@/components/creatives/CreativeTaskSelector";
 
@@ -103,7 +102,28 @@ const Creatives = () => {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <ImageEditor />
-              <DesignStudio />
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      Design Studio
+                    </span>
+                    <Maximize2 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </CardTitle>
+                  <CardDescription>
+                    Create stunning designs with professional tools
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => navigate("/design-studio")}
+                  >
+                    Open Full Studio
+                  </Button>
+                </CardContent>
+              </Card>
               <VideoEditor />
             </div>
           </CardContent>

@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
-import { Canvas as FabricCanvas, Rect, Circle, IText, FabricImage, Point } from "fabric";
+import { Canvas as FabricCanvas, Rect, Circle, IText, FabricImage, Point, filters } from "fabric";
 import { useToast } from "@/hooks/use-toast";
 import { CanvasToolbar } from "./design-studio/CanvasToolbar";
 import { PropertiesPanel } from "./design-studio/PropertiesPanel";
+import { FiltersPanel } from "./design-studio/FiltersPanel";
+import { PagesPanel } from "./design-studio/PagesPanel";
+import { AlignmentTools } from "./design-studio/AlignmentTools";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TemplateLibrary } from "./design-studio/TemplateLibrary";
 import { SaveTemplateDialog } from "./design-studio/SaveTemplateDialog";
 import { VersionHistory } from "./design-studio/VersionHistory";
@@ -28,6 +32,19 @@ export const DesignStudio = forwardRef((props, ref) => {
   // Undo/Redo state
   const [history, setHistory] = useState<string[]>([]);
   const [redoStack, setRedoStack] = useState<string[]>([]);
+  
+  // Pages state
+  const [pages, setPages] = useState([
+    { id: "page-1", name: "Page 1", canvasData: null, thumbnail: undefined }
+  ]);
+  const [currentPageId, setCurrentPageId] = useState("page-1");
+  
+  // Grid and snap state
+  const [showGrid, setShowGrid] = useState(false);
+  const [snapEnabled, setSnapEnabled] = useState(true);
+  
+  // Autosave
+  const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Initialize canvas
   useEffect(() => {
@@ -351,6 +368,20 @@ export const DesignStudio = forwardRef((props, ref) => {
     toast({ title: "Design exported", description: "Your design has been downloaded" });
   };
 
+  const exportCanvasJPEG = () => {
+    if (!fabricCanvas) return;
+    const dataURL = fabricCanvas.toDataURL({
+      format: "jpeg",
+      quality: 0.9,
+      multiplier: 1,
+    });
+    const link = document.createElement("a");
+    link.download = `design-${Date.now()}.jpg`;
+    link.href = dataURL;
+    link.click();
+    toast({ title: "Design exported as JPEG", description: "Your design has been downloaded" });
+  };
+
   const pushHistory = () => {
     if (!fabricCanvas) return;
     const state = JSON.stringify(fabricCanvas.toJSON());
@@ -567,6 +598,167 @@ export const DesignStudio = forwardRef((props, ref) => {
     }
   };
 
+  // Alignment functions
+  const alignObjects = (alignment: string) => {
+    if (!fabricCanvas) return;
+    const activeObject = fabricCanvas.getActiveObject();
+    if (!activeObject) return;
+
+    const canvasWidth = fabricCanvas.width!;
+    const canvasHeight = fabricCanvas.height!;
+
+    switch (alignment) {
+      case "left":
+        activeObject.set({ left: 0 });
+        break;
+      case "center-h":
+        activeObject.set({ left: (canvasWidth - (activeObject.width! * (activeObject.scaleX || 1))) / 2 });
+        break;
+      case "right":
+        activeObject.set({ left: canvasWidth - (activeObject.width! * (activeObject.scaleX || 1)) });
+        break;
+      case "top":
+        activeObject.set({ top: 0 });
+        break;
+      case "center-v":
+        activeObject.set({ top: (canvasHeight - (activeObject.height! * (activeObject.scaleY || 1))) / 2 });
+        break;
+      case "bottom":
+        activeObject.set({ top: canvasHeight - (activeObject.height! * (activeObject.scaleY || 1)) });
+        break;
+    }
+
+    activeObject.setCoords();
+    fabricCanvas.renderAll();
+    pushHistory();
+    toast({ title: "Object aligned" });
+  };
+
+  // Filter functions
+  const applyFilter = (filterType: string, value: number) => {
+    if (!fabricCanvas || !selectedObject || selectedObject.type !== "image") return;
+
+    let filterInstance;
+    switch (filterType) {
+      case "brightness":
+        filterInstance = new filters.Brightness({ brightness: value / 100 });
+        break;
+      case "contrast":
+        filterInstance = new filters.Contrast({ contrast: value });
+        break;
+      case "saturation":
+        filterInstance = new filters.Saturation({ saturation: value });
+        break;
+      default:
+        return;
+    }
+
+    // Remove existing filter of the same type
+    selectedObject.filters = selectedObject.filters?.filter((f: any) => f.type !== filterType) || [];
+    selectedObject.filters.push(filterInstance);
+    selectedObject.applyFilters();
+    fabricCanvas.renderAll();
+    setSelectedObject({ ...selectedObject });
+  };
+
+  const resetFilters = () => {
+    if (!fabricCanvas || !selectedObject || selectedObject.type !== "image") return;
+    selectedObject.filters = [];
+    selectedObject.applyFilters();
+    fabricCanvas.renderAll();
+    setSelectedObject({ ...selectedObject });
+    toast({ title: "Filters reset" });
+  };
+
+  // Pages functions
+  const handlePageSelect = (pageId: string) => {
+    if (!fabricCanvas) return;
+    
+    // Save current page data
+    const currentPage = pages.find(p => p.id === currentPageId);
+    if (currentPage) {
+      const updatedPages = pages.map(p =>
+        p.id === currentPageId
+          ? { ...p, canvasData: fabricCanvas.toJSON(), thumbnail: fabricCanvas.toDataURL({ multiplier: 0.1 }) }
+          : p
+      );
+      setPages(updatedPages);
+    }
+
+    // Load new page
+    const newPage = pages.find(p => p.id === pageId);
+    if (newPage?.canvasData) {
+      fabricCanvas.loadFromJSON(newPage.canvasData, () => {
+        fabricCanvas.renderAll();
+      });
+    } else {
+      fabricCanvas.clear();
+      fabricCanvas.backgroundColor = "#ffffff";
+      fabricCanvas.renderAll();
+    }
+
+    setCurrentPageId(pageId);
+  };
+
+  const addPage = () => {
+    const newPage = {
+      id: `page-${Date.now()}`,
+      name: `Page ${pages.length + 1}`,
+      canvasData: null,
+      thumbnail: undefined,
+    };
+    setPages([...pages, newPage]);
+    handlePageSelect(newPage.id);
+    toast({ title: "Page added" });
+  };
+
+  const deletePage = (pageId: string) => {
+    if (pages.length === 1) {
+      toast({ title: "Cannot delete", description: "At least one page is required" });
+      return;
+    }
+    const updatedPages = pages.filter(p => p.id !== pageId);
+    setPages(updatedPages);
+    if (currentPageId === pageId) {
+      handlePageSelect(updatedPages[0].id);
+    }
+    toast({ title: "Page deleted" });
+  };
+
+  const duplicatePage = (pageId: string) => {
+    const page = pages.find(p => p.id === pageId);
+    if (!page) return;
+    
+    const newPage = {
+      ...page,
+      id: `page-${Date.now()}`,
+      name: `${page.name} Copy`,
+    };
+    setPages([...pages, newPage]);
+    toast({ title: "Page duplicated" });
+  };
+
+  const renamePage = (pageId: string, name: string) => {
+    setPages(pages.map(p => p.id === pageId ? { ...p, name } : p));
+  };
+
+  // Autosave effect
+  useEffect(() => {
+    if (!fabricCanvas || !currentTemplateId) return;
+
+    const autoSave = () => {
+      saveVersion();
+    };
+
+    autosaveTimerRef.current = setInterval(autoSave, 30000); // Autosave every 30 seconds
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearInterval(autosaveTimerRef.current);
+      }
+    };
+  }, [fabricCanvas, currentTemplateId]);
+
   useImperativeHandle(ref, () => ({
     addImageFromUrl,
   }));
@@ -591,6 +783,7 @@ export const DesignStudio = forwardRef((props, ref) => {
         onDelete={deleteSelected}
         onClear={clearCanvas}
         onExport={exportCanvas}
+        onExportJPEG={exportCanvasJPEG}
         onDuplicate={duplicateSelected}
         onBringForward={bringForward}
         onSendBackward={sendBackward}
@@ -607,6 +800,15 @@ export const DesignStudio = forwardRef((props, ref) => {
         onRedo={redo}
         canUndo={history.length > 0}
         canRedo={redoStack.length > 0}
+        alignmentTools={
+          <AlignmentTools
+            onAlign={alignObjects}
+            onToggleGrid={() => setShowGrid(!showGrid)}
+            onToggleSnap={() => setSnapEnabled(!snapEnabled)}
+            showGrid={showGrid}
+            snapEnabled={snapEnabled}
+          />
+        }
       />
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
@@ -634,13 +836,42 @@ export const DesignStudio = forwardRef((props, ref) => {
         <ResizableHandle withHandle />
 
         <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-          <ScrollArea className="h-full">
-            <PropertiesPanel
-              selectedObject={selectedObject}
-              onPropertyChange={handlePropertyChange}
-              onRemoveBackground={removeBackground}
-            />
-          </ScrollArea>
+          <Tabs defaultValue="properties" className="h-full flex flex-col">
+            <TabsList className="w-full grid grid-cols-3 shrink-0">
+              <TabsTrigger value="properties">Properties</TabsTrigger>
+              <TabsTrigger value="filters">Filters</TabsTrigger>
+              <TabsTrigger value="pages">Pages</TabsTrigger>
+            </TabsList>
+            <TabsContent value="properties" className="flex-1 overflow-hidden mt-0">
+              <ScrollArea className="h-full">
+                <PropertiesPanel
+                  selectedObject={selectedObject}
+                  onPropertyChange={handlePropertyChange}
+                  onRemoveBackground={removeBackground}
+                />
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="filters" className="flex-1 overflow-hidden mt-0">
+              <ScrollArea className="h-full">
+                <FiltersPanel
+                  selectedObject={selectedObject}
+                  onFilterChange={applyFilter}
+                  onResetFilters={resetFilters}
+                />
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="pages" className="flex-1 overflow-hidden mt-0">
+              <PagesPanel
+                pages={pages}
+                currentPageId={currentPageId}
+                onPageSelect={handlePageSelect}
+                onPageAdd={addPage}
+                onPageDelete={deletePage}
+                onPageDuplicate={duplicatePage}
+                onPageRename={renamePage}
+              />
+            </TabsContent>
+          </Tabs>
         </ResizablePanel>
       </ResizablePanelGroup>
 

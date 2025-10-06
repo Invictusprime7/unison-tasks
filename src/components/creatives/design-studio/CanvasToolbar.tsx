@@ -20,6 +20,7 @@ import {
   BookmarkPlus,
   Undo,
   Redo,
+  Crop,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,6 +35,7 @@ interface CanvasToolbarProps {
   onDelete: () => void;
   onClear: () => void;
   onExport: () => void;
+  onExportJPEG: () => void;
   onDuplicate: () => void;
   onBringForward: () => void;
   onSendBackward: () => void;
@@ -50,6 +52,7 @@ interface CanvasToolbarProps {
   onRedo: () => void;
   canUndo: boolean;
   canRedo: boolean;
+  alignmentTools?: React.ReactNode;
 }
 
 export const CanvasToolbar = ({
@@ -62,6 +65,7 @@ export const CanvasToolbar = ({
   onDelete,
   onClear,
   onExport,
+  onExportJPEG,
   onDuplicate,
   onBringForward,
   onSendBackward,
@@ -78,6 +82,7 @@ export const CanvasToolbar = ({
   onRedo,
   canUndo,
   canRedo,
+  alignmentTools,
 }: CanvasToolbarProps) => {
   return (
     <div className="border-b bg-card p-4">
@@ -138,7 +143,20 @@ export const CanvasToolbar = ({
           >
             <Image className="h-4 w-4" />
           </Button>
+          <Button
+            variant={activeTool === "crop" ? "default" : "outline"}
+            size="icon"
+            onClick={() => onToolSelect("crop")}
+            title="Crop"
+          >
+            <Crop className="h-4 w-4" />
+          </Button>
         </div>
+
+        <Separator orientation="vertical" className="h-8" />
+
+        {/* Alignment Tools */}
+        {alignmentTools}
 
         <Separator orientation="vertical" className="h-8" />
 
@@ -265,9 +283,13 @@ export const CanvasToolbar = ({
           <Button variant="outline" size="sm" onClick={onClear}>
             Clear All
           </Button>
+          <Button variant="outline" size="sm" onClick={onExportJPEG}>
+            <Download className="h-4 w-4 mr-2" />
+            JPEG
+          </Button>
           <Button size="sm" onClick={onExport}>
             <Download className="h-4 w-4 mr-2" />
-            Export
+            PNG
           </Button>
         </div>
       </div>

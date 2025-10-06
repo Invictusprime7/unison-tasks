@@ -70,8 +70,9 @@ export const DesignStudio = forwardRef((props, ref) => {
         const vpt = canvas.viewportTransform!;
         const clientX = 'clientX' in evt ? evt.clientX : 0;
         const clientY = 'clientY' in evt ? evt.clientY : 0;
-        vpt[4] += clientX - lastPosX;
-        vpt[5] += clientY - lastPosY;
+        // Increase pan sensitivity by 1.5x
+        vpt[4] += (clientX - lastPosX) * 1.5;
+        vpt[5] += (clientY - lastPosY) * 1.5;
         canvas.requestRenderAll();
         lastPosX = clientX;
         lastPosY = clientY;
@@ -507,24 +508,32 @@ export const DesignStudio = forwardRef((props, ref) => {
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={75} minSize={50}>
-          <ScrollArea className="h-full w-full">
-            <div
-              ref={containerRef}
-              className="w-full h-full bg-muted/20 relative min-h-[800px] min-w-[1200px]"
-              style={{
-                backgroundImage: `
-                  linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)
-                `,
-                backgroundSize: "20px 20px",
-              }}
-            >
-              <canvas ref={canvasRef} />
-              <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground">
-                💡 Scroll to zoom | Shift+Drag to pan
+          <div className="h-full flex flex-col">
+            <ScrollArea className="flex-1 w-full">
+              <div
+                ref={containerRef}
+                className="w-full h-full bg-muted/20 relative min-h-[800px] min-w-[1200px]"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)
+                  `,
+                  backgroundSize: "20px 20px",
+                }}
+              >
+                <canvas ref={canvasRef} />
+                <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground">
+                  💡 Scroll to zoom | Shift+Drag to pan
+                </div>
               </div>
+            </ScrollArea>
+            <div className="h-12 border-t bg-card flex items-center px-4 gap-2 shrink-0">
+              <span className="text-xs text-muted-foreground">Scroll:</span>
+              <ScrollArea className="flex-1">
+                <div className="min-w-[1200px] h-2 bg-muted/30 rounded-full" />
+              </ScrollArea>
             </div>
-          </ScrollArea>
+          </div>
         </ResizablePanel>
 
         <ResizableHandle withHandle />

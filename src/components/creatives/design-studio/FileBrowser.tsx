@@ -13,7 +13,7 @@ interface FileBrowserProps {
 }
 
 export const FileBrowser = ({ open, onOpenChange }: FileBrowserProps) => {
-  const [currentFolder, setCurrentFolder] = useState("/generated-images");
+  const [currentFolder, setCurrentFolder] = useState("/");
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: files, isLoading } = useQuery({

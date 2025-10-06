@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,22 @@ const Creatives = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectorOpen, setSelectorOpen] = useState(false);
+
+  // Check authentication
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          title: "Authentication required",
+          description: "Please sign in to access Creatives",
+          variant: "destructive",
+        });
+        navigate("/auth");
+      }
+    };
+    checkAuth();
+  }, [navigate, toast]);
 
   const { data: creativeTasks, isLoading } = useQuery({
     queryKey: ["creative-tasks", searchQuery],

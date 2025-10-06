@@ -48,6 +48,44 @@ export const DesignStudio = forwardRef((props, ref) => {
       opt.e.stopPropagation();
     });
 
+    // Enable panning with Shift + drag or middle mouse button
+    let isPanning = false;
+    let lastPosX = 0;
+    let lastPosY = 0;
+
+    canvas.on("mouse:down", (opt) => {
+      const evt = opt.e;
+      if ('button' in evt && (evt.button === 1 || (evt.button === 0 && evt.shiftKey))) {
+        isPanning = true;
+        canvas.selection = false;
+        lastPosX = 'clientX' in evt ? evt.clientX : 0;
+        lastPosY = 'clientY' in evt ? evt.clientY : 0;
+        canvas.setCursor("grab");
+      }
+    });
+
+    canvas.on("mouse:move", (opt) => {
+      if (isPanning) {
+        const evt = opt.e;
+        const vpt = canvas.viewportTransform!;
+        const clientX = 'clientX' in evt ? evt.clientX : 0;
+        const clientY = 'clientY' in evt ? evt.clientY : 0;
+        vpt[4] += clientX - lastPosX;
+        vpt[5] += clientY - lastPosY;
+        canvas.requestRenderAll();
+        lastPosX = clientX;
+        lastPosY = clientY;
+        canvas.setCursor("grabbing");
+      }
+    });
+
+    canvas.on("mouse:up", () => {
+      canvas.setViewportTransform(canvas.viewportTransform!);
+      isPanning = false;
+      canvas.selection = true;
+      canvas.setCursor("default");
+    });
+
     setFabricCanvas(canvas);
 
     // Selection events
@@ -483,7 +521,7 @@ export const DesignStudio = forwardRef((props, ref) => {
             >
               <canvas ref={canvasRef} />
               <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground">
-                💡 Drag & drop images | Scroll to zoom
+                💡 Scroll to zoom | Shift+Drag to pan
               </div>
             </div>
           </ScrollArea>

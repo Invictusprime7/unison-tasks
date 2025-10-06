@@ -131,6 +131,17 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
     }
   };
 
+  const handleAddToCanvas = (element: { type: 'text' | 'image' | 'section'; data: any }) => {
+    // Store element data for later use in the canvas
+    toast.success(`Adding ${element.type} to canvas...`);
+    console.log('Element to add:', element);
+    
+    // For now, just show a toast. In production, this would integrate with canvas API
+    if (element.type === 'section') {
+      toast.info(`Section variant: ${element.data.variant}`);
+    }
+  };
+
   if (editorOpen && currentTemplate) {
     return (
       <TemplateEditor
@@ -235,6 +246,7 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
                   : undefined
               }
               onOpenStudio={handleOpenStudio}
+              onAddToCanvas={handleAddToCanvas}
             />
           </div>
         </div>

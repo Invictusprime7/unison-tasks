@@ -70,6 +70,10 @@ export interface DesignKitProps {
   tokens?: Tokens;
   maxWidth?: number; // container max width
   onOpenStudio?: () => void; // callback to open design studio
+  onAddToCanvas?: (element: {
+    type: 'text' | 'image' | 'section';
+    data: any;
+  }) => void; // callback to add element to canvas
 }
 
 // ---------------- Defaults ----------------
@@ -86,7 +90,19 @@ const DEFAULT_TOKENS: Required<Tokens> = {
 const fallback = <T,>(v: T | undefined, d: T): T => (v === undefined ? d : v);
 
 // ---------------- Primitive UI ----------------
-function Button({ cta, tokens, onOpenStudio }: { cta: CTA; tokens: Required<Tokens>; onOpenStudio?: () => void }) {
+function Button({ 
+  cta, 
+  tokens, 
+  onOpenStudio, 
+  onAddToCanvas,
+  elementData 
+}: { 
+  cta: CTA; 
+  tokens: Required<Tokens>; 
+  onOpenStudio?: () => void;
+  onAddToCanvas?: (element: { type: 'text' | 'image' | 'section'; data: any }) => void;
+  elementData?: any;
+}) {
   const base: React.CSSProperties = {
     background: tokens.colorPrimary,
     color: "#0b1220",
@@ -98,6 +114,9 @@ function Button({ cta, tokens, onOpenStudio }: { cta: CTA; tokens: Required<Toke
   };
   
   const handleClick = (e?: React.MouseEvent) => {
+    if (onAddToCanvas && elementData) {
+      onAddToCanvas(elementData);
+    }
     if (onOpenStudio) {
       onOpenStudio();
     }
@@ -171,6 +190,18 @@ function Hero({ p, t }: { p: DesignKitProps; t: Required<Tokens> }) {
   };
   const titleStyle: React.CSSProperties = { fontSize: 48, lineHeight: 1.1, margin: 0, color: t.colorFg };
   const subStyle: React.CSSProperties = { fontSize: 18, color: t.colorMuted, marginTop: t.spacing };
+  
+  const heroElementData = {
+    type: 'section' as const,
+    data: {
+      variant: 'hero',
+      title: p.title,
+      subtitle: p.subtitle,
+      description: p.description,
+      media: p.media,
+    }
+  };
+  
   return (
     <div style={container}>
       <div>
@@ -179,7 +210,13 @@ function Hero({ p, t }: { p: DesignKitProps; t: Required<Tokens> }) {
         {p.subtitle ? <p style={subStyle}>{p.subtitle}</p> : null}
         {p.cta ? (
           <div style={{ marginTop: t.spacing * 2 }}>
-            <Button cta={p.cta} tokens={t} onOpenStudio={p.onOpenStudio} />
+            <Button 
+              cta={p.cta} 
+              tokens={t} 
+              onOpenStudio={p.onOpenStudio} 
+              onAddToCanvas={p.onAddToCanvas}
+              elementData={heroElementData}
+            />
           </div>
         ) : null}
       </div>
@@ -222,22 +259,38 @@ function Pricing({ p, t }: { p: DesignKitProps; t: Required<Tokens> }) {
       {p.title ? <h2 style={{ color: t.colorFg, marginTop: 0 }}>{p.title}</h2> : null}
       {p.subtitle ? <p style={{ color: t.colorMuted }}>{p.subtitle}</p> : null}
       <div style={grid}>
-        {(p.tiers || []).map((tier, i) => (
-          <div key={i} style={{ background: "rgba(255,255,255,0.04)", borderRadius: t.radius, padding: t.spacing * 2 }}>
-            <div style={{ color: t.colorFg, fontWeight: 700, fontSize: 18 }}>{tier.name}</div>
-            <div style={{ color: t.colorFg, fontSize: 32, marginTop: t.spacing }}>{tier.price}</div>
-            <ul style={{ marginTop: t.spacing, paddingLeft: t.spacing * 2, color: t.colorMuted }}>
-              {tier.features.map((feat, j) => (
-                <li key={j}>{feat}</li>
-              ))}
-            </ul>
-            {tier.cta ? (
-              <div style={{ marginTop: t.spacing * 2 }}>
-                <Button cta={tier.cta} tokens={t} onOpenStudio={p.onOpenStudio} />
-              </div>
-            ) : null}
-          </div>
-        ))}
+        {(p.tiers || []).map((tier, i) => {
+          const tierElementData = {
+            type: 'section' as const,
+            data: {
+              variant: 'pricing',
+              tier: tier,
+            }
+          };
+          
+          return (
+            <div key={i} style={{ background: "rgba(255,255,255,0.04)", borderRadius: t.radius, padding: t.spacing * 2 }}>
+              <div style={{ color: t.colorFg, fontWeight: 700, fontSize: 18 }}>{tier.name}</div>
+              <div style={{ color: t.colorFg, fontSize: 32, marginTop: t.spacing }}>{tier.price}</div>
+              <ul style={{ marginTop: t.spacing, paddingLeft: t.spacing * 2, color: t.colorMuted }}>
+                {tier.features.map((feat, j) => (
+                  <li key={j}>{feat}</li>
+                ))}
+              </ul>
+              {tier.cta ? (
+                <div style={{ marginTop: t.spacing * 2 }}>
+                  <Button 
+                    cta={tier.cta} 
+                    tokens={t} 
+                    onOpenStudio={p.onOpenStudio}
+                    onAddToCanvas={p.onAddToCanvas}
+                    elementData={tierElementData}
+                  />
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

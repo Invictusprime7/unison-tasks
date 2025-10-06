@@ -10,9 +10,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface FileBrowserProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onImageSelect?: (imageUrl: string) => void;
 }
 
-export const FileBrowser = ({ open, onOpenChange }: FileBrowserProps) => {
+export const FileBrowser = ({ open, onOpenChange, onImageSelect }: FileBrowserProps) => {
   const [currentFolder, setCurrentFolder] = useState("/");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -60,6 +61,24 @@ export const FileBrowser = ({ open, onOpenChange }: FileBrowserProps) => {
     const parts = currentFolder.split("/").filter(Boolean);
     parts.pop();
     setCurrentFolder(parts.length ? `/${parts.join("/")}` : "/");
+  };
+
+  const handleImageClick = async (file: any) => {
+    if (file.mime_type === "folder") {
+      handleFolderClick(file.name);
+      return;
+    }
+
+    if (file.mime_type?.startsWith("image/") && onImageSelect) {
+      const { data } = await supabase.storage
+        .from("user-files")
+        .getPublicUrl(file.storage_path);
+
+      if (data?.publicUrl) {
+        onImageSelect(data.publicUrl);
+        onOpenChange(false);
+      }
+    }
   };
 
   return (
@@ -110,7 +129,7 @@ export const FileBrowser = ({ open, onOpenChange }: FileBrowserProps) => {
                     key={file.id}
                     draggable={file.mime_type !== "folder"}
                     onDragStart={(e) => handleDragStart(e, file)}
-                    onClick={() => file.mime_type === "folder" && handleFolderClick(file.name)}
+                    onClick={() => handleImageClick(file)}
                     className="group relative aspect-square rounded-lg border bg-card hover:bg-accent hover:shadow-lg transition-all cursor-pointer"
                   >
                     <div className="absolute inset-0 flex flex-col items-center justify-center p-2">
@@ -128,7 +147,7 @@ export const FileBrowser = ({ open, onOpenChange }: FileBrowserProps) => {
                       </p>
                       {file.mime_type !== "folder" && (
                         <p className="text-xs text-muted-foreground mt-1">
-                          Drag to canvas
+                          Click or drag
                         </p>
                       )}
                     </div>
@@ -143,7 +162,7 @@ export const FileBrowser = ({ open, onOpenChange }: FileBrowserProps) => {
           </ScrollArea>
 
           <div className="text-xs text-muted-foreground border-t pt-2">
-            💡 Tip: Drag images directly onto the canvas to add them
+            💡 Tip: Click images to add them to canvas, or drag and drop
           </div>
         </div>
       </DialogContent>

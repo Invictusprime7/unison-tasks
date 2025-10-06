@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Canvas as FabricCanvas, Rect, Circle, IText, FabricImage } from "fabric";
 import { useToast } from "@/hooks/use-toast";
 import { CanvasToolbar } from "./design-studio/CanvasToolbar";
@@ -9,7 +9,7 @@ import { SaveTemplateDialog } from "./design-studio/SaveTemplateDialog";
 import { VersionHistory } from "./design-studio/VersionHistory";
 import { supabase } from "@/integrations/supabase/client";
 
-export const DesignStudio = () => {
+export const DesignStudio = forwardRef((props, ref) => {
   const { toast } = useToast();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -355,6 +355,36 @@ export const DesignStudio = () => {
     toast({ title: "Version saved" });
   };
 
+  const addImageFromUrl = async (imageUrl: string) => {
+    if (!fabricCanvas) return;
+    
+    try {
+      const img = await FabricImage.fromURL(imageUrl, { crossOrigin: "anonymous" });
+      img.scale(0.5);
+      img.set({
+        left: 100,
+        top: 100,
+      });
+      fabricCanvas.add(img);
+      fabricCanvas.renderAll();
+      toast({
+        title: "Image added",
+        description: "Image has been added to the canvas",
+      });
+    } catch (error) {
+      console.error("Error loading image:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load image",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useImperativeHandle(ref, () => ({
+    addImageFromUrl,
+  }));
+
   return (
     <div className="h-full flex flex-col">
       <input
@@ -439,4 +469,4 @@ export const DesignStudio = () => {
       />
     </div>
   );
-};
+});

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -8,6 +8,7 @@ import { FileBrowser } from "@/components/creatives/design-studio/FileBrowser";
 const DesignStudioPage = () => {
   const navigate = useNavigate();
   const [fileBrowserOpen, setFileBrowserOpen] = useState(false);
+  const designStudioRef = useRef<any>(null);
 
   return (
     <div className="h-screen w-full flex flex-col bg-background">
@@ -34,12 +35,13 @@ const DesignStudioPage = () => {
       </header>
 
       <div className="flex-1 overflow-hidden">
-        <DesignStudio />
+        <DesignStudio ref={designStudioRef} />
       </div>
 
       <FileBrowser 
         open={fileBrowserOpen} 
-        onOpenChange={setFileBrowserOpen} 
+        onOpenChange={setFileBrowserOpen}
+        onImageSelect={(imageUrl) => designStudioRef.current?.addImageFromUrl(imageUrl)}
       />
     </div>
   );

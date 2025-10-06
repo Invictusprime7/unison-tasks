@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateEditor } from "./TemplateEditor";
 import DesignKitSection from "./design-studio/DesignKitSection";
+import { useNavigate } from "react-router-dom";
 
 interface WebDesignKitProps {
   open: boolean;
@@ -17,6 +18,7 @@ interface WebDesignKitProps {
 }
 
 export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [generating, setGenerating] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -26,7 +28,6 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
     code: string;
   } | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<"hero" | "features" | "pricing">("hero");
-  const [studioOpen, setStudioOpen] = useState(false);
 
   const templateCategories = {
     google: [
@@ -93,9 +94,41 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
     setCurrentTemplate(null);
   };
 
-  const handleOpenStudio = () => {
-    setStudioOpen(true);
-    toast.success("Opening Design Studio...");
+  const handleOpenStudio = async () => {
+    try {
+      // Create a new design document
+      const { data: doc, error: docError } = await supabase
+        .from("documents")
+        .insert([
+          {
+            title: "Web Design from Template",
+            type: "design",
+            user_id: null,
+          },
+        ])
+        .select()
+        .single();
+
+      if (docError) throw docError;
+
+      // Initialize with a page
+      const { error: pageError } = await supabase.from("pages").insert({
+        document_id: doc.id,
+        width: 1920,
+        height: 1080,
+        sort_order: 0,
+      });
+      
+      if (pageError) throw pageError;
+
+      // Close the dialog and navigate to design studio
+      onOpenChange(false);
+      toast.success("Opening Design Studio...");
+      navigate(`/design-studio/${doc.id}`);
+    } catch (error: any) {
+      console.error("Error creating document:", error);
+      toast.error("Failed to create design canvas. Please try again.");
+    }
   };
 
   if (editorOpen && currentTemplate) {

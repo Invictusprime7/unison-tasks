@@ -46,6 +46,7 @@ export const DocumentManager = () => {
           {
             title: newDocTitle,
             type: newDocType,
+            user_id: null,
           },
         ])
         .select()

@@ -811,69 +811,71 @@ export const DesignStudio = forwardRef((props, ref) => {
         }
       />
 
-      <ResizablePanelGroup direction="horizontal" className="flex-1">
-        <ResizablePanel defaultSize={75} minSize={50}>
-          <ScrollArea className="h-full w-full">
-            <div
-              ref={containerRef}
-              className="w-full h-full bg-muted/20 relative min-h-[800px] min-w-[1200px]"
-              style={{
-                backgroundImage: `
-                  linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                  linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)
-                `,
-                backgroundSize: "20px 20px",
-              }}
-            >
-              <canvas ref={canvasRef} />
-              <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground">
-                💡 Scroll to zoom | Shift+Drag to pan
+      <div className="flex-1 flex flex-col">
+        <ResizablePanelGroup direction="horizontal" className="flex-1">
+          <ResizablePanel defaultSize={80} minSize={60}>
+            <ScrollArea className="h-full w-full">
+              <div
+                ref={containerRef}
+                className="w-full h-full bg-muted/20 relative min-h-[800px] min-w-[1200px]"
+                style={{
+                  backgroundImage: `
+                    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)
+                  `,
+                  backgroundSize: "20px 20px",
+                }}
+              >
+                <canvas ref={canvasRef} />
+                <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground">
+                  💡 Scroll to zoom | Shift+Drag to pan
+                </div>
               </div>
-            </div>
-          </ScrollArea>
-        </ResizablePanel>
+            </ScrollArea>
+          </ResizablePanel>
 
-        <ResizableHandle withHandle />
+          <ResizableHandle withHandle />
 
-        <ResizablePanel defaultSize={25} minSize={20} maxSize={40}>
-          <Tabs defaultValue="properties" className="h-full flex flex-col">
-            <TabsList className="w-full grid grid-cols-3 shrink-0">
-              <TabsTrigger value="properties">Properties</TabsTrigger>
-              <TabsTrigger value="filters">Filters</TabsTrigger>
-              <TabsTrigger value="pages">Pages</TabsTrigger>
-            </TabsList>
-            <TabsContent value="properties" className="flex-1 overflow-hidden mt-0">
-              <ScrollArea className="h-full">
-                <PropertiesPanel
-                  selectedObject={selectedObject}
-                  onPropertyChange={handlePropertyChange}
-                  onRemoveBackground={removeBackground}
-                />
-              </ScrollArea>
-            </TabsContent>
-            <TabsContent value="filters" className="flex-1 overflow-hidden mt-0">
-              <ScrollArea className="h-full">
-                <FiltersPanel
-                  selectedObject={selectedObject}
-                  onFilterChange={applyFilter}
-                  onResetFilters={resetFilters}
-                />
-              </ScrollArea>
-            </TabsContent>
-            <TabsContent value="pages" className="flex-1 overflow-hidden mt-0">
-              <PagesPanel
-                pages={pages}
-                currentPageId={currentPageId}
-                onPageSelect={handlePageSelect}
-                onPageAdd={addPage}
-                onPageDelete={deletePage}
-                onPageDuplicate={duplicatePage}
-                onPageRename={renamePage}
-              />
-            </TabsContent>
-          </Tabs>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+            <Tabs defaultValue="properties" className="h-full flex flex-col">
+              <TabsList className="w-full grid grid-cols-2 shrink-0">
+                <TabsTrigger value="properties">Properties</TabsTrigger>
+                <TabsTrigger value="filters">Filters</TabsTrigger>
+              </TabsList>
+              <TabsContent value="properties" className="flex-1 overflow-hidden mt-0">
+                <ScrollArea className="h-full">
+                  <PropertiesPanel
+                    selectedObject={selectedObject}
+                    onPropertyChange={handlePropertyChange}
+                    onRemoveBackground={removeBackground}
+                  />
+                </ScrollArea>
+              </TabsContent>
+              <TabsContent value="filters" className="flex-1 overflow-hidden mt-0">
+                <ScrollArea className="h-full">
+                  <FiltersPanel
+                    selectedObject={selectedObject}
+                    onFilterChange={applyFilter}
+                    onResetFilters={resetFilters}
+                  />
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          </ResizablePanel>
+        </ResizablePanelGroup>
+
+        <div className="h-32 border-t shrink-0 bg-card">
+          <PagesPanel
+            pages={pages}
+            currentPageId={currentPageId}
+            onPageSelect={handlePageSelect}
+            onPageAdd={addPage}
+            onPageDelete={deletePage}
+            onPageDuplicate={duplicatePage}
+            onPageRename={renamePage}
+          />
+        </div>
+      </div>
 
       <TemplateLibrary
         open={showTemplateLibrary}

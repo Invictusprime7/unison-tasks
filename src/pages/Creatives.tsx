@@ -11,7 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import { ImageEditor } from "@/components/creatives/ImageEditor";
 import { VideoEditor } from "@/components/creatives/VideoEditor";
 import { CreativeTaskSelector } from "@/components/creatives/CreativeTaskSelector";
-import { DocumentManager } from "@/components/creatives/DocumentManager";
 
 const Creatives = () => {
   const navigate = useNavigate();
@@ -89,8 +88,46 @@ const Creatives = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
-        {/* Document Manager */}
-        <DocumentManager />
+        {/* Content Cloud Section */}
+        <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-2xl">
+              <Cloud className="h-6 w-6 text-primary" />
+              Content Cloud
+            </CardTitle>
+            <CardDescription>
+              Access professional content creation tools with AI-powered features
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <ImageEditor />
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary/50">
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      Design Studio
+                    </span>
+                    <Maximize2 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                  </CardTitle>
+                  <CardDescription>
+                    Create stunning designs with professional tools
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => navigate("/design-studio")}
+                  >
+                    Open Full Studio
+                  </Button>
+                </CardContent>
+              </Card>
+              <VideoEditor />
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

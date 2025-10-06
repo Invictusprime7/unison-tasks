@@ -69,6 +69,7 @@ export interface DesignKitProps {
   tiers?: PricingTier[];
   tokens?: Tokens;
   maxWidth?: number; // container max width
+  onOpenStudio?: () => void; // callback to open design studio
 }
 
 // ---------------- Defaults ----------------
@@ -85,7 +86,7 @@ const DEFAULT_TOKENS: Required<Tokens> = {
 const fallback = <T,>(v: T | undefined, d: T): T => (v === undefined ? d : v);
 
 // ---------------- Primitive UI ----------------
-function Button({ cta, tokens }: { cta: CTA; tokens: Required<Tokens> }) {
+function Button({ cta, tokens, onOpenStudio }: { cta: CTA; tokens: Required<Tokens>; onOpenStudio?: () => void }) {
   const base: React.CSSProperties = {
     background: tokens.colorPrimary,
     color: "#0b1220",
@@ -95,15 +96,25 @@ function Button({ cta, tokens }: { cta: CTA; tokens: Required<Tokens> }) {
     fontWeight: 600,
     cursor: "pointer",
   };
+  
+  const handleClick = (e?: React.MouseEvent) => {
+    if (onOpenStudio) {
+      onOpenStudio();
+    }
+    if (cta.onClick) {
+      cta.onClick();
+    }
+  };
+  
   if (cta.href) {
     return (
-      <a href={cta.href} style={{ ...base, display: "inline-block", textDecoration: "none" }} onClick={cta.onClick}>
+      <a href={cta.href} style={{ ...base, display: "inline-block", textDecoration: "none" }} onClick={handleClick}>
         {cta.label}
       </a>
     );
   }
   return (
-    <button style={base} onClick={cta.onClick}>
+    <button style={base} onClick={handleClick}>
       {cta.label}
     </button>
   );
@@ -168,7 +179,7 @@ function Hero({ p, t }: { p: DesignKitProps; t: Required<Tokens> }) {
         {p.subtitle ? <p style={subStyle}>{p.subtitle}</p> : null}
         {p.cta ? (
           <div style={{ marginTop: t.spacing * 2 }}>
-            <Button cta={p.cta} tokens={t} />
+            <Button cta={p.cta} tokens={t} onOpenStudio={p.onOpenStudio} />
           </div>
         ) : null}
       </div>
@@ -222,7 +233,7 @@ function Pricing({ p, t }: { p: DesignKitProps; t: Required<Tokens> }) {
             </ul>
             {tier.cta ? (
               <div style={{ marginTop: t.spacing * 2 }}>
-                <Button cta={tier.cta} tokens={t} />
+                <Button cta={tier.cta} tokens={t} onOpenStudio={p.onOpenStudio} />
               </div>
             ) : null}
           </div>

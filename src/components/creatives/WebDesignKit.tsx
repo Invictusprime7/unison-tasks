@@ -25,8 +25,8 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
     aesthetic: string;
     code: string;
   } | null>(null);
-
   const [selectedVariant, setSelectedVariant] = useState<"hero" | "features" | "pricing">("hero");
+  const [studioOpen, setStudioOpen] = useState(false);
 
   const templateCategories = {
     google: [
@@ -91,6 +91,11 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
   const handleEditorBack = () => {
     setEditorOpen(false);
     setCurrentTemplate(null);
+  };
+
+  const handleOpenStudio = () => {
+    setStudioOpen(true);
+    toast.success("Opening Design Studio...");
   };
 
   if (editorOpen && currentTemplate) {
@@ -172,7 +177,7 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
                   : "Pick a plan"
               }
               description={selectedVariant === "hero" ? "NEW" : undefined}
-              cta={selectedVariant === "hero" ? { label: "Get Started", onClick: () => toast.info("CTA clicked!") } : undefined}
+              cta={selectedVariant === "hero" ? { label: "Get Started", onClick: handleOpenStudio } : undefined}
               media={
                 selectedVariant === "hero"
                   ? { kind: "image", src: "https://picsum.photos/720/480" }
@@ -190,12 +195,13 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
               tiers={
                 selectedVariant === "pricing"
                   ? [
-                      { name: "Starter", price: "$0", features: ["1 project", "Community"], cta: { label: "Choose" } },
-                      { name: "Pro", price: "$19/mo", features: ["Unlimited projects", "Priority support"], cta: { label: "Try Pro" } },
-                      { name: "Team", price: "$49/mo", features: ["Collaboration", "SSO"], cta: { label: "Contact Sales" } },
+                      { name: "Starter", price: "$0", features: ["1 project", "Community"], cta: { label: "Choose", onClick: handleOpenStudio } },
+                      { name: "Pro", price: "$19/mo", features: ["Unlimited projects", "Priority support"], cta: { label: "Try Pro", onClick: handleOpenStudio } },
+                      { name: "Team", price: "$49/mo", features: ["Collaboration", "SSO"], cta: { label: "Contact Sales", onClick: handleOpenStudio } },
                     ]
                   : undefined
               }
+              onOpenStudio={handleOpenStudio}
             />
           </div>
         </div>

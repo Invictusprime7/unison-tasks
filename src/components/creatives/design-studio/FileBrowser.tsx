@@ -41,10 +41,10 @@ export const FileBrowser = ({ open, onOpenChange, onImageSelect }: FileBrowserPr
     if (file.mime_type !== "folder") {
       const { data } = await supabase.storage
         .from("user-files")
-        .getPublicUrl(file.storage_path);
+        .createSignedUrl(file.storage_path, 3600); // 1 hour expiry
 
-      if (data?.publicUrl) {
-        e.dataTransfer.setData("text/plain", data.publicUrl);
+      if (data?.signedUrl) {
+        e.dataTransfer.setData("text/plain", data.signedUrl);
         e.dataTransfer.effectAllowed = "copy";
       }
     }
@@ -72,10 +72,10 @@ export const FileBrowser = ({ open, onOpenChange, onImageSelect }: FileBrowserPr
     if (file.mime_type?.startsWith("image/") && onImageSelect) {
       const { data } = await supabase.storage
         .from("user-files")
-        .getPublicUrl(file.storage_path);
+        .createSignedUrl(file.storage_path, 3600); // 1 hour expiry
 
-      if (data?.publicUrl) {
-        onImageSelect(data.publicUrl);
+      if (data?.signedUrl) {
+        onImageSelect(data.signedUrl);
         onOpenChange(false);
       }
     }

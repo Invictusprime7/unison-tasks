@@ -1,6 +1,5 @@
 import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { ArrowLeft, FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DesignStudio } from "@/components/creatives/DesignStudio";
@@ -35,9 +34,9 @@ const DesignStudioPage = () => {
         </Button>
       </header>
 
-      <ScrollArea className="flex-1">
+      <div className="flex-1 overflow-hidden">
         <DesignStudio ref={designStudioRef} />
-      </ScrollArea>
+      </div>
 
       <FileBrowser 
         open={fileBrowserOpen} 

@@ -431,22 +431,24 @@ export const DesignStudio = forwardRef((props, ref) => {
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
         <ResizablePanel defaultSize={75} minSize={50}>
-          <div
-            ref={containerRef}
-            className="w-full h-full bg-muted/20 overflow-hidden relative"
-            style={{
-              backgroundImage: `
-                linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)
-              `,
-              backgroundSize: "20px 20px",
-            }}
-          >
-            <canvas ref={canvasRef} />
-            <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground">
-              💡 Drag & drop images from AI Image Editor or Files
+          <ScrollArea className="h-full w-full">
+            <div
+              ref={containerRef}
+              className="w-full h-full bg-muted/20 relative min-h-[800px] min-w-[1200px]"
+              style={{
+                backgroundImage: `
+                  linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
+                  linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)
+                `,
+                backgroundSize: "20px 20px",
+              }}
+            >
+              <canvas ref={canvasRef} />
+              <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground">
+                💡 Drag & drop images from AI Image Editor or Files
+              </div>
             </div>
-          </div>
+          </ScrollArea>
         </ResizablePanel>
 
         <ResizableHandle withHandle />

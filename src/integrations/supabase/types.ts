@@ -14,6 +14,85 @@ export type Database = {
   }
   public: {
     Tables: {
+      brand_kits: {
+        Row: {
+          colors: Json | null
+          created_at: string | null
+          document_id: string
+          fonts: string[] | null
+          id: string
+          logo_url: string | null
+        }
+        Insert: {
+          colors?: Json | null
+          created_at?: string | null
+          document_id: string
+          fonts?: string[] | null
+          id?: string
+          logo_url?: string | null
+        }
+        Update: {
+          colors?: Json | null
+          created_at?: string | null
+          document_id?: string
+          fonts?: string[] | null
+          id?: string
+          logo_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "brand_kits_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clips: {
+        Row: {
+          clip_in: number
+          clip_out: number
+          created_at: string | null
+          effects: Json | null
+          id: string
+          src: string
+          timeline_start: number
+          track_id: string
+          transforms: Json | null
+        }
+        Insert: {
+          clip_in?: number
+          clip_out?: number
+          created_at?: string | null
+          effects?: Json | null
+          id?: string
+          src: string
+          timeline_start?: number
+          track_id: string
+          transforms?: Json | null
+        }
+        Update: {
+          clip_in?: number
+          clip_out?: number
+          created_at?: string | null
+          effects?: Json | null
+          id?: string
+          src?: string
+          timeline_start?: number
+          track_id?: string
+          transforms?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clips_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comments: {
         Row: {
           content: string
@@ -88,6 +167,65 @@ export type Database = {
           name?: string
           thumbnail_url?: string | null
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      document_history: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          document_id: string
+          id: string
+          snapshot: Json
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          document_id: string
+          id?: string
+          snapshot: Json
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          document_id?: string
+          id?: string
+          snapshot?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_history_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          created_at: string | null
+          id: string
+          title: string
+          type: Database["public"]["Enums"]["document_type"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          title: string
+          type?: Database["public"]["Enums"]["document_type"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          title?: string
+          type?: Database["public"]["Enums"]["document_type"]
+          updated_at?: string | null
           user_id?: string
         }
         Relationships: []
@@ -216,6 +354,100 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      layers: {
+        Row: {
+          adjustments: Json | null
+          blend: Database["public"]["Enums"]["blend_mode"]
+          created_at: string | null
+          id: string
+          kind: Database["public"]["Enums"]["layer_kind"]
+          locked: boolean
+          masks: Json | null
+          opacity: number
+          page_id: string
+          payload: Json
+          sort_order: number
+          transform: Json
+          visible: boolean
+        }
+        Insert: {
+          adjustments?: Json | null
+          blend?: Database["public"]["Enums"]["blend_mode"]
+          created_at?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["layer_kind"]
+          locked?: boolean
+          masks?: Json | null
+          opacity?: number
+          page_id: string
+          payload?: Json
+          sort_order?: number
+          transform?: Json
+          visible?: boolean
+        }
+        Update: {
+          adjustments?: Json | null
+          blend?: Database["public"]["Enums"]["blend_mode"]
+          created_at?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["layer_kind"]
+          locked?: boolean
+          masks?: Json | null
+          opacity?: number
+          page_id?: string
+          payload?: Json
+          sort_order?: number
+          transform?: Json
+          visible?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "layers_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pages: {
+        Row: {
+          background: Json | null
+          created_at: string | null
+          document_id: string
+          height: number
+          id: string
+          sort_order: number
+          width: number
+        }
+        Insert: {
+          background?: Json | null
+          created_at?: string | null
+          document_id: string
+          height?: number
+          id?: string
+          sort_order?: number
+          width?: number
+        }
+        Update: {
+          background?: Json | null
+          created_at?: string | null
+          document_id?: string
+          height?: number
+          id?: string
+          sort_order?: number
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pages_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -458,6 +690,70 @@ export type Database = {
           },
         ]
       }
+      timelines: {
+        Row: {
+          created_at: string | null
+          document_id: string
+          duration: number
+          fps: number
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          document_id: string
+          duration?: number
+          fps?: number
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          document_id?: string
+          duration?: number
+          fps?: number
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timelines_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: true
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tracks: {
+        Row: {
+          created_at: string | null
+          id: string
+          sort_order: number
+          timeline_id: string
+          type: Database["public"]["Enums"]["track_type"]
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          sort_order?: number
+          timeline_id: string
+          type: Database["public"]["Enums"]["track_type"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          sort_order?: number
+          timeline_id?: string
+          type?: Database["public"]["Enums"]["track_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracks_timeline_id_fkey"
+            columns: ["timeline_id"]
+            isOneToOne: false
+            referencedRelation: "timelines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -466,7 +762,22 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      blend_mode:
+        | "normal"
+        | "multiply"
+        | "screen"
+        | "overlay"
+        | "darken"
+        | "lighten"
+        | "color-dodge"
+        | "color-burn"
+        | "hard-light"
+        | "soft-light"
+        | "difference"
+        | "exclusion"
+      document_type: "design" | "video"
+      layer_kind: "image" | "text" | "shape" | "group" | "video" | "audio"
+      track_type: "video" | "audio" | "overlay"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -593,6 +904,24 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      blend_mode: [
+        "normal",
+        "multiply",
+        "screen",
+        "overlay",
+        "darken",
+        "lighten",
+        "color-dodge",
+        "color-burn",
+        "hard-light",
+        "soft-light",
+        "difference",
+        "exclusion",
+      ],
+      document_type: ["design", "video"],
+      layer_kind: ["image", "text", "shape", "group", "video", "audio"],
+      track_type: ["video", "audio", "overlay"],
+    },
   },
 } as const

@@ -4,17 +4,21 @@ import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Palette, Type as TypeIcon } from "lucide-react";
+import { Settings, Palette, Type as TypeIcon, Eraser } from "lucide-react";
+import { useState } from "react";
 
 interface PropertiesPanelProps {
   selectedObject: any;
   onPropertyChange: (property: string, value: any) => void;
+  onRemoveBackground?: (tolerance: number) => void;
 }
 
 export const PropertiesPanel = ({
   selectedObject,
   onPropertyChange,
+  onRemoveBackground,
 }: PropertiesPanelProps) => {
+  const [chromaTolerance, setChromaTolerance] = useState(30);
   if (!selectedObject) {
     return (
       <Card className="h-full">
@@ -145,6 +149,37 @@ export const PropertiesPanel = ({
           </TabsContent>
 
           <TabsContent value="style" className="space-y-4 mt-4">
+            {selectedObject.type === "image" && onRemoveBackground && (
+              <div className="space-y-4 pb-4 border-b">
+                <Label>Background Removal</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => onRemoveBackground(chromaTolerance)}
+                >
+                  <Eraser className="h-4 w-4 mr-2" />
+                  Remove Background
+                </Button>
+                <div className="space-y-2">
+                  <Label htmlFor="chroma-tolerance">
+                    Tolerance: {chromaTolerance}
+                  </Label>
+                  <Slider
+                    id="chroma-tolerance"
+                    min={0}
+                    max={100}
+                    step={1}
+                    value={[chromaTolerance]}
+                    onValueChange={(value) => setChromaTolerance(value[0])}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Click the button to remove the background. Adjust tolerance for better results.
+                  </p>
+                </div>
+              </div>
+            )}
+            
             <div className="space-y-2">
               <Label htmlFor="fill">Fill Color</Label>
               <div className="flex gap-2">

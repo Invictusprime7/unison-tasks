@@ -376,6 +376,59 @@ export const DesignStudio = forwardRef((props, ref) => {
     setSelectedObject({ ...selectedObject });
   };
 
+  const removeBackground = (tolerance: number) => {
+    if (!fabricCanvas || !selectedObject || selectedObject.type !== "image") return;
+
+    const imgElement = selectedObject.getElement();
+    if (!imgElement) return;
+
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    canvas.width = imgElement.width;
+    canvas.height = imgElement.height;
+    ctx.drawImage(imgElement, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    // Auto-detect key color from top-left corner
+    const keyR = data[0];
+    const keyG = data[1];
+    const keyB = data[2];
+
+    // Apply chroma key
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+
+      // Calculate color distance
+      const distance = Math.sqrt(
+        Math.pow(r - keyR, 2) +
+        Math.pow(g - keyG, 2) +
+        Math.pow(b - keyB, 2)
+      );
+
+      // If color is close to key color, make it transparent
+      if (distance < tolerance * 2.55) {
+        data[i + 3] = 0; // Set alpha to 0
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+
+    // Update the image with the new canvas
+    selectedObject.setSrc(canvas.toDataURL(), () => {
+      fabricCanvas.renderAll();
+      toast({
+        title: "Background removed",
+        description: "Adjust tolerance if needed for better results",
+      });
+    });
+  };
+
   const getCanvasData = () => {
     if (!fabricCanvas) return null;
     return fabricCanvas.toJSON();
@@ -534,6 +587,7 @@ export const DesignStudio = forwardRef((props, ref) => {
             <PropertiesPanel
               selectedObject={selectedObject}
               onPropertyChange={handlePropertyChange}
+              onRemoveBackground={removeBackground}
             />
           </ScrollArea>
         </ResizablePanel>

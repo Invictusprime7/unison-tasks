@@ -1,10 +1,13 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DesignStudio } from "@/components/creatives/DesignStudio";
+import { FileBrowser } from "@/components/creatives/design-studio/FileBrowser";
 
 const DesignStudioPage = () => {
   const navigate = useNavigate();
+  const [fileBrowserOpen, setFileBrowserOpen] = useState(false);
 
   return (
     <div className="h-screen w-full flex flex-col bg-background">
@@ -23,7 +26,7 @@ const DesignStudioPage = () => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => navigate("/files")}
+          onClick={() => setFileBrowserOpen(true)}
         >
           <FolderOpen className="h-4 w-4 mr-2" />
           Browse Files
@@ -33,6 +36,11 @@ const DesignStudioPage = () => {
       <div className="flex-1 overflow-hidden">
         <DesignStudio />
       </div>
+
+      <FileBrowser 
+        open={fileBrowserOpen} 
+        onOpenChange={setFileBrowserOpen} 
+      />
     </div>
   );
 };

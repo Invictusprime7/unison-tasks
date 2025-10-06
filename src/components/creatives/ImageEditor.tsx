@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Image, Wand2, Upload, Download } from "lucide-react";
+import { Image, Wand2, Upload, Download, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -59,11 +59,76 @@ export const ImageEditor = () => {
     }
   };
 
+  const base64ToBlob = (base64: string) => {
+    const parts = base64.split(';base64,');
+    const contentType = parts[0].split(':')[1];
+    const raw = window.atob(parts[1]);
+    const rawLength = raw.length;
+    const uInt8Array = new Uint8Array(rawLength);
+
+    for (let i = 0; i < rawLength; ++i) {
+      uInt8Array[i] = raw.charCodeAt(i);
+    }
+
+    return new Blob([uInt8Array], { type: contentType });
+  };
+
   const handleDownload = (imageUrl: string) => {
     const link = document.createElement("a");
     link.href = imageUrl;
-    link.download = "generated-image.png";
+    link.download = `ai-generated-${Date.now()}.png`;
     link.click();
+  };
+
+  const handleSaveToFiles = async (imageUrl: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const userId = user?.id || null;
+
+      // Convert base64 to blob
+      const blob = base64ToBlob(imageUrl);
+      const fileName = `ai-generated-${Date.now()}.png`;
+      const filePath = userId 
+        ? `${userId}/${fileName}`
+        : `anonymous/${fileName}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from("user-files")
+        .upload(filePath, blob, {
+          contentType: 'image/png'
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Save metadata to database in /generated-images folder
+      const { error: dbError } = await supabase.from("files").insert({
+        user_id: userId,
+        name: fileName,
+        size: blob.size,
+        mime_type: 'image/png',
+        storage_path: filePath,
+        folder_path: '/generated-images',
+      });
+
+      if (dbError) throw dbError;
+
+      toast({
+        title: "Saved to Files!",
+        description: "Image saved to 'generated-images' folder",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Failed to save",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDownloadAndSave = async (imageUrl: string) => {
+    handleDownload(imageUrl);
+    await handleSaveToFiles(imageUrl);
   };
 
   return (
@@ -130,14 +195,23 @@ export const ImageEditor = () => {
                 className="w-full h-64 object-contain rounded"
               />
             </div>
-            <Button
-              variant="outline"
-              onClick={() => handleDownload(generatedImage)}
-              className="w-full"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download Image
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => handleDownload(generatedImage)}
+                className="flex-1"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+              <Button
+                onClick={() => handleDownloadAndSave(generatedImage)}
+                className="flex-1"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                Save & Download
+              </Button>
+            </div>
           </div>
         )}
       </CardContent>

@@ -24,6 +24,10 @@ export const DesignStudio = forwardRef((props, ref) => {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null);
+  
+  // Undo/Redo state
+  const [history, setHistory] = useState<string[]>([]);
+  const [redoStack, setRedoStack] = useState<string[]>([]);
 
   // Initialize canvas
   useEffect(() => {
@@ -180,10 +184,19 @@ export const DesignStudio = forwardRef((props, ref) => {
       if (e.key === "Delete" && canvas.getActiveObject()) {
         canvas.remove(canvas.getActiveObject()!);
         canvas.renderAll();
+        pushHistory();
       }
       if (e.key === "d" && e.ctrlKey) {
         e.preventDefault();
         duplicateSelected();
+      }
+      if (e.key === "z" && e.ctrlKey && !e.shiftKey) {
+        e.preventDefault();
+        undo();
+      }
+      if (e.key === "z" && e.ctrlKey && e.shiftKey) {
+        e.preventDefault();
+        redo();
       }
     };
 
@@ -236,6 +249,7 @@ export const DesignStudio = forwardRef((props, ref) => {
     fabricCanvas.add(rect);
     fabricCanvas.setActiveObject(rect);
     fabricCanvas.renderAll();
+    pushHistory();
     toast({ title: "Rectangle added" });
   };
 
@@ -253,6 +267,7 @@ export const DesignStudio = forwardRef((props, ref) => {
     fabricCanvas.add(circle);
     fabricCanvas.setActiveObject(circle);
     fabricCanvas.renderAll();
+    pushHistory();
     toast({ title: "Circle added" });
   };
 
@@ -269,6 +284,7 @@ export const DesignStudio = forwardRef((props, ref) => {
     fabricCanvas.add(text);
     fabricCanvas.setActiveObject(text);
     fabricCanvas.renderAll();
+    pushHistory();
     toast({ title: "Text added" });
   };
 
@@ -308,6 +324,7 @@ export const DesignStudio = forwardRef((props, ref) => {
     if (activeObject) {
       fabricCanvas.remove(activeObject);
       fabricCanvas.renderAll();
+      pushHistory();
       toast({ title: "Object deleted" });
     }
   };
@@ -334,6 +351,35 @@ export const DesignStudio = forwardRef((props, ref) => {
     toast({ title: "Design exported", description: "Your design has been downloaded" });
   };
 
+  const pushHistory = () => {
+    if (!fabricCanvas) return;
+    const state = JSON.stringify(fabricCanvas.toJSON());
+    setHistory((prev) => [...prev, state]);
+    setRedoStack([]);
+  };
+
+  const undo = () => {
+    if (!fabricCanvas || history.length === 0) return;
+    const prev = history[history.length - 1];
+    setRedoStack((r) => [...r, JSON.stringify(fabricCanvas.toJSON())]);
+    fabricCanvas.loadFromJSON(JSON.parse(prev), () => {
+      fabricCanvas.renderAll();
+      toast({ title: "Undo" });
+    });
+    setHistory((h) => h.slice(0, -1));
+  };
+
+  const redo = () => {
+    if (!fabricCanvas || redoStack.length === 0) return;
+    const next = redoStack[redoStack.length - 1];
+    setHistory((h) => [...h, JSON.stringify(fabricCanvas.toJSON())]);
+    fabricCanvas.loadFromJSON(JSON.parse(next), () => {
+      fabricCanvas.renderAll();
+      toast({ title: "Redo" });
+    });
+    setRedoStack((r) => r.slice(0, -1));
+  };
+
   const duplicateSelected = () => {
     if (!fabricCanvas) return;
     const activeObject = fabricCanvas.getActiveObject();
@@ -346,6 +392,7 @@ export const DesignStudio = forwardRef((props, ref) => {
         fabricCanvas.add(cloned);
         fabricCanvas.setActiveObject(cloned);
         fabricCanvas.renderAll();
+        pushHistory();
         toast({ title: "Object duplicated" });
       });
     }
@@ -556,6 +603,10 @@ export const DesignStudio = forwardRef((props, ref) => {
         onShowVersionHistory={() => setShowVersionHistory(true)}
         onSaveVersion={saveVersion}
         hasTemplate={!!currentTemplateId}
+        onUndo={undo}
+        onRedo={redo}
+        canUndo={history.length > 0}
+        canRedo={redoStack.length > 0}
       />
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">

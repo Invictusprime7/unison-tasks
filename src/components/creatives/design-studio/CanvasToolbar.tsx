@@ -18,6 +18,8 @@ import {
   FolderOpen,
   History,
   BookmarkPlus,
+  Undo,
+  Redo,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,6 +46,10 @@ interface CanvasToolbarProps {
   onShowVersionHistory: () => void;
   onSaveVersion: () => void;
   hasTemplate: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
+  canUndo: boolean;
+  canRedo: boolean;
 }
 
 export const CanvasToolbar = ({
@@ -68,6 +74,10 @@ export const CanvasToolbar = ({
   onShowVersionHistory,
   onSaveVersion,
   hasTemplate,
+  onUndo,
+  onRedo,
+  canUndo,
+  canRedo,
 }: CanvasToolbarProps) => {
   return (
     <div className="border-b bg-card p-4">
@@ -127,6 +137,30 @@ export const CanvasToolbar = ({
             title="Image (I)"
           >
             <Image className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <Separator orientation="vertical" className="h-8" />
+
+        {/* Undo/Redo */}
+        <div className="flex gap-1">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onUndo}
+            disabled={!canUndo}
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onRedo}
+            disabled={!canRedo}
+            title="Redo (Ctrl+Shift+Z)"
+          >
+            <Redo className="h-4 w-4" />
           </Button>
         </div>
 

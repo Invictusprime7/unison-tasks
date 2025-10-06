@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
-import { Canvas as FabricCanvas, Rect, Circle, IText, FabricImage } from "fabric";
+import { Canvas as FabricCanvas, Rect, Circle, IText, FabricImage, Point } from "fabric";
 import { useToast } from "@/hooks/use-toast";
 import { CanvasToolbar } from "./design-studio/CanvasToolbar";
 import { PropertiesPanel } from "./design-studio/PropertiesPanel";
@@ -34,6 +34,18 @@ export const DesignStudio = forwardRef((props, ref) => {
       width: container.clientWidth,
       height: container.clientHeight,
       backgroundColor: "#ffffff",
+    });
+
+    // Enable zoom with mouse wheel
+    canvas.on("mouse:wheel", (opt) => {
+      const delta = opt.e.deltaY;
+      let zoom = canvas.getZoom();
+      zoom *= 0.999 ** delta;
+      if (zoom > 20) zoom = 20;
+      if (zoom < 0.1) zoom = 0.1;
+      canvas.zoomToPoint(new Point(opt.e.offsetX, opt.e.offsetY), zoom);
+      opt.e.preventDefault();
+      opt.e.stopPropagation();
     });
 
     setFabricCanvas(canvas);
@@ -71,10 +83,13 @@ export const DesignStudio = forwardRef((props, ref) => {
             imgElement.src = event.target?.result as string;
             imgElement.onload = () => {
               FabricImage.fromURL(imgElement.src).then((img) => {
-                img.scale(0.5);
+                const scaleFactor = Math.min(canvas.width! / img.width!, canvas.height! / img.height!, 0.5);
+                img.scale(scaleFactor);
+                const zoom = canvas.getZoom();
+                const vpt = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
                 img.set({
-                  left: e.offsetX,
-                  top: e.offsetY,
+                  left: (e.offsetX - vpt[4]) / zoom - (img.width! * scaleFactor) / 2,
+                  top: (e.offsetY - vpt[5]) / zoom - (img.height! * scaleFactor) / 2,
                 });
                 canvas.add(img);
                 canvas.renderAll();
@@ -93,10 +108,13 @@ export const DesignStudio = forwardRef((props, ref) => {
       const imageUrl = e.dataTransfer?.getData("text/plain");
       if (imageUrl && (imageUrl.startsWith("http") || imageUrl.startsWith("data:image"))) {
         FabricImage.fromURL(imageUrl, { crossOrigin: "anonymous" }).then((img) => {
-          img.scale(0.5);
+          const scaleFactor = Math.min(canvas.width! / img.width!, canvas.height! / img.height!, 0.5);
+          img.scale(scaleFactor);
+          const zoom = canvas.getZoom();
+          const vpt = canvas.viewportTransform || [1, 0, 0, 1, 0, 0];
           img.set({
-            left: e.offsetX,
-            top: e.offsetY,
+            left: (e.offsetX - vpt[4]) / zoom - (img.width! * scaleFactor) / 2,
+            top: (e.offsetY - vpt[5]) / zoom - (img.height! * scaleFactor) / 2,
           });
           canvas.add(img);
           canvas.renderAll();
@@ -155,11 +173,22 @@ export const DesignStudio = forwardRef((props, ref) => {
     };
   }, []);
 
+  const getCenterPosition = () => {
+    if (!fabricCanvas) return { left: 100, top: 100 };
+    const zoom = fabricCanvas.getZoom();
+    const vpt = fabricCanvas.viewportTransform || [1, 0, 0, 1, 0, 0];
+    return {
+      left: (fabricCanvas.width! / 2 - vpt[4]) / zoom,
+      top: (fabricCanvas.height! / 2 - vpt[5]) / zoom,
+    };
+  };
+
   const addRectangle = () => {
     if (!fabricCanvas) return;
+    const center = getCenterPosition();
     const rect = new Rect({
-      left: 100,
-      top: 100,
+      left: center.left - 100,
+      top: center.top - 75,
       fill: fillColor,
       stroke: strokeColor,
       strokeWidth: 2,
@@ -174,9 +203,10 @@ export const DesignStudio = forwardRef((props, ref) => {
 
   const addCircle = () => {
     if (!fabricCanvas) return;
+    const center = getCenterPosition();
     const circle = new Circle({
-      left: 100,
-      top: 100,
+      left: center.left - 75,
+      top: center.top - 75,
       fill: fillColor,
       stroke: strokeColor,
       strokeWidth: 2,
@@ -190,9 +220,10 @@ export const DesignStudio = forwardRef((props, ref) => {
 
   const addText = () => {
     if (!fabricCanvas) return;
+    const center = getCenterPosition();
     const text = new IText("Double click to edit", {
-      left: 100,
-      top: 100,
+      left: center.left - 100,
+      top: center.top - 12,
       fill: fillColor,
       fontSize: 24,
       fontFamily: "Arial",
@@ -216,8 +247,13 @@ export const DesignStudio = forwardRef((props, ref) => {
         imgElement.src = event.target?.result as string;
         imgElement.onload = () => {
           FabricImage.fromURL(imgElement.src).then((img) => {
-            img.scale(0.5);
-            img.set({ left: 100, top: 100 });
+            const center = getCenterPosition();
+            const scaleFactor = Math.min(fabricCanvas.width! / img.width!, fabricCanvas.height! / img.height!, 0.5);
+            img.scale(scaleFactor);
+            img.set({ 
+              left: center.left - (img.width! * scaleFactor) / 2, 
+              top: center.top - (img.height! * scaleFactor) / 2 
+            });
             fabricCanvas.add(img);
             fabricCanvas.renderAll();
             toast({ title: "Image added" });
@@ -370,10 +406,12 @@ export const DesignStudio = forwardRef((props, ref) => {
       // Clean up object URL
       URL.revokeObjectURL(objectUrl);
       
-      img.scale(0.5);
+      const center = getCenterPosition();
+      const scaleFactor = Math.min(fabricCanvas.width! / img.width!, fabricCanvas.height! / img.height!, 0.5);
+      img.scale(scaleFactor);
       img.set({
-        left: 100,
-        top: 100,
+        left: center.left - (img.width! * scaleFactor) / 2,
+        top: center.top - (img.height! * scaleFactor) / 2,
       });
       fabricCanvas.add(img);
       fabricCanvas.renderAll();
@@ -445,7 +483,7 @@ export const DesignStudio = forwardRef((props, ref) => {
             >
               <canvas ref={canvasRef} />
               <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground">
-                💡 Drag & drop images from AI Image Editor or Files
+                💡 Drag & drop images | Scroll to zoom
               </div>
             </div>
           </ScrollArea>

@@ -359,7 +359,16 @@ export const DesignStudio = forwardRef((props, ref) => {
     if (!fabricCanvas) return;
     
     try {
-      const img = await FabricImage.fromURL(imageUrl, { crossOrigin: "anonymous" });
+      // For Supabase storage URLs, fetch as blob to avoid CORS issues
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      
+      const img = await FabricImage.fromURL(objectUrl);
+      
+      // Clean up object URL
+      URL.revokeObjectURL(objectUrl);
+      
       img.scale(0.5);
       img.set({
         left: 100,
@@ -375,7 +384,7 @@ export const DesignStudio = forwardRef((props, ref) => {
       console.error("Error loading image:", error);
       toast({
         title: "Error",
-        description: "Failed to load image",
+        description: "Failed to load image from storage",
         variant: "destructive",
       });
     }

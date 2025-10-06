@@ -46,6 +46,7 @@ export const DocumentManager = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
 
+      // Create the document
       const { data: doc, error: docError } = await supabase
         .from("documents")
         .insert({
@@ -58,6 +59,7 @@ export const DocumentManager = () => {
 
       if (docError) throw docError;
 
+      // Initialize based on type
       if (newDocType === "design") {
         const { error: pageError } = await supabase.from("pages").insert({
           document_id: doc.id,
@@ -85,10 +87,15 @@ export const DocumentManager = () => {
         ]);
       }
 
-      toast({ title: "Success", description: `${newDocType === "design" ? "Design" : "Video"} created!` });
+      // Close dialog and navigate to the studio
       setDialogOpen(false);
       setNewDocTitle("");
-      refetch();
+      toast({ 
+        title: "Success", 
+        description: `${newDocType === "design" ? "Design" : "Video"} project created!` 
+      });
+      
+      // Navigate to the document in the studio
       navigate(`/design-studio/${doc.id}`);
     } catch (error: any) {
       toast({ title: "Error", description: error.message, variant: "destructive" });

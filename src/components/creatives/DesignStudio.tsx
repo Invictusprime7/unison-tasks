@@ -1,12 +1,9 @@
 import { useEffect, useRef, useState, forwardRef, useImperativeHandle } from "react";
 import { Canvas as FabricCanvas, Rect, Circle, IText, FabricImage, Point, filters } from "fabric";
 import { useToast } from "@/hooks/use-toast";
-import { CanvasToolbar } from "./design-studio/CanvasToolbar";
+import { Button } from "@/components/ui/button";
 import { PropertiesPanel } from "./design-studio/PropertiesPanel";
 import { FiltersPanel } from "./design-studio/FiltersPanel";
-import { PagesPanel } from "./design-studio/PagesPanel";
-import { AlignmentTools } from "./design-studio/AlignmentTools";
-import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TemplateLibrary } from "./design-studio/TemplateLibrary";
@@ -50,10 +47,9 @@ export const DesignStudio = forwardRef((props, ref) => {
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
-    const container = containerRef.current;
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: container.clientWidth,
-      height: container.clientHeight,
+      width: 960,
+      height: 540,
       backgroundColor: "#ffffff",
     });
 
@@ -222,25 +218,13 @@ export const DesignStudio = forwardRef((props, ref) => {
 
     window.addEventListener("keydown", handleKeyDown);
 
-    // Resize observer
-    const resizeObserver = new ResizeObserver(() => {
-      if (container) {
-        canvas.setDimensions({
-          width: container.clientWidth,
-          height: container.clientHeight,
-        });
-        canvas.renderAll();
-      }
-    });
-
-    resizeObserver.observe(container);
+    // Canvas is now fixed size, no resize observer needed
 
     return () => {
       canvas.dispose();
       window.removeEventListener("keydown", handleKeyDown);
       canvasElement.removeEventListener("dragover", handleDragOver);
       canvasElement.removeEventListener("drop", handleDrop);
-      resizeObserver.disconnect();
     };
   }, []);
 
@@ -767,7 +751,7 @@ export const DesignStudio = forwardRef((props, ref) => {
   }));
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full bg-slate-900 text-white">
       <input
         ref={fileInputRef}
         type="file"
@@ -776,109 +760,109 @@ export const DesignStudio = forwardRef((props, ref) => {
         onChange={handleImageUpload}
       />
       
-      <CanvasToolbar
-        activeTool={activeTool}
-        onToolSelect={setActiveTool}
-        onAddRectangle={addRectangle}
-        onAddCircle={addCircle}
-        onAddText={addText}
-        onAddImage={addImage}
-        onDelete={deleteSelected}
-        onClear={clearCanvas}
-        onExport={exportCanvas}
-        onExportJPEG={exportCanvasJPEG}
-        onDuplicate={duplicateSelected}
-        onBringForward={bringForward}
-        onSendBackward={sendBackward}
-        fillColor={fillColor}
-        onFillColorChange={setFillColor}
-        strokeColor={strokeColor}
-        onStrokeColorChange={setStrokeColor}
-        onSaveTemplate={saveAsTemplate}
-        onOpenTemplates={() => setShowTemplateLibrary(true)}
-        onShowVersionHistory={() => setShowVersionHistory(true)}
-        onSaveVersion={saveVersion}
-        hasTemplate={!!currentTemplateId}
-        onUndo={undo}
-        onRedo={redo}
-        canUndo={history.length > 0}
-        canRedo={redoStack.length > 0}
-        alignmentTools={
-          <AlignmentTools
-            onAlign={alignObjects}
-            onToggleGrid={() => setShowGrid(!showGrid)}
-            onToggleSnap={() => setSnapEnabled(!snapEnabled)}
-            showGrid={showGrid}
-            snapEnabled={snapEnabled}
-          />
-        }
-      />
-
-      <div className="flex-1 flex flex-col">
-        <ResizablePanelGroup direction="horizontal" className="flex-1">
-          <ResizablePanel defaultSize={85} minSize={70}>
-            <ScrollArea className="h-full w-full">
-              <div
-                ref={containerRef}
-                className="w-full h-full bg-muted/20 relative min-h-[1600px] min-w-[1200px]"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(0, 0, 0, 0.05) 1px, transparent 1px)
-                  `,
-                  backgroundSize: "20px 20px",
-                }}
-              >
-                <canvas ref={canvasRef} />
-                <div className="absolute bottom-4 left-4 bg-card/90 backdrop-blur-sm px-3 py-2 rounded-lg text-xs text-muted-foreground">
-                  💡 Scroll to zoom | Shift+Drag to pan
-                </div>
-              </div>
-            </ScrollArea>
-          </ResizablePanel>
-
-          <ResizableHandle withHandle />
-
-          <ResizablePanel defaultSize={15} minSize={12} maxSize={25}>
-            <Tabs defaultValue="properties" className="h-full flex flex-col">
-              <TabsList className="w-full grid grid-cols-2 shrink-0 h-9 text-xs">
-                <TabsTrigger value="properties" className="text-xs">Properties</TabsTrigger>
-                <TabsTrigger value="filters" className="text-xs">Filters</TabsTrigger>
-              </TabsList>
-              <TabsContent value="properties" className="flex-1 overflow-hidden mt-0">
-                <ScrollArea className="h-full">
-                  <PropertiesPanel
-                    selectedObject={selectedObject}
-                    onPropertyChange={handlePropertyChange}
-                    onRemoveBackground={removeBackground}
-                  />
-                </ScrollArea>
-              </TabsContent>
-              <TabsContent value="filters" className="flex-1 overflow-hidden mt-0">
-                <ScrollArea className="h-full">
-                  <FiltersPanel
-                    selectedObject={selectedObject}
-                    onFilterChange={applyFilter}
-                    onResetFilters={resetFilters}
-                  />
-                </ScrollArea>
-              </TabsContent>
-            </Tabs>
-          </ResizablePanel>
-        </ResizablePanelGroup>
-
-        <div className="h-24 border-t shrink-0 bg-card">
-          <PagesPanel
-            pages={pages}
-            currentPageId={currentPageId}
-            onPageSelect={handlePageSelect}
-            onPageAdd={addPage}
-            onPageDelete={deletePage}
-            onPageDuplicate={duplicatePage}
-            onPageRename={renamePage}
-          />
+      {/* Left Sidebar - Tools & Elements */}
+      <aside className="w-64 bg-slate-800 border-r border-slate-700 p-4 flex flex-col gap-4">
+        <div>
+          <h3 className="text-sm font-semibold mb-3 text-slate-300">Tools</h3>
+          <div className="flex flex-col gap-2">
+            <Button
+              variant={activeTool === "select" ? "secondary" : "outline"}
+              size="sm"
+              onClick={() => setActiveTool("select")}
+              className="justify-start"
+            >
+              Select
+            </Button>
+          </div>
         </div>
-      </div>
+
+        <div>
+          <h3 className="text-sm font-semibold mb-3 text-slate-300">Shapes</h3>
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" size="sm" onClick={addRectangle} className="justify-start">
+              Rectangle
+            </Button>
+            <Button variant="outline" size="sm" onClick={addCircle} className="justify-start">
+              Circle
+            </Button>
+            <Button variant="outline" size="sm" onClick={addText} className="justify-start">
+              Text
+            </Button>
+            <Button variant="outline" size="sm" onClick={addImage} className="justify-start">
+              Image
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold mb-3 text-slate-300">Actions</h3>
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" size="sm" onClick={undo} disabled={history.length === 0} className="justify-start">
+              Undo
+            </Button>
+            <Button variant="outline" size="sm" onClick={redo} disabled={redoStack.length === 0} className="justify-start">
+              Redo
+            </Button>
+            <Button variant="outline" size="sm" onClick={deleteSelected} className="justify-start">
+              Delete
+            </Button>
+            <Button variant="outline" size="sm" onClick={duplicateSelected} className="justify-start">
+              Duplicate
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold mb-3 text-slate-300">Export</h3>
+          <div className="flex flex-col gap-2">
+            <Button variant="outline" size="sm" onClick={exportCanvas} className="justify-start">
+              Export PNG
+            </Button>
+            <Button variant="outline" size="sm" onClick={exportCanvasJPEG} className="justify-start">
+              Export JPEG
+            </Button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Canvas Area */}
+      <main className="flex-1 flex items-center justify-center relative bg-slate-900">
+        <div
+          ref={containerRef}
+          className="bg-white rounded-lg shadow-lg relative"
+          style={{ width: 960, height: 540 }}
+        >
+          <canvas ref={canvasRef} />
+        </div>
+      </main>
+
+      {/* Right Sidebar - Properties */}
+      <aside className="w-72 bg-slate-800 border-l border-slate-700 p-4">
+        <Tabs defaultValue="properties" className="h-full flex flex-col">
+          <TabsList className="w-full grid grid-cols-2 bg-slate-700">
+            <TabsTrigger value="properties">Properties</TabsTrigger>
+            <TabsTrigger value="filters">Filters</TabsTrigger>
+          </TabsList>
+          <TabsContent value="properties" className="flex-1 overflow-hidden mt-4">
+            <ScrollArea className="h-full">
+              <PropertiesPanel
+                selectedObject={selectedObject}
+                onPropertyChange={handlePropertyChange}
+                onRemoveBackground={removeBackground}
+              />
+            </ScrollArea>
+          </TabsContent>
+          <TabsContent value="filters" className="flex-1 overflow-hidden mt-4">
+            <ScrollArea className="h-full">
+              <FiltersPanel
+                selectedObject={selectedObject}
+                onFilterChange={applyFilter}
+                onResetFilters={resetFilters}
+              />
+            </ScrollArea>
+          </TabsContent>
+        </Tabs>
+      </aside>
 
       <TemplateLibrary
         open={showTemplateLibrary}

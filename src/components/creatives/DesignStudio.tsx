@@ -1140,35 +1140,11 @@ export const DesignStudio = forwardRef((props, ref) => {
         template,
       });
       
-      // Step 4: Render to canvas using existing renderer
+      // Step 4: Render to canvas using new Fabric renderer
       console.log('[DesignStudio] Rendering AI template to canvas:', template.name);
-      if (templateRendererRef.current) {
-        // Convert back to AIGeneratedTemplate format for renderer
-        // (This is a bridge until we fully migrate to the new Document format)
-        const aiTemplate: AIGeneratedTemplate = {
-          id: template.id || `template-${Date.now()}`,
-          name: template.name,
-          description: template.description,
-          brandKit: {
-            primaryColor: '#3b82f6',
-            secondaryColor: '#1e40af',
-            accentColor: '#06b6d4',
-            fonts: { heading: 'Inter', body: 'Inter', accent: 'Inter' },
-          },
-          sections: [],
-          variants: [{
-            id: 'v1',
-            name: 'Main',
-            size: { width: template.frames[0].width, height: template.frames[0].height },
-            format: 'web',
-          }],
-          data: {},
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        
-        await templateRendererRef.current.renderTemplate(aiTemplate);
-      }
+      const { FabricTemplateRenderer } = await import('@/utils/fabricTemplateRenderer');
+      const renderer = new FabricTemplateRenderer(fabricCanvas);
+      await renderer.renderTemplate(template);
       
       setCurrentTemplateId(template.id || null);
       pushHistory();

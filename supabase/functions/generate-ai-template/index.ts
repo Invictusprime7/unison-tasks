@@ -18,97 +18,78 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    const systemPrompt = `You are an expert design system architect that generates structured template layouts.
+    const systemPrompt = `You are an expert design template generator. Create beautiful, production-ready templates with actual visual content.
 
-Given a user's brief (industry, goal, target audience), generate a complete template structure with:
-1. Sections (hero, content, gallery, CTA, footer)
-2. Components within each section (text, images, buttons, shapes)
-3. Layout constraints (width/height modes: fixed/hug/fill)
-4. Flexbox properties (direction, alignment, justification, gap, padding)
-5. Data bindings for dynamic content
-6. Brand kit integration (colors, fonts)
-
-Output MUST be valid JSON matching this structure:
+Your templates MUST use the new Zod-validated schema:
 {
-  "name": "Template Name",
-  "description": "Brief description",
-  "industry": "industry type",
-  "brandKit": {
-    "primaryColor": "#hex",
-    "secondaryColor": "#hex",
-    "accentColor": "#hex",
-    "fonts": {
-      "heading": "Font Name",
-      "body": "Font Name",
-      "accent": "Font Name"
-    }
-  },
-  "sections": [
+  "name": "string",
+  "description": "string",
+  "category": "social-media|web|presentation|print",
+  "frames": [
     {
-      "id": "unique-id",
-      "name": "Section Name",
-      "type": "hero|content|gallery|cta|footer|custom",
-      "constraints": {
-        "width": { "mode": "fill" },
-        "height": { "mode": "hug" },
-        "padding": { "top": 40, "right": 20, "bottom": 40, "left": 20 },
-        "gap": 20,
-        "flexDirection": "column",
-        "alignItems": "center",
-        "justifyContent": "center"
-      },
-      "components": [
+      "id": "frame-1",
+      "name": "Main Frame",
+      "width": 1080,
+      "height": 1080,
+      "background": "#ffffff",
+      "layout": "free|flex-column|flex-row|grid",
+      "gap": 20,
+      "padding": 40,
+      "layers": [
         {
-          "id": "unique-component-id",
-          "type": "text|image|shape|container|button",
-          "name": "Component Name",
-          "constraints": {
-            "width": { "mode": "hug" },
-            "height": { "mode": "fixed", "value": 60 }
-          },
-          "dataBinding": {
-            "field": "title",
-            "type": "text",
-            "defaultValue": "Default Title"
-          },
-          "style": {
-            "backgroundColor": "#hex",
-            "borderRadius": 8,
-            "opacity": 1
-          },
-          "fabricProps": {
-            "fontSize": 48,
-            "fontFamily": "Font Name",
-            "fill": "#hex",
-            "fontWeight": "bold"
-          }
+          "type": "shape|text|image",
+          "x": 0,
+          "y": 0,
+          "width": 200,
+          "height": 100,
+          "rotation": 0,
+          "opacity": 1,
+          "visible": true,
+          "locked": false,
+          // For text layers:
+          "content": "Text content",
+          "fontFamily": "Inter",
+          "fontSize": 48,
+          "fontWeight": "bold|normal",
+          "fontStyle": "normal|italic",
+          "textAlign": "left|center|right",
+          "color": "#000000",
+          "lineHeight": 1.2,
+          "letterSpacing": 0,
+          // For image layers:
+          "src": "https://images.unsplash.com/...",
+          "fit": "cover|contain|fill",
+          "filters": [],
+          "borderRadius": 0,
+          // For shape layers:
+          "shape": "rectangle|circle|ellipse",
+          "fill": "#3b82f6",
+          "stroke": "#000000",
+          "strokeWidth": 0,
+          "borderRadius": 8
         }
       ]
     }
-  ],
-  "variants": [
-    {
-      "id": "variant-id",
-      "name": "Desktop",
-      "size": { "width": 1920, "height": 1080 },
-      "format": "web"
-    }
-  ],
-  "data": {
-    "title": "Sample Title",
-    "subtitle": "Sample Subtitle",
-    "cta": "Get Started"
-  }
+  ]
 }
 
-CRITICAL RULES:
-- Use semantic section types (hero, content, gallery, cta, footer)
-- Apply Auto Layout principles: use "hug" for content-sized, "fill" for responsive, "fixed" for specific sizes
-- Include data bindings for all dynamic content (titles, images, prices, etc.)
-- Use flexbox for proper alignment and spacing
-- Generate multiple variants for different formats (web, social media, presentation)
-- Ensure color harmony and font pairing in brand kit
-- Add padding and gap for proper spacing`;
+CRITICAL REQUIREMENTS:
+1. ALWAYS create multiple visible layers - minimum 5 layers per frame
+2. Use real Unsplash image URLs: https://images.unsplash.com/photo-{id}?w=800&q=80
+3. Create visual hierarchy: backgrounds, images, text overlays, shapes
+4. Use proper colors (hex format like #3b82f6)
+5. Set appropriate dimensions and positions
+6. Use layouts: "free" for absolute positioning, "flex-column" for vertical stacks
+7. Create professional designs inspired by Canva, Figma templates
+
+EXAMPLE TEMPLATE FOR E-COMMERCE:
+- Background shape (full frame, gradient color)
+- Hero image layer (product photo from Unsplash)
+- Text layers: brand name, product title, price, description
+- Shape layers: colored accent boxes, decorative elements
+- Call-to-action button (shape + text)
+
+Make it visually stunning and immediately usable!`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -122,52 +103,7 @@ CRITICAL RULES:
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt.description }
         ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "generate_template_structure",
-              description: "Generate a complete template structure with sections, components, and layouts",
-              parameters: {
-                type: "object",
-                properties: {
-                  name: { type: "string" },
-                  description: { type: "string" },
-                  industry: { type: "string" },
-                  brandKit: {
-                    type: "object",
-                    properties: {
-                      primaryColor: { type: "string" },
-                      secondaryColor: { type: "string" },
-                      accentColor: { type: "string" },
-                      fonts: {
-                        type: "object",
-                        properties: {
-                          heading: { type: "string" },
-                          body: { type: "string" },
-                          accent: { type: "string" }
-                        },
-                        required: ["heading", "body", "accent"]
-                      }
-                    },
-                    required: ["primaryColor", "secondaryColor", "accentColor", "fonts"]
-                  },
-                  sections: {
-                    type: "array",
-                    items: { type: "object" }
-                  },
-                  variants: {
-                    type: "array",
-                    items: { type: "object" }
-                  },
-                  data: { type: "object" }
-                },
-                required: ["name", "description", "brandKit", "sections", "variants", "data"]
-              }
-            }
-          }
-        ],
-        tool_choice: { type: "function", function: { name: "generate_template_structure" } }
+        response_format: { type: "json_object" }
       }),
     });
 
@@ -188,13 +124,13 @@ CRITICAL RULES:
     }
 
     const data = await response.json();
-    const toolCall = data.choices[0]?.message?.tool_calls?.[0];
+    const messageContent = data.choices[0]?.message?.content;
     
-    if (!toolCall) {
+    if (!messageContent) {
       throw new Error("No template generated");
     }
 
-    const templateStructure = JSON.parse(toolCall.function.arguments);
+    const templateStructure = JSON.parse(messageContent);
 
     return new Response(
       JSON.stringify({ 

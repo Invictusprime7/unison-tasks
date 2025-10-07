@@ -9,7 +9,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TemplateLibrary } from "./design-studio/TemplateLibrary";
 import { SaveTemplateDialog } from "./design-studio/SaveTemplateDialog";
 import { VersionHistory } from "./design-studio/VersionHistory";
+import { AITemplateGenerator } from "./AITemplateGenerator";
 import { supabase } from "@/integrations/supabase/client";
+import { TemplateRenderer } from "@/utils/templateRenderer";
+import { HTMLExporter } from "@/utils/htmlExporter";
+import type { AIGeneratedTemplate } from "@/types/template";
 
 export const DesignStudio = forwardRef((props, ref) => {
   const { toast } = useToast();
@@ -24,7 +28,12 @@ export const DesignStudio = forwardRef((props, ref) => {
   const [showTemplateLibrary, setShowTemplateLibrary] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null);
+  
+  // Template renderer and exporter
+  const templateRendererRef = useRef<TemplateRenderer | null>(null);
+  const htmlExporterRef = useRef<HTMLExporter>(new HTMLExporter());
   
   // Undo/Redo state
   const [history, setHistory] = useState<string[]>([]);
@@ -228,6 +237,9 @@ export const DesignStudio = forwardRef((props, ref) => {
     window.addEventListener("keydown", handleKeyDown);
 
     // Canvas is now fixed size, no resize observer needed
+
+    // Initialize template renderer
+    templateRendererRef.current = new TemplateRenderer(canvas);
 
     return () => {
       canvas.dispose();
@@ -832,6 +844,91 @@ export const DesignStudio = forwardRef((props, ref) => {
     };
   }, [fabricCanvas, currentTemplateId]);
 
+  // AI Template handlers
+  const handleAITemplateGenerated = async (template: AIGeneratedTemplate) => {
+    if (!fabricCanvas || !templateRendererRef.current) return;
+    
+    try {
+      await templateRendererRef.current.renderTemplate(template);
+      setCurrentTemplateId(template.id);
+      pushHistory();
+      toast({ 
+        title: "AI Template Loaded", 
+        description: `${template.name} rendered successfully` 
+      });
+    } catch (error) {
+      console.error("Error rendering AI template:", error);
+      toast({ 
+        title: "Error", 
+        description: "Failed to render AI template",
+        variant: "destructive" 
+      });
+    }
+  };
+
+  const exportToHTML = () => {
+    if (!htmlExporterRef.current) return;
+    
+    // For now, export current canvas as static template
+    const mockTemplate: AIGeneratedTemplate = {
+      id: currentTemplateId || "export-" + Date.now(),
+      name: "Exported Template",
+      description: "Canvas export",
+      brandKit: {
+        primaryColor: "#3b82f6",
+        secondaryColor: "#1e40af",
+        accentColor: "#06b6d4",
+        fonts: { heading: "Arial", body: "Arial", accent: "Arial" }
+      },
+      sections: [],
+      variants: [{ id: "v1", name: "Web", size: { width: 960, height: 540 }, format: "web" }],
+      data: {},
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    const html = htmlExporterRef.current.exportToHTML(mockTemplate);
+    const blob = new Blob([html], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "template.html";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "HTML exported successfully" });
+  };
+
+  const exportToReact = () => {
+    if (!htmlExporterRef.current) return;
+    
+    const mockTemplate: AIGeneratedTemplate = {
+      id: currentTemplateId || "export-" + Date.now(),
+      name: "ExportedTemplate",
+      description: "Canvas export",
+      brandKit: {
+        primaryColor: "#3b82f6",
+        secondaryColor: "#1e40af",
+        accentColor: "#06b6d4",
+        fonts: { heading: "Arial", body: "Arial", accent: "Arial" }
+      },
+      sections: [],
+      variants: [{ id: "v1", name: "Web", size: { width: 960, height: 540 }, format: "web" }],
+      data: {},
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    
+    const reactCode = htmlExporterRef.current.exportToReact(mockTemplate);
+    const blob = new Blob([reactCode], { type: "text/tsx" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "Template.tsx";
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: "React component exported successfully" });
+  };
+
   useImperativeHandle(ref, () => ({
     addImageFromUrl,
   }));
@@ -858,11 +955,25 @@ export const DesignStudio = forwardRef((props, ref) => {
           </Button>
         </div>
         <div className="ml-auto flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => setShowAIGenerator(true)} 
+            className="h-8 px-3 text-xs bg-purple-600 hover:bg-purple-500 text-white"
+          >
+            AI Generate
+          </Button>
           <Button variant="ghost" size="sm" onClick={exportCanvas} className="h-8 px-3 text-xs bg-cyan-600 hover:bg-cyan-500 text-white">
             Export PNG
           </Button>
           <Button variant="ghost" size="sm" onClick={exportCanvasJPEG} className="h-8 px-3 text-xs">
             Export JPEG
+          </Button>
+          <Button variant="ghost" size="sm" onClick={exportToHTML} className="h-8 px-3 text-xs">
+            Export HTML
+          </Button>
+          <Button variant="ghost" size="sm" onClick={exportToReact} className="h-8 px-3 text-xs">
+            Export React
           </Button>
         </div>
       </div>
@@ -1031,6 +1142,12 @@ export const DesignStudio = forwardRef((props, ref) => {
         onOpenChange={setShowVersionHistory}
         templateId={currentTemplateId}
         onRestoreVersion={handleVersionRestore}
+      />
+
+      <AITemplateGenerator
+        open={showAIGenerator}
+        onOpenChange={setShowAIGenerator}
+        onTemplateGenerated={handleAITemplateGenerated}
       />
     </div>
   );

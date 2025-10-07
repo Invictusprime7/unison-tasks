@@ -69,37 +69,17 @@ export const DesignStudio = forwardRef((props, ref) => {
       opt.e.stopPropagation();
     });
 
-    // Enable panning with drag (Space key, middle mouse, or empty canvas drag)
+    // Enable panning by dragging on empty canvas or middle mouse button
     let isPanning = false;
     let lastPosX = 0;
     let lastPosY = 0;
-    let spacePressed = false;
-
-    // Track space key for panning
-    const handleSpaceKey = (e: KeyboardEvent) => {
-      if (e.code === "Space" && !spacePressed && e.type === "keydown") {
-        spacePressed = true;
-        canvas.defaultCursor = "grab";
-        canvas.setCursor("grab");
-      } else if (e.code === "Space" && e.type === "keyup") {
-        spacePressed = false;
-        canvas.defaultCursor = "default";
-        if (!isPanning) {
-          canvas.setCursor("default");
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleSpaceKey);
-    window.addEventListener("keyup", handleSpaceKey);
 
     canvas.on("mouse:down", (opt) => {
       const evt = opt.e;
       const isMiddleButton = 'button' in evt && evt.button === 1;
-      const isSpaceDrag = spacePressed && 'button' in evt && evt.button === 0;
       const isEmptyCanvasDrag = !opt.target && 'button' in evt && evt.button === 0;
       
-      if (isMiddleButton || isSpaceDrag || isEmptyCanvasDrag) {
+      if (isMiddleButton || isEmptyCanvasDrag) {
         isPanning = true;
         canvas.selection = false;
         lastPosX = 'clientX' in evt ? evt.clientX : 0;
@@ -127,7 +107,7 @@ export const DesignStudio = forwardRef((props, ref) => {
       canvas.setViewportTransform(canvas.viewportTransform!);
       isPanning = false;
       canvas.selection = true;
-      canvas.setCursor(spacePressed ? "grab" : "default");
+      canvas.setCursor("default");
     });
 
     setFabricCanvas(canvas);
@@ -258,8 +238,6 @@ export const DesignStudio = forwardRef((props, ref) => {
     return () => {
       canvas.dispose();
       window.removeEventListener("keydown", handleKeyDown);
-      window.removeEventListener("keydown", handleSpaceKey);
-      window.removeEventListener("keyup", handleSpaceKey);
       canvasElement.removeEventListener("dragover", handleDragOver);
       canvasElement.removeEventListener("drop", handleDrop);
       resizeObserver.disconnect();

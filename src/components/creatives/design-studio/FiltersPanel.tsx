@@ -6,13 +6,13 @@ import { RotateCcw, Wand2 } from "lucide-react";
 
 interface FiltersPanelProps {
   selectedObject: any;
-  onFilterChange: (filterType: string, value: number) => void;
+  onApplyFilter: (filterType: string, value: number) => void;
   onResetFilters: () => void;
 }
 
 export const FiltersPanel = ({
   selectedObject,
-  onFilterChange,
+  onApplyFilter,
   onResetFilters,
 }: FiltersPanelProps) => {
   if (!selectedObject || selectedObject.type !== "image") {
@@ -73,7 +73,7 @@ export const FiltersPanel = ({
             max={100}
             step={1}
             value={[getCurrentFilterValue("brightness")]}
-            onValueChange={(value) => onFilterChange("brightness", value[0])}
+            onValueChange={(value) => onApplyFilter("brightness", value[0])}
           />
         </div>
 
@@ -87,7 +87,7 @@ export const FiltersPanel = ({
             max={100}
             step={1}
             value={[getCurrentFilterValue("contrast") * 100]}
-            onValueChange={(value) => onFilterChange("contrast", value[0] / 100)}
+            onValueChange={(value) => onApplyFilter("contrast", value[0] / 100)}
           />
         </div>
 
@@ -101,7 +101,7 @@ export const FiltersPanel = ({
             max={100}
             step={1}
             value={[getCurrentFilterValue("saturation") * 100]}
-            onValueChange={(value) => onFilterChange("saturation", value[0] / 100)}
+            onValueChange={(value) => onApplyFilter("saturation", value[0] / 100)}
           />
         </div>
 

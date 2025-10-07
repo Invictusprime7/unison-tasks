@@ -1257,38 +1257,20 @@ export const DesignStudio = forwardRef((props, ref) => {
               <TabsTrigger value="filters" className="text-xs">Filters</TabsTrigger>
             </TabsList>
             <TabsContent value="properties" className="flex-1 overflow-y-auto m-0">
-              {selectedObject ? (
-                <div className="p-3 space-y-3">
-                  <div className="text-sm font-medium text-slate-200 mb-3">
-                    {selectedObject.type?.toUpperCase() || 'Object'} Properties
-                  </div>
-                  <div className="space-y-2 text-xs">
-                    {selectedObject.left !== undefined && (
-                      <div>X: {Math.round(selectedObject.left)}</div>
-                    )}
-                    {selectedObject.top !== undefined && (
-                      <div>Y: {Math.round(selectedObject.top)}</div>
-                    )}
-                    {selectedObject.width !== undefined && (
-                      <div>Width: {Math.round(selectedObject.width * (selectedObject.scaleX || 1))}</div>
-                    )}
-                    {selectedObject.height !== undefined && (
-                      <div>Height: {Math.round(selectedObject.height * (selectedObject.scaleY || 1))}</div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="p-3 text-xs text-slate-400">No object selected</div>
-              )}
+              <PropertiesPanel
+                selectedObject={selectedObject}
+                onPropertyChange={handlePropertyChange}
+                onStartCrop={startCrop}
+                onRemoveBackground={removeBackground}
+                onAlign={alignObjects}
+              />
             </TabsContent>
             <TabsContent value="filters" className="flex-1 overflow-y-auto m-0">
-              {selectedObject ? (
-                <div className="p-3 text-xs text-slate-400">
-                  Filters panel (select image to apply filters)
-                </div>
-              ) : (
-                <div className="p-3 text-xs text-slate-400">No object selected</div>
-              )}
+              <FiltersPanel
+                selectedObject={selectedObject}
+                onApplyFilter={applyFilter}
+                onResetFilters={resetFilters}
+              />
             </TabsContent>
           </Tabs>
         </aside>

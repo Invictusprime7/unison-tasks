@@ -11,12 +11,16 @@ interface PropertiesPanelProps {
   selectedObject: any;
   onPropertyChange: (property: string, value: any) => void;
   onRemoveBackground?: (tolerance: number) => void;
+  onStartCrop?: () => void;
+  onAlign?: (alignment: string) => void;
 }
 
 export const PropertiesPanel = ({
   selectedObject,
   onPropertyChange,
   onRemoveBackground,
+  onStartCrop,
+  onAlign,
 }: PropertiesPanelProps) => {
   const [chromaTolerance, setChromaTolerance] = useState(30);
   if (!selectedObject) {
@@ -146,6 +150,64 @@ export const PropertiesPanel = ({
                 onValueChange={(value) => onPropertyChange("opacity", value[0] / 100)}
               />
             </div>
+
+            {selectedObject.type === "image" && (
+              <div className="space-y-2">
+                <Label>Image Controls</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onPropertyChange("flipX", !selectedObject.flipX)}
+                  >
+                    Flip H
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onPropertyChange("flipY", !selectedObject.flipY)}
+                  >
+                    Flip V
+                  </Button>
+                  {onStartCrop && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="col-span-2"
+                      onClick={onStartCrop}
+                    >
+                      Crop Image
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {onAlign && (
+              <div className="space-y-2">
+                <Label>Alignment</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <Button variant="outline" size="sm" onClick={() => onAlign("left")}>
+                    Left
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => onAlign("center-h")}>
+                    Center
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => onAlign("right")}>
+                    Right
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => onAlign("top")}>
+                    Top
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => onAlign("center-v")}>
+                    Middle
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => onAlign("bottom")}>
+                    Bottom
+                  </Button>
+                </div>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="style" className="space-y-4 mt-4">

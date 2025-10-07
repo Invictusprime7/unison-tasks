@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Search, Grid3x3, Square, Circle, Image, Type, Layout, Smartphone, MonitorPlay } from 'lucide-react';
 
 interface ElementsPanelProps {
@@ -185,36 +192,50 @@ export const ElementsPanel = ({ onElementSelect, onElementDragStart }: ElementsP
   return (
     <div className="h-full flex flex-col bg-slate-950/40">
       {/* Search */}
-      <div className="p-3 border-b border-slate-800">
+      <div className="p-3 border-b border-slate-800 space-y-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input
             placeholder="Search elements"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 bg-slate-900 border-slate-700 text-sm"
+            className="pl-9 bg-slate-900 border-slate-700 text-sm h-9"
           />
         </div>
-      </div>
 
-      {/* Category Tabs */}
-      <div className="flex gap-1 p-2 border-b border-slate-800 overflow-x-auto">
-        {categories.map(({ id, label, icon: Icon }) => (
-          <Button
-            key={id}
-            variant={activeCategory === id ? "default" : "ghost"}
-            size="sm"
-            onClick={() => setActiveCategory(id)}
-            className={`flex items-center gap-2 text-xs whitespace-nowrap ${
-              activeCategory === id 
-                ? 'bg-cyan-600 hover:bg-cyan-500 text-white' 
-                : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800'
-            }`}
-          >
-            <Icon className="w-3.5 h-3.5" />
-            {label}
-          </Button>
-        ))}
+        {/* Category Dropdown */}
+        <Select
+          value={activeCategory}
+          onValueChange={(value: any) => setActiveCategory(value)}
+        >
+          <SelectTrigger className="w-full bg-slate-900 border-slate-700 h-9 text-sm">
+            <SelectValue>
+              <div className="flex items-center gap-2">
+                {categories.find(c => c.id === activeCategory)?.icon && (
+                  (() => {
+                    const Icon = categories.find(c => c.id === activeCategory)!.icon;
+                    return <Icon className="w-4 h-4" />;
+                  })()
+                )}
+                <span>{categories.find(c => c.id === activeCategory)?.label}</span>
+              </div>
+            </SelectValue>
+          </SelectTrigger>
+          <SelectContent className="bg-slate-900 border-slate-700 z-50">
+            {categories.map(({ id, label, icon: Icon }) => (
+              <SelectItem 
+                key={id} 
+                value={id}
+                className="text-sm focus:bg-slate-800 focus:text-slate-100 cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <Icon className="w-4 h-4" />
+                  <span>{label}</span>
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Elements Grid */}

@@ -1056,11 +1056,19 @@ export const DesignStudio = forwardRef((props, ref) => {
     };
   }, [fabricCanvas, currentTemplateId]);
 
-  // AI Template handlers
+  // AI Template handlers with error boundary
   const handleAITemplateGenerated = async (template: AIGeneratedTemplate) => {
-    if (!fabricCanvas || !templateRendererRef.current) return;
+    if (!fabricCanvas || !templateRendererRef.current) {
+      toast({ 
+        title: "Error", 
+        description: "Canvas not initialized",
+        variant: "destructive" 
+      });
+      return;
+    }
     
     try {
+      console.log('[DesignStudio] Rendering AI template:', template);
       await templateRendererRef.current.renderTemplate(template);
       setCurrentTemplateId(template.id);
       pushHistory();
@@ -1070,9 +1078,10 @@ export const DesignStudio = forwardRef((props, ref) => {
       });
     } catch (error) {
       console.error("Error rendering AI template:", error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       toast({ 
-        title: "Error", 
-        description: "Failed to render AI template",
+        title: "Template Rendering Failed", 
+        description: errorMessage,
         variant: "destructive" 
       });
     }

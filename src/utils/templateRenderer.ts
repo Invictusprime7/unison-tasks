@@ -1,43 +1,80 @@
 import { Canvas as FabricCanvas, Rect, Circle, IText, FabricImage } from 'fabric';
 import type { AIGeneratedTemplate, TemplateComponent } from '@/types/template';
 import { LayoutEngine, type LayoutResult } from './layoutEngine';
+import { TemplateValidator } from './templateValidator';
+import { AssetPreloader } from './assetPreloader';
 
+/**
+ * Pillar 2 & 3: Deterministic Layout + Safe Adapter
+ * Renders validated templates with preloaded assets
+ */
 export class TemplateRenderer {
   private canvas: FabricCanvas;
   private layoutEngine: LayoutEngine;
+  private validator: TemplateValidator;
+  private preloader: AssetPreloader;
+  private preloadedImages: Map<string, HTMLImageElement> = new Map();
 
   constructor(canvas: FabricCanvas) {
     this.canvas = canvas;
     this.layoutEngine = new LayoutEngine();
+    this.validator = new TemplateValidator();
+    this.preloader = new AssetPreloader();
   }
 
   /**
    * Render AI-generated template to Fabric canvas
+   * Implements all 5 pillars of reliable rendering
    */
-  async renderTemplate(template: AIGeneratedTemplate, data?: Record<string, any>) {
-    const mergedData = { ...template.data, ...data };
-    this.canvas.clear();
+  async renderTemplate(template: any, data?: Record<string, any>) {
+    try {
+      // Pillar 1: Validate and normalize template
+      const validatedTemplate = this.validator.validateTemplate(template);
+      console.log('[TemplateRenderer] Template validated:', validatedTemplate);
 
-    // Set canvas size based on first variant
-    if (template.variants.length > 0) {
-      const variant = template.variants[0];
+      // Pillar 4: Preload assets
+      const assets = this.preloader.extractAssetUrls(validatedTemplate);
+      console.log('[TemplateRenderer] Preloading assets:', assets);
+      
+      await this.preloader.preloadFonts(assets.fonts);
+      this.preloadedImages = await this.preloader.preloadImages(assets.images, (loaded, total) => {
+        console.log(`[TemplateRenderer] Loading images: ${loaded}/${total}`);
+      });
+
+      // Merge data with defaults
+      const mergedData = { ...validatedTemplate.data, ...data };
+      
+      // Clear canvas
+      this.canvas.clear();
+
+      // Set canvas size based on first variant (guaranteed to exist after validation)
+      const variant = validatedTemplate.variants[0];
       this.canvas.setWidth(variant.size.width);
       this.canvas.setHeight(variant.size.height);
-    }
+      this.canvas.backgroundColor = '#ffffff';
 
-    // Render each section
-    let currentY = 0;
-    for (const section of template.sections) {
-      // Calculate layout using Yoga
-      const layout = this.layoutEngine.applyLayout(section);
-      
-      // Render components based on calculated layout
-      await this.renderSection(section, layout, mergedData, 0, currentY);
-      
-      currentY += layout.height;
-    }
+      // Pillar 2: Deterministic layout pass
+      let currentY = 0;
+      for (const section of validatedTemplate.sections) {
+        // Calculate layout
+        const layout = this.layoutEngine.applyLayout(section);
+        console.log(`[TemplateRenderer] Section "${section.name}" layout:`, layout);
+        
+        // Pillar 3: Safe adapter - render with error isolation
+        await this.renderSection(section, layout, mergedData, 0, currentY);
+        
+        currentY += layout.height;
+      }
 
-    this.canvas.renderAll();
+      this.canvas.renderAll();
+      console.log('[TemplateRenderer] Rendering complete');
+      
+    } catch (error) {
+      // Pillar 5: Error isolation
+      console.error('[TemplateRenderer] Render failed:', error);
+      this.renderErrorState(error instanceof Error ? error.message : 'Unknown error');
+      throw error;
+    }
   }
 
   private async renderSection(
@@ -160,5 +197,38 @@ export class TemplateRenderer {
         break;
       }
     }
+  }
+
+  /**
+   * Pillar 5: Error isolation - render error state
+   */
+  private renderErrorState(errorMessage: string): void {
+    this.canvas.clear();
+    this.canvas.backgroundColor = '#fee2e2';
+
+    const errorText = new IText('Failed to render template', {
+      left: this.canvas.width! / 2,
+      top: this.canvas.height! / 2 - 20,
+      fontSize: 20,
+      fontFamily: 'Inter, sans-serif',
+      fill: '#991b1b',
+      originX: 'center',
+      originY: 'center',
+      fontWeight: 'bold',
+    });
+    this.canvas.add(errorText);
+
+    const detailText = new IText(errorMessage, {
+      left: this.canvas.width! / 2,
+      top: this.canvas.height! / 2 + 20,
+      fontSize: 14,
+      fontFamily: 'Inter, sans-serif',
+      fill: '#7f1d1d',
+      originX: 'center',
+      originY: 'center',
+    });
+    this.canvas.add(detailText);
+
+    this.canvas.renderAll();
   }
 }

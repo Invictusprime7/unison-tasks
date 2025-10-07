@@ -670,8 +670,10 @@ export const DesignStudio = forwardRef((props, ref) => {
   const handlePropertyChange = (property: string, value: any) => {
     if (!fabricCanvas || !selectedObject) return;
     selectedObject.set(property, value);
-    fabricCanvas.renderAll();
-    setSelectedObject({ ...selectedObject });
+    selectedObject.setCoords();
+    fabricCanvas.requestRenderAll();
+    // Create a fresh reference to trigger re-render without losing focus
+    setSelectedObject({ ...selectedObject, [property]: value });
   };
 
   const removeBackground = (tolerance: number) => {

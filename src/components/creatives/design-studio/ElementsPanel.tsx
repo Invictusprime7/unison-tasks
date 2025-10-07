@@ -208,17 +208,19 @@ export const ElementsPanel = ({ onElementSelect, onElementDragStart }: ElementsP
           value={activeCategory}
           onValueChange={(value: any) => setActiveCategory(value)}
         >
-          <SelectTrigger className="w-full bg-slate-900 border-slate-700 h-9 text-sm">
-            <SelectValue>
-              <div className="flex items-center gap-2">
-                {categories.find(c => c.id === activeCategory)?.icon && (
-                  (() => {
-                    const Icon = categories.find(c => c.id === activeCategory)!.icon;
-                    return <Icon className="w-4 h-4" />;
-                  })()
-                )}
-                <span>{categories.find(c => c.id === activeCategory)?.label}</span>
-              </div>
+          <SelectTrigger className="w-full bg-slate-900 border-slate-700 h-9 text-sm text-slate-200">
+            <SelectValue placeholder="Select category">
+              {(() => {
+                const currentCategory = categories.find(c => c.id === activeCategory);
+                if (!currentCategory) return "Select category";
+                const Icon = currentCategory.icon;
+                return (
+                  <div className="flex items-center gap-2 text-slate-200">
+                    <Icon className="w-4 h-4" />
+                    <span className="text-slate-200">{currentCategory.label}</span>
+                  </div>
+                );
+              })()}
             </SelectValue>
           </SelectTrigger>
           <SelectContent className="bg-slate-900 border-slate-700 z-50">
@@ -226,9 +228,9 @@ export const ElementsPanel = ({ onElementSelect, onElementDragStart }: ElementsP
               <SelectItem 
                 key={id} 
                 value={id}
-                className="text-sm focus:bg-slate-800 focus:text-slate-100 cursor-pointer"
+                className="text-sm text-slate-200 focus:bg-slate-800 focus:text-slate-100 cursor-pointer hover:bg-slate-800"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 text-slate-200">
                   <Icon className="w-4 h-4" />
                   <span>{label}</span>
                 </div>

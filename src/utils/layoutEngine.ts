@@ -1,17 +1,23 @@
-import Yoga, { Node } from 'yoga-layout';
+import Yoga, { type Node } from 'yoga-layout';
 import type { LayoutConstraints, TemplateComponent, TemplateSection } from '@/types/template';
 
 export class LayoutEngine {
   private yoga: typeof Yoga;
+  private initialized: boolean = false;
 
   constructor() {
     this.yoga = Yoga;
+    this.initialized = true;
   }
 
   /**
    * Apply Yoga layout constraints to calculate positions and sizes
    */
   applyLayout(section: TemplateSection): LayoutResult {
+    if (!this.initialized) {
+      throw new Error('LayoutEngine not initialized');
+    }
+    
     const rootNode = this.createYogaNode(section.constraints);
     const componentNodes = new Map<string, Node>();
 

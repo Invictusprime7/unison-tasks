@@ -820,7 +820,7 @@ export const DesignStudio = forwardRef((props, ref) => {
             <ScrollArea className="h-full w-full">
               <div
                 ref={containerRef}
-                className="w-full h-full bg-muted/20 relative min-h-[1200px] min-w-[1600px]"
+                className="w-full h-full bg-muted/20 relative min-h-[1600px] min-w-[1200px]"
                 style={{
                   backgroundImage: `
                     linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),

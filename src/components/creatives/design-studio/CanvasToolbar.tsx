@@ -85,8 +85,8 @@ export const CanvasToolbar = ({
   alignmentTools,
 }: CanvasToolbarProps) => {
   return (
-    <div className="border-b bg-card p-4">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="border-b bg-card p-2">
+      <div className="flex flex-wrap items-center gap-1">
         {/* Selection Tools */}
         <div className="flex gap-1">
           <Button
@@ -107,7 +107,7 @@ export const CanvasToolbar = ({
           </Button>
         </div>
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Shape Tools */}
         <div className="flex gap-1">
@@ -153,12 +153,12 @@ export const CanvasToolbar = ({
           </Button>
         </div>
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Alignment Tools */}
         {alignmentTools}
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Undo/Redo */}
         <div className="flex gap-1">
@@ -182,7 +182,7 @@ export const CanvasToolbar = ({
           </Button>
         </div>
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Layer Controls */}
         <div className="flex gap-1">
@@ -212,7 +212,7 @@ export const CanvasToolbar = ({
           </Button>
         </div>
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Colors */}
         <div className="flex items-center gap-2">
@@ -242,7 +242,7 @@ export const CanvasToolbar = ({
           </div>
         </div>
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Template Actions */}
         <div className="flex gap-1">
@@ -268,7 +268,7 @@ export const CanvasToolbar = ({
           )}
         </div>
 
-        <Separator orientation="vertical" className="h-8" />
+        <Separator orientation="vertical" className="h-6" />
 
         {/* Actions */}
         <div className="flex gap-1 ml-auto">

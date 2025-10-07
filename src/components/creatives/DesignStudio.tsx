@@ -10,10 +10,13 @@ import { TemplateLibrary } from "./design-studio/TemplateLibrary";
 import { SaveTemplateDialog } from "./design-studio/SaveTemplateDialog";
 import { VersionHistory } from "./design-studio/VersionHistory";
 import { AITemplateGenerator } from "./AITemplateGenerator";
+import { ElementsPanel, type DesignElement } from "./design-studio/ElementsPanel";
+import { DesignSidebar } from "./DesignSidebar";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateRenderer } from "@/utils/templateRenderer";
 import { HTMLExporter } from "@/utils/htmlExporter";
 import type { AIGeneratedTemplate } from "@/types/template";
+import { Polygon } from "fabric";
 
 export const DesignStudio = forwardRef((props, ref) => {
   const { toast } = useToast();
@@ -335,12 +338,216 @@ export const DesignStudio = forwardRef((props, ref) => {
             });
             fabricCanvas.add(img);
             fabricCanvas.renderAll();
+            pushHistory();
             toast({ title: "Image added" });
           });
         };
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  // Add element from Elements Panel
+  const addElementToCanvas = (element: DesignElement) => {
+    if (!fabricCanvas) return;
+    const center = getCenterPosition();
+
+    switch (element.type) {
+      case 'frame':
+        addFrame(element, center);
+        break;
+      case 'grid':
+        addGrid(element, center);
+        break;
+      case 'shape':
+        addShape(element, center);
+        break;
+      case 'mockup':
+        addMockup(element, center);
+        break;
+    }
+    
+    pushHistory();
+  };
+
+  const addFrame = (element: DesignElement, center: { left: number; top: number }) => {
+    if (!fabricCanvas) return;
+    
+    if (element.variant.includes('circle')) {
+      const circle = new Circle({
+        ...element.config,
+        left: center.left - element.config.radius,
+        top: center.top - element.config.radius,
+      });
+      fabricCanvas.add(circle);
+      fabricCanvas.setActiveObject(circle);
+    } else {
+      const rect = new Rect({
+        ...element.config,
+        left: center.left - element.config.width / 2,
+        top: center.top - element.config.height / 2,
+        rx: element.config.borderRadius,
+        ry: element.config.borderRadius,
+      });
+      fabricCanvas.add(rect);
+      fabricCanvas.setActiveObject(rect);
+    }
+    
+    fabricCanvas.renderAll();
+    toast({ title: `${element.name} added` });
+  };
+
+  const addGrid = (element: DesignElement, center: { left: number; top: number }) => {
+    if (!fabricCanvas) return;
+    
+    const { rows, cols, gap, cellWidth, cellHeight } = element.config;
+    const totalWidth = cols * cellWidth + (cols - 1) * gap;
+    const totalHeight = rows * cellHeight + (rows - 1) * gap;
+    const startX = center.left - totalWidth / 2;
+    const startY = center.top - totalHeight / 2;
+
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const rect = new Rect({
+          left: startX + col * (cellWidth + gap),
+          top: startY + row * (cellHeight + gap),
+          width: cellWidth,
+          height: cellHeight,
+          fill: '#f3f4f6',
+          stroke: '#9ca3af',
+          strokeWidth: 1,
+          rx: 4,
+          ry: 4,
+        });
+        fabricCanvas.add(rect);
+      }
+    }
+    
+    fabricCanvas.renderAll();
+    toast({ title: `${element.name} added` });
+  };
+
+  const addShape = (element: DesignElement, center: { left: number; top: number }) => {
+    if (!fabricCanvas) return;
+
+    if (element.variant === 'circle') {
+      const circle = new Circle({
+        ...element.config,
+        left: center.left - element.config.radius,
+        top: center.top - element.config.radius,
+      });
+      fabricCanvas.add(circle);
+      fabricCanvas.setActiveObject(circle);
+    } else if (element.variant === 'rectangle') {
+      const rect = new Rect({
+        ...element.config,
+        left: center.left - element.config.width / 2,
+        top: center.top - element.config.height / 2,
+      });
+      fabricCanvas.add(rect);
+      fabricCanvas.setActiveObject(rect);
+    } else if (element.variant === 'triangle') {
+      const points = [
+        { x: 0, y: -element.config.height / 2 },
+        { x: -element.config.width / 2, y: element.config.height / 2 },
+        { x: element.config.width / 2, y: element.config.height / 2 },
+      ];
+      const triangle = new Polygon(points, {
+        left: center.left,
+        top: center.top,
+        fill: element.config.fill,
+        stroke: element.config.stroke,
+        strokeWidth: element.config.strokeWidth,
+      });
+      fabricCanvas.add(triangle);
+      fabricCanvas.setActiveObject(triangle);
+    } else if (element.variant === 'star') {
+      const starPoints = createStarPoints(5, element.config.outerRadius, element.config.innerRadius);
+      const star = new Polygon(starPoints, {
+        left: center.left,
+        top: center.top,
+        fill: element.config.fill,
+        stroke: element.config.stroke,
+        strokeWidth: element.config.strokeWidth,
+      });
+      fabricCanvas.add(star);
+      fabricCanvas.setActiveObject(star);
+    } else if (element.variant === 'hexagon') {
+      const hexPoints = createRegularPolygonPoints(6, element.config.radius);
+      const hex = new Polygon(hexPoints, {
+        left: center.left,
+        top: center.top,
+        fill: element.config.fill,
+        stroke: element.config.stroke,
+        strokeWidth: element.config.strokeWidth,
+      });
+      fabricCanvas.add(hex);
+      fabricCanvas.setActiveObject(hex);
+    }
+    
+    fabricCanvas.renderAll();
+    toast({ title: `${element.name} added` });
+  };
+
+  const createStarPoints = (points: number, outerRadius: number, innerRadius: number) => {
+    const starPoints = [];
+    const angle = Math.PI / points;
+    
+    for (let i = 0; i < 2 * points; i++) {
+      const radius = i % 2 === 0 ? outerRadius : innerRadius;
+      const currentAngle = i * angle - Math.PI / 2;
+      starPoints.push({
+        x: radius * Math.cos(currentAngle),
+        y: radius * Math.sin(currentAngle),
+      });
+    }
+    
+    return starPoints;
+  };
+
+  const createRegularPolygonPoints = (sides: number, radius: number) => {
+    const points = [];
+    const angle = (2 * Math.PI) / sides;
+    
+    for (let i = 0; i < sides; i++) {
+      const currentAngle = i * angle - Math.PI / 2;
+      points.push({
+        x: radius * Math.cos(currentAngle),
+        y: radius * Math.sin(currentAngle),
+      });
+    }
+    
+    return points;
+  };
+
+  const addMockup = (element: DesignElement, center: { left: number; top: number }) => {
+    if (!fabricCanvas) return;
+
+    const mockup = new Rect({
+      ...element.config,
+      left: center.left - element.config.width / 2,
+      top: center.top - element.config.height / 2,
+      rx: element.config.borderRadius,
+      ry: element.config.borderRadius,
+    });
+    
+    // Add screen area inside mockup
+    const screenPadding = 20;
+    const screen = new Rect({
+      left: mockup.left! + screenPadding,
+      top: mockup.top! + screenPadding,
+      width: element.config.width - screenPadding * 2,
+      height: element.config.height - screenPadding * 2,
+      fill: '#ffffff',
+      rx: element.config.borderRadius - 5,
+      ry: element.config.borderRadius - 5,
+    });
+    
+    fabricCanvas.add(mockup);
+    fabricCanvas.add(screen);
+    fabricCanvas.setActiveObject(mockup);
+    fabricCanvas.renderAll();
+    toast({ title: `${element.name} added` });
   };
 
   const deleteSelected = () => {
@@ -980,8 +1187,37 @@ export const DesignStudio = forwardRef((props, ref) => {
 
       {/* Work Area: 3-column grid */}
       <div className="flex-1 grid grid-cols-[260px_1fr_320px] overflow-hidden">
-        {/* Left Sidebar - Tools & Elements */}
-        <aside className="border-r border-slate-800 p-3 bg-slate-950/40 flex flex-col gap-3 overflow-y-auto">
+        {/* Left Sidebar - Elements & Layers */}
+        <aside className="border-r border-slate-800 bg-slate-950/40 overflow-hidden">
+          <DesignSidebar
+            onElementSelect={addElementToCanvas}
+            onElementDragStart={(element) => {
+              if (fabricCanvas) {
+                (fabricCanvas as any)._pendingElement = element;
+              }
+            }}
+            onAddText={addText}
+            onAddRectangle={addRectangle}
+            onAddCircle={addCircle}
+            onAddImage={addImage}
+            onDuplicate={duplicateSelected}
+            onBringForward={bringForward}
+            onSendBackward={sendBackward}
+            onDelete={deleteSelected}
+            selectedObject={selectedObject}
+            layers={fabricCanvas?.getObjects() || []}
+            onLayerSelect={(obj) => {
+              if (fabricCanvas) {
+                fabricCanvas.setActiveObject(obj);
+                fabricCanvas.renderAll();
+                setSelectedObject(obj);
+              }
+            }}
+            isCropping={isCropping}
+            onApplyCrop={applyCrop}
+            onCancelCrop={cancelCrop}
+          />
+        </aside>
           <div>
             <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">Add</div>
             <div className="flex flex-col gap-2">
@@ -1000,69 +1236,6 @@ export const DesignStudio = forwardRef((props, ref) => {
             </div>
           </div>
 
-          <div>
-            <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">Layers</div>
-            <div className="flex flex-col gap-1 max-h-64 overflow-auto pr-1">
-              {fabricCanvas?.getObjects().map((obj: any, idx: number) => (
-                <button
-                  key={idx}
-                  className={`text-left px-2 py-1.5 rounded border text-xs ${
-                    selectedObject === obj
-                      ? "border-cyan-400 bg-cyan-400/10 text-cyan-200"
-                      : "border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800"
-                  }`}
-                  onClick={() => {
-                    fabricCanvas.setActiveObject(obj);
-                    fabricCanvas.renderAll();
-                    setSelectedObject(obj);
-                  }}
-                >
-                  {idx + 1}. {obj.type || "Object"}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-2">
-            <div className="flex gap-2 flex-wrap">
-              <Button variant="ghost" size="sm" onClick={duplicateSelected} className="px-2 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 h-7">
-                Duplicate
-              </Button>
-              <Button variant="ghost" size="sm" onClick={bringForward} className="px-2 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 h-7">
-                Forward
-              </Button>
-              <Button variant="ghost" size="sm" onClick={sendBackward} className="px-2 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 h-7">
-                Backward
-              </Button>
-              <Button variant="ghost" size="sm" onClick={deleteSelected} className="px-2 py-1 text-xs rounded bg-red-600 hover:bg-red-500 h-7 text-white">
-                Delete
-              </Button>
-            </div>
-          </div>
-
-          {isCropping && (
-            <div className="mt-2 p-2 bg-cyan-900/30 border border-cyan-700 rounded">
-              <div className="text-xs text-cyan-300 mb-2">Crop Mode Active</div>
-              <div className="flex gap-2">
-                <Button variant="ghost" size="sm" onClick={applyCrop} className="flex-1 h-7 text-xs bg-cyan-600 hover:bg-cyan-500 text-white">
-                  Apply Crop
-                </Button>
-                <Button variant="ghost" size="sm" onClick={cancelCrop} className="flex-1 h-7 text-xs bg-slate-700 hover:bg-slate-600">
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          )}
-
-          <div className="mt-3 text-xs text-slate-400 leading-relaxed">
-            <div className="space-y-1">
-              <div>Wheel: Zoom</div>
-              <div>Ctrl+Z / Ctrl+Y: Undo/Redo</div>
-              <div>Ctrl+D: Duplicate</div>
-              <div>Delete: Remove</div>
-            </div>
-          </div>
-        </aside>
 
         {/* Canvas Center */}
         <main className="relative bg-slate-900 flex items-center justify-center overflow-hidden">

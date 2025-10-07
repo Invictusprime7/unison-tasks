@@ -182,3 +182,23 @@ export class AssetPreloader {
     this.fontCache.clear();
   }
 }
+
+/**
+ * Standalone function to preload assets
+ */
+export async function preloadAssets(urls: string[]): Promise<Array<{ url: string; status: 'loaded' | 'failed'; size?: { width: number; height: number } }>> {
+  const preloader = new AssetPreloader();
+  const results = await preloader.preloadImages(urls);
+  
+  return urls.map(url => {
+    const img = results.get(url);
+    if (img && img.complete && img.naturalWidth > 0) {
+      return {
+        url,
+        status: 'loaded' as const,
+        size: { width: img.naturalWidth, height: img.naturalHeight },
+      };
+    }
+    return { url, status: 'failed' as const };
+  });
+}

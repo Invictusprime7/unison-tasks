@@ -13,9 +13,14 @@ import { AITemplateGenerator } from "./AITemplateGenerator";
 import { ElementsPanel, type DesignElement } from "./design-studio/ElementsPanel";
 import { DesignSidebar } from "./DesignSidebar";
 import { MobileToolbar } from "./MobileToolbar";
+import { TemplateDebugPanel } from "./design-studio/TemplateDebugPanel";
+import { TemplateErrorBoundary } from "../TemplateErrorBoundary";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateRenderer } from "@/utils/templateRenderer";
 import { HTMLExporter } from "@/utils/htmlExporter";
+import { validateTemplateStrict } from "@/utils/zodTemplateValidator";
+import { templateToDocument, extractTemplateAssets } from "@/utils/templateAdapter";
+import { preloadAssets } from "@/utils/assetPreloader";
 import type { AIGeneratedTemplate } from "@/types/template";
 import { Polygon } from "fabric";
 
@@ -34,6 +39,13 @@ export const DesignStudio = forwardRef((props, ref) => {
   const [showVersionHistory, setShowVersionHistory] = useState(false);
   const [showAIGenerator, setShowAIGenerator] = useState(false);
   const [currentTemplateId, setCurrentTemplateId] = useState<string | null>(null);
+  
+  // Debug mode - check URL parameter
+  const [debugMode] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.has('debugTemplates');
+  });
+  const [debugInfo, setDebugInfo] = useState<any>(null);
   
   // Template renderer and exporter
   const templateRendererRef = useRef<TemplateRenderer | null>(null);
@@ -1058,9 +1070,9 @@ export const DesignStudio = forwardRef((props, ref) => {
     };
   }, [fabricCanvas, currentTemplateId]);
 
-  // AI Template handlers with error boundary
-  const handleAITemplateGenerated = async (template: AIGeneratedTemplate) => {
-    if (!fabricCanvas || !templateRendererRef.current) {
+  // AI Template handlers with robust validation and error boundary
+  const handleAITemplateGenerated = async (rawTemplate: any) => {
+    if (!fabricCanvas) {
       toast({ 
         title: "Error", 
         description: "Canvas not initialized",
@@ -1070,17 +1082,113 @@ export const DesignStudio = forwardRef((props, ref) => {
     }
     
     try {
-      console.log('[DesignStudio] Rendering AI template:', template);
-      await templateRendererRef.current.renderTemplate(template);
-      setCurrentTemplateId(template.id);
+      const layoutStart = performance.now();
+      
+      // Step 1: Validate using Zod schema
+      console.log('[DesignStudio] Validating AI template with Zod...');
+      const validation = validateTemplateStrict(rawTemplate, debugMode);
+      
+      if (!validation.success) {
+        setDebugInfo({
+          parseResult: {
+            success: false,
+            errors: validation.errors,
+          },
+          assets: [],
+        });
+        
+        toast({ 
+          title: "Template Validation Failed", 
+          description: validation.errors?.[0] || 'Invalid template structure',
+          variant: "destructive" 
+        });
+        return;
+      }
+      
+      const template = validation.data!;
+      
+      // Step 2: Extract and preload assets
+      console.log('[DesignStudio] Preloading template assets...');
+      const assetUrls = extractTemplateAssets(template);
+      const assetsStatus = await preloadAssets(assetUrls);
+      
+      // Step 3: Compute layout
+      console.log('[DesignStudio] Converting template to document...');
+      const document = templateToDocument(template);
+      
+      const layoutEnd = performance.now();
+      
+      // Update debug info
+      setDebugInfo({
+        parseResult: {
+          success: true,
+          autoFilled: validation.autoFilled,
+        },
+        layoutTiming: {
+          start: layoutStart,
+          end: layoutEnd,
+          duration: Math.round(layoutEnd - layoutStart),
+        },
+        assets: assetUrls.map(url => {
+          const status = assetsStatus.find(a => a.url === url);
+          return {
+            url,
+            status: status?.status || 'pending',
+            size: status?.size,
+          };
+        }),
+        template,
+      });
+      
+      // Step 4: Render to canvas using existing renderer
+      console.log('[DesignStudio] Rendering AI template to canvas:', template.name);
+      if (templateRendererRef.current) {
+        // Convert back to AIGeneratedTemplate format for renderer
+        // (This is a bridge until we fully migrate to the new Document format)
+        const aiTemplate: AIGeneratedTemplate = {
+          id: template.id || `template-${Date.now()}`,
+          name: template.name,
+          description: template.description,
+          brandKit: {
+            primaryColor: '#3b82f6',
+            secondaryColor: '#1e40af',
+            accentColor: '#06b6d4',
+            fonts: { heading: 'Inter', body: 'Inter', accent: 'Inter' },
+          },
+          sections: [],
+          variants: [{
+            id: 'v1',
+            name: 'Main',
+            size: { width: template.frames[0].width, height: template.frames[0].height },
+            format: 'web',
+          }],
+          data: {},
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        
+        await templateRendererRef.current.renderTemplate(aiTemplate);
+      }
+      
+      setCurrentTemplateId(template.id || null);
       pushHistory();
+      
       toast({ 
-        title: "AI Template Loaded", 
-        description: `${template.name} rendered successfully` 
+        title: "AI Template Loaded Successfully", 
+        description: `${template.name} rendered with ${template.frames.length} frame(s)`,
       });
     } catch (error) {
-      console.error("Error rendering AI template:", error);
+      console.error('[DesignStudio] Error rendering AI template:', error);
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      setDebugInfo(prev => ({
+        ...prev,
+        parseResult: {
+          success: false,
+          errors: [errorMessage],
+        },
+      }));
+      
       toast({ 
         title: "Template Rendering Failed", 
         description: errorMessage,
@@ -1335,11 +1443,15 @@ export const DesignStudio = forwardRef((props, ref) => {
         onRestoreVersion={handleVersionRestore}
       />
 
-      <AITemplateGenerator
-        open={showAIGenerator}
-        onOpenChange={setShowAIGenerator}
-        onTemplateGenerated={handleAITemplateGenerated}
-      />
+      <TemplateErrorBoundary onReset={() => setDebugInfo(null)}>
+        <AITemplateGenerator
+          open={showAIGenerator}
+          onOpenChange={setShowAIGenerator}
+          onTemplateGenerated={handleAITemplateGenerated}
+        />
+      </TemplateErrorBoundary>
+
+      <TemplateDebugPanel debugInfo={debugInfo} enabled={debugMode} />
     </div>
   );
 });

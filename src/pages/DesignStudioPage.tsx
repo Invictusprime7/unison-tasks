@@ -1,14 +1,24 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FolderOpen } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { DesignStudio } from "@/components/creatives/DesignStudio";
 import { FileBrowser } from "@/components/creatives/design-studio/FileBrowser";
 
 const DesignStudioPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [fileBrowserOpen, setFileBrowserOpen] = useState(false);
   const designStudioRef = useRef<any>(null);
+
+  // Load template from navigation state if available
+  useEffect(() => {
+    const state = location.state as { templateCode?: string; templateName?: string; aesthetic?: string };
+    if (state?.templateCode && designStudioRef.current) {
+      // Load the HTML template into the design studio
+      designStudioRef.current?.loadHTMLTemplate?.(state.templateCode);
+    }
+  }, [location.state]);
 
   return (
     <div className="h-screen w-full flex flex-col bg-background">

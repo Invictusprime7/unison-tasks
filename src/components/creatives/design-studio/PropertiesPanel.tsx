@@ -5,7 +5,7 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Settings, Palette, Type as TypeIcon, Eraser, FlipHorizontal, FlipVertical, Crop, AlignLeft, AlignCenter, AlignRight, AlignVerticalJustifyCenter, AlignHorizontalJustifyStart, AlignHorizontalJustifyEnd } from "lucide-react";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 interface PropertiesPanelProps {
   selectedObject: any;
@@ -32,6 +32,35 @@ export const PropertiesPanel = ({
     height: 0,
   });
 
+  // Local slider states to avoid freeze and allow continuous updates
+  const [rotation, setRotation] = useState(0);
+  const [opacityVal, setOpacityVal] = useState(100); // 0-100 for UI
+  const [strokeWidthVal, setStrokeWidthVal] = useState(0);
+  const [fontSizeVal, setFontSizeVal] = useState(20);
+
+  // rAF throttling per property to prevent excessive re-renders
+  const rafIds = useRef<Record<string, number | null>>({});
+
+  const schedulePropertyChange = useCallback((property: string, value: any) => {
+    const id = rafIds.current[property];
+    if (typeof id === "number") {
+      cancelAnimationFrame(id);
+    }
+    rafIds.current[property] = requestAnimationFrame(() => {
+      onPropertyChange(property, value);
+      rafIds.current[property] = null;
+    });
+  }, [onPropertyChange]);
+
+  // Cleanup any pending rAFs on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(rafIds.current).forEach((id) => {
+        if (typeof id === "number") cancelAnimationFrame(id);
+      });
+    };
+  }, []);
+
   // Sync local values when selectedObject changes
   useEffect(() => {
     if (selectedObject) {
@@ -41,20 +70,35 @@ export const PropertiesPanel = ({
         width: Math.round((selectedObject.width || 0) * (selectedObject.scaleX || 1)),
         height: Math.round((selectedObject.height || 0) * (selectedObject.scaleY || 1)),
       });
+      setRotation(Math.round(selectedObject.angle || 0));
+      setOpacityVal(Math.round((selectedObject.opacity ?? 1) * 100));
+      setStrokeWidthVal(Math.round(selectedObject.strokeWidth ?? 0));
+      setFontSizeVal(Math.round(selectedObject.fontSize ?? 20));
     }
-  }, [selectedObject?.left, selectedObject?.top, selectedObject?.width, selectedObject?.height, selectedObject?.scaleX, selectedObject?.scaleY]);
+  }, [
+    selectedObject?.left,
+    selectedObject?.top,
+    selectedObject?.width,
+    selectedObject?.height,
+    selectedObject?.scaleX,
+    selectedObject?.scaleY,
+    selectedObject?.angle,
+    selectedObject?.opacity,
+    selectedObject?.strokeWidth,
+    selectedObject?.fontSize,
+  ]);
 
   const handleInputChange = useCallback((property: string, value: number) => {
     setLocalValues(prev => ({ ...prev, [property]: value }));
     
     if (property === 'width' && selectedObject?.width) {
-      onPropertyChange("scaleX", value / selectedObject.width);
+      schedulePropertyChange("scaleX", value / selectedObject.width);
     } else if (property === 'height' && selectedObject?.height) {
-      onPropertyChange("scaleY", value / selectedObject.height);
+      schedulePropertyChange("scaleY", value / selectedObject.height);
     } else {
-      onPropertyChange(property, value);
+      schedulePropertyChange(property, value);
     }
-  }, [selectedObject, onPropertyChange]);
+  }, [selectedObject, schedulePropertyChange]);
 
   if (!selectedObject) {
     return (
@@ -150,15 +194,19 @@ export const PropertiesPanel = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="rotation">Rotation</Label>
-                <span className="text-sm text-muted-foreground">{Math.round(selectedObject.angle || 0)}°</span>
+                <span className="text-sm text-muted-foreground">{rotation}°</span>
               </div>
               <Slider
                 id="rotation"
                 min={0}
                 max={360}
                 step={1}
-                value={[selectedObject.angle || 0]}
-                onValueChange={(value) => onPropertyChange("angle", value[0])}
+                value={[rotation]}
+                onValueChange={(value) => {
+                  const v = value[0];
+                  setRotation(v);
+                  schedulePropertyChange("angle", v);
+                }}
                 className="cursor-pointer"
               />
             </div>
@@ -166,15 +214,19 @@ export const PropertiesPanel = ({
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <Label htmlFor="opacity">Opacity</Label>
-                <span className="text-sm text-muted-foreground">{Math.round((selectedObject.opacity || 1) * 100)}%</span>
+                <span className="text-sm text-muted-foreground">{opacityVal}%</span>
               </div>
               <Slider
                 id="opacity"
                 min={0}
                 max={100}
                 step={1}
-                value={[(selectedObject.opacity || 1) * 100]}
-                onValueChange={(value) => onPropertyChange("opacity", value[0] / 100)}
+                value={[opacityVal]}
+                onValueChange={(value) => {
+                  const v = value[0];
+                  setOpacityVal(v);
+                  schedulePropertyChange("opacity", v / 100);
+                }}
                 className="cursor-pointer"
               />
             </div>
@@ -326,15 +378,19 @@ export const PropertiesPanel = ({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="stroke-width">Stroke Width</Label>
-                    <span className="text-sm text-muted-foreground">{selectedObject.strokeWidth || 0}px</span>
+                    <span className="text-sm text-muted-foreground">{strokeWidthVal || 0}px</span>
                   </div>
                   <Slider
                     id="stroke-width"
                     min={0}
                     max={20}
                     step={1}
-                    value={[selectedObject.strokeWidth || 0]}
-                    onValueChange={(value) => onPropertyChange("strokeWidth", value[0])}
+                    value={[strokeWidthVal || 0]}
+                    onValueChange={(value) => {
+                      const v = value[0];
+                      setStrokeWidthVal(v);
+                      schedulePropertyChange("strokeWidth", v);
+                    }}
                     className="cursor-pointer"
                   />
                 </div>
@@ -348,15 +404,19 @@ export const PropertiesPanel = ({
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="font-size">Font Size</Label>
-                    <span className="text-sm text-muted-foreground">{selectedObject.fontSize || 20}px</span>
+                    <span className="text-sm text-muted-foreground">{fontSizeVal || 20}px</span>
                   </div>
                   <Slider
                     id="font-size"
                     min={8}
                     max={200}
                     step={1}
-                    value={[selectedObject.fontSize || 20]}
-                    onValueChange={(value) => onPropertyChange("fontSize", value[0])}
+                    value={[fontSizeVal || 20]}
+                    onValueChange={(value) => {
+                      const v = value[0];
+                      setFontSizeVal(v);
+                      schedulePropertyChange("fontSize", v);
+                    }}
                     className="cursor-pointer"
                   />
                 </div>

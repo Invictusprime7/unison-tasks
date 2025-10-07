@@ -1,15 +1,26 @@
 # Code Migration & Deployment Guide
 
-This guide explains how to migrate your Lovable project to other code editors and deployment platforms for flexible modifications.
+This guide provides **actual runnable code** and scripts to migrate your Lovable project to other code editors and deployment platforms.
+
+## Quick Start Scripts
+
+All deployment scripts and configuration files are included in this repository:
+- `docker-compose.yml` - Docker setup
+- `.github/workflows/deploy.yml` - GitHub Actions CI/CD
+- `scripts/setup-local.sh` - Local setup automation
+- `scripts/deploy.sh` - Deployment automation
+- `vercel.json` / `netlify.toml` - Platform configs
 
 ## Table of Contents
-1. [Exporting Your Code](#exporting-your-code)
-2. [Local Development Setup](#local-development-setup)
-3. [Environment Configuration](#environment-configuration)
-4. [Database Setup](#database-setup)
-5. [Running Locally](#running-locally)
-6. [Deployment Options](#deployment-options)
-7. [Common Issues](#common-issues)
+1. [Quick Start Scripts](#quick-start-scripts)
+2. [Exporting Your Code](#exporting-your-code)
+3. [Automated Local Setup](#automated-local-setup)
+4. [Environment Configuration](#environment-configuration)
+5. [Database Setup](#database-setup)
+6. [Docker Deployment](#docker-deployment)
+7. [CI/CD Pipelines](#cicd-pipelines)
+8. [Platform-Specific Deployments](#platform-specific-deployments)
+9. [Common Issues](#common-issues)
 
 ---
 

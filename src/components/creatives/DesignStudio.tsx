@@ -751,7 +751,7 @@ export const DesignStudio = forwardRef((props, ref) => {
   }));
 
   return (
-    <div className="flex h-full bg-slate-900 text-white">
+    <div className="w-full h-full min-h-screen bg-slate-900 text-slate-100 flex flex-col select-none">
       <input
         ref={fileInputRef}
         type="file"
@@ -759,110 +759,148 @@ export const DesignStudio = forwardRef((props, ref) => {
         className="hidden"
         onChange={handleImageUpload}
       />
-      
-      {/* Left Sidebar - Tools & Elements */}
-      <aside className="w-64 bg-slate-800 border-r border-slate-700 p-4 flex flex-col gap-4">
-        <div>
-          <h3 className="text-sm font-semibold mb-3 text-slate-300">Tools</h3>
-          <div className="flex flex-col gap-2">
-            <Button
-              variant={activeTool === "select" ? "secondary" : "outline"}
-              size="sm"
-              onClick={() => setActiveTool("select")}
-              className="justify-start"
-            >
-              Select
-            </Button>
+
+      {/* Top Toolbar */}
+      <div className="flex items-center gap-3 px-4 py-2 border-b border-slate-800 bg-slate-900">
+        <div className="flex items-center gap-2">
+          <span className="font-semibold text-sm">Design Studio</span>
+          <Button variant="ghost" size="sm" onClick={undo} disabled={history.length === 0} className="h-8 px-2 text-xs">
+            Undo
+          </Button>
+          <Button variant="ghost" size="sm" onClick={redo} disabled={redoStack.length === 0} className="h-8 px-2 text-xs">
+            Redo
+          </Button>
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={exportCanvas} className="h-8 px-3 text-xs bg-cyan-600 hover:bg-cyan-500 text-white">
+            Export PNG
+          </Button>
+          <Button variant="ghost" size="sm" onClick={exportCanvasJPEG} className="h-8 px-3 text-xs">
+            Export JPEG
+          </Button>
+        </div>
+      </div>
+
+      {/* Work Area: 3-column grid */}
+      <div className="flex-1 grid grid-cols-[260px_1fr_320px] overflow-hidden">
+        {/* Left Sidebar - Tools & Elements */}
+        <aside className="border-r border-slate-800 p-3 bg-slate-950/40 flex flex-col gap-3 overflow-y-auto">
+          <div>
+            <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">Add</div>
+            <div className="flex flex-col gap-2">
+              <Button variant="ghost" size="sm" onClick={addText} className="justify-start bg-slate-800 hover:bg-slate-700 h-9 text-sm">
+                Text
+              </Button>
+              <Button variant="ghost" size="sm" onClick={addRectangle} className="justify-start bg-slate-800 hover:bg-slate-700 h-9 text-sm">
+                Rectangle
+              </Button>
+              <Button variant="ghost" size="sm" onClick={addCircle} className="justify-start bg-slate-800 hover:bg-slate-700 h-9 text-sm">
+                Ellipse
+              </Button>
+              <Button variant="ghost" size="sm" onClick={addImage} className="justify-start bg-slate-800 hover:bg-slate-700 h-9 text-sm">
+                Upload Image
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="text-sm font-semibold mb-3 text-slate-300">Shapes</h3>
-          <div className="flex flex-col gap-2">
-            <Button variant="outline" size="sm" onClick={addRectangle} className="justify-start">
-              Rectangle
-            </Button>
-            <Button variant="outline" size="sm" onClick={addCircle} className="justify-start">
-              Circle
-            </Button>
-            <Button variant="outline" size="sm" onClick={addText} className="justify-start">
-              Text
-            </Button>
-            <Button variant="outline" size="sm" onClick={addImage} className="justify-start">
-              Image
-            </Button>
+          <div>
+            <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">Layers</div>
+            <div className="flex flex-col gap-1 max-h-64 overflow-auto pr-1">
+              {fabricCanvas?.getObjects().map((obj: any, idx: number) => (
+                <button
+                  key={idx}
+                  className={`text-left px-2 py-1.5 rounded border text-xs ${
+                    selectedObject === obj
+                      ? "border-cyan-400 bg-cyan-400/10 text-cyan-200"
+                      : "border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800"
+                  }`}
+                  onClick={() => {
+                    fabricCanvas.setActiveObject(obj);
+                    fabricCanvas.renderAll();
+                    setSelectedObject(obj);
+                  }}
+                >
+                  {idx + 1}. {obj.type || "Object"}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="text-sm font-semibold mb-3 text-slate-300">Actions</h3>
-          <div className="flex flex-col gap-2">
-            <Button variant="outline" size="sm" onClick={undo} disabled={history.length === 0} className="justify-start">
-              Undo
-            </Button>
-            <Button variant="outline" size="sm" onClick={redo} disabled={redoStack.length === 0} className="justify-start">
-              Redo
-            </Button>
-            <Button variant="outline" size="sm" onClick={deleteSelected} className="justify-start">
-              Delete
-            </Button>
-            <Button variant="outline" size="sm" onClick={duplicateSelected} className="justify-start">
-              Duplicate
-            </Button>
+          <div className="mt-2">
+            <div className="flex gap-2 flex-wrap">
+              <Button variant="ghost" size="sm" onClick={duplicateSelected} className="px-2 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 h-7">
+                Duplicate
+              </Button>
+              <Button variant="ghost" size="sm" onClick={bringForward} className="px-2 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 h-7">
+                Forward
+              </Button>
+              <Button variant="ghost" size="sm" onClick={sendBackward} className="px-2 py-1 text-xs rounded bg-slate-800 hover:bg-slate-700 h-7">
+                Backward
+              </Button>
+              <Button variant="ghost" size="sm" onClick={deleteSelected} className="px-2 py-1 text-xs rounded bg-red-600 hover:bg-red-500 h-7 text-white">
+                Delete
+              </Button>
+            </div>
           </div>
-        </div>
 
-        <div>
-          <h3 className="text-sm font-semibold mb-3 text-slate-300">Export</h3>
-          <div className="flex flex-col gap-2">
-            <Button variant="outline" size="sm" onClick={exportCanvas} className="justify-start">
-              Export PNG
-            </Button>
-            <Button variant="outline" size="sm" onClick={exportCanvasJPEG} className="justify-start">
-              Export JPEG
-            </Button>
+          <div className="mt-3 text-xs text-slate-400 leading-relaxed">
+            <div className="space-y-1">
+              <div>Wheel: Zoom</div>
+              <div>Ctrl+Z / Ctrl+Shift+Z: Undo/Redo</div>
+              <div>Ctrl+D: Duplicate</div>
+              <div>Delete: Remove</div>
+            </div>
           </div>
-        </div>
-      </aside>
+        </aside>
 
-      {/* Canvas Area */}
-      <main className="flex-1 flex items-center justify-center relative bg-slate-900">
-        <div
-          ref={containerRef}
-          className="bg-white rounded-lg shadow-lg relative"
-          style={{ width: 960, height: 540 }}
-        >
-          <canvas ref={canvasRef} />
-        </div>
-      </main>
+        {/* Canvas Center */}
+        <main className="relative bg-slate-900 flex items-center justify-center overflow-hidden">
+          <div
+            ref={containerRef}
+            className="bg-white rounded-lg shadow-lg relative"
+            style={{ width: 960, height: 540 }}
+          >
+            <canvas ref={canvasRef} />
+          </div>
+        </main>
 
-      {/* Right Sidebar - Properties */}
-      <aside className="w-72 bg-slate-800 border-l border-slate-700 p-4">
-        <Tabs defaultValue="properties" className="h-full flex flex-col">
-          <TabsList className="w-full grid grid-cols-2 bg-slate-700">
-            <TabsTrigger value="properties">Properties</TabsTrigger>
-            <TabsTrigger value="filters">Filters</TabsTrigger>
-          </TabsList>
-          <TabsContent value="properties" className="flex-1 overflow-hidden mt-4">
-            <ScrollArea className="h-full">
-              <PropertiesPanel
-                selectedObject={selectedObject}
-                onPropertyChange={handlePropertyChange}
-                onRemoveBackground={removeBackground}
-              />
-            </ScrollArea>
-          </TabsContent>
-          <TabsContent value="filters" className="flex-1 overflow-hidden mt-4">
-            <ScrollArea className="h-full">
-              <FiltersPanel
-                selectedObject={selectedObject}
-                onFilterChange={applyFilter}
-                onResetFilters={resetFilters}
-              />
-            </ScrollArea>
-          </TabsContent>
-        </Tabs>
-      </aside>
+        {/* Right Sidebar - Inspector/Properties */}
+        <aside className="border-l border-slate-800 p-3 bg-slate-950/40 overflow-y-auto">
+          <div className="text-xs uppercase tracking-wide text-slate-400 mb-3">Properties</div>
+          <Tabs defaultValue="properties" className="h-full flex flex-col">
+            <TabsList className="w-full grid grid-cols-2 bg-slate-700">
+              <TabsTrigger value="properties" className="text-xs">Properties</TabsTrigger>
+              <TabsTrigger value="filters" className="text-xs">Filters</TabsTrigger>
+            </TabsList>
+            <TabsContent value="properties" className="flex-1 overflow-hidden mt-3">
+              <ScrollArea className="h-full">
+                {selectedObject ? (
+                  <PropertiesPanel
+                    selectedObject={selectedObject}
+                    onPropertyChange={handlePropertyChange}
+                    onRemoveBackground={removeBackground}
+                  />
+                ) : (
+                  <div className="text-slate-400 text-sm">Select an object to edit</div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="filters" className="flex-1 overflow-hidden mt-3">
+              <ScrollArea className="h-full">
+                {selectedObject && selectedObject.type === "image" ? (
+                  <FiltersPanel
+                    selectedObject={selectedObject}
+                    onFilterChange={applyFilter}
+                    onResetFilters={resetFilters}
+                  />
+                ) : (
+                  <div className="text-slate-400 text-sm">Select an image to apply filters</div>
+                )}
+              </ScrollArea>
+            </TabsContent>
+          </Tabs>
+        </aside>
+      </div>
 
       <TemplateLibrary
         open={showTemplateLibrary}

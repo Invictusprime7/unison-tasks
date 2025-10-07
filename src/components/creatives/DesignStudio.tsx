@@ -40,6 +40,10 @@ export const DesignStudio = forwardRef((props, ref) => {
   const [showGrid, setShowGrid] = useState(false);
   const [snapEnabled, setSnapEnabled] = useState(true);
   
+  // Cropping state
+  const [isCropping, setIsCropping] = useState(false);
+  const [cropTarget, setCropTarget] = useState<any>(null);
+  
   // Autosave
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -202,15 +206,20 @@ export const DesignStudio = forwardRef((props, ref) => {
         canvas.renderAll();
         pushHistory();
       }
-      if (e.key === "d" && e.ctrlKey) {
+      if ((e.key === "d" || e.key === "D") && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         duplicateSelected();
       }
-      if (e.key === "z" && e.ctrlKey && !e.shiftKey) {
+      if ((e.key === "z" || e.key === "Z") && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
         e.preventDefault();
         undo();
       }
-      if (e.key === "z" && e.ctrlKey && e.shiftKey) {
+      if ((e.key === "y" || e.key === "Y") && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        redo();
+      }
+      // Also support Ctrl+Shift+Z for redo
+      if ((e.key === "z" || e.key === "Z") && (e.ctrlKey || e.metaKey) && e.shiftKey) {
         e.preventDefault();
         redo();
       }
@@ -657,6 +666,83 @@ export const DesignStudio = forwardRef((props, ref) => {
     toast({ title: "Filters reset" });
   };
 
+  // Cropping functions
+  const startCrop = () => {
+    if (!fabricCanvas || !selectedObject || selectedObject.type !== "image") {
+      toast({ title: "Please select an image to crop", variant: "destructive" });
+      return;
+    }
+    
+    setIsCropping(true);
+    setCropTarget(selectedObject);
+    
+    // Store original dimensions
+    selectedObject.set({
+      cropX: 0,
+      cropY: 0,
+    });
+    
+    fabricCanvas.renderAll();
+    toast({ title: "Crop mode enabled", description: "Resize the image to crop. Click 'Apply Crop' when done." });
+  };
+
+  const applyCrop = () => {
+    if (!fabricCanvas || !cropTarget) return;
+    
+    const img = cropTarget;
+    const scaleX = img.scaleX || 1;
+    const scaleY = img.scaleY || 1;
+    
+    // Get the current crop rectangle
+    const cropX = img.cropX || 0;
+    const cropY = img.cropY || 0;
+    const cropWidth = img.width * scaleX;
+    const cropHeight = img.height * scaleY;
+    
+    // Create a new canvas element for cropping
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    
+    canvas.width = cropWidth;
+    canvas.height = cropHeight;
+    
+    const imgElement = img.getElement();
+    ctx.drawImage(
+      imgElement,
+      cropX, cropY,
+      cropWidth / scaleX, cropHeight / scaleY,
+      0, 0,
+      cropWidth, cropHeight
+    );
+    
+    // Create new fabric image from cropped canvas
+    FabricImage.fromURL(canvas.toDataURL()).then((newImg) => {
+      newImg.set({
+        left: img.left,
+        top: img.top,
+        scaleX: 1,
+        scaleY: 1,
+      });
+      
+      fabricCanvas.remove(img);
+      fabricCanvas.add(newImg);
+      fabricCanvas.setActiveObject(newImg);
+      fabricCanvas.renderAll();
+      
+      setIsCropping(false);
+      setCropTarget(null);
+      pushHistory();
+      toast({ title: "Image cropped successfully" });
+    });
+  };
+
+  const cancelCrop = () => {
+    setIsCropping(false);
+    setCropTarget(null);
+    toast({ title: "Crop cancelled" });
+  };
+
   // Pages functions
   const handlePageSelect = (pageId: string) => {
     if (!fabricCanvas) return;
@@ -843,10 +929,24 @@ export const DesignStudio = forwardRef((props, ref) => {
             </div>
           </div>
 
+          {isCropping && (
+            <div className="mt-2 p-2 bg-cyan-900/30 border border-cyan-700 rounded">
+              <div className="text-xs text-cyan-300 mb-2">Crop Mode Active</div>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={applyCrop} className="flex-1 h-7 text-xs bg-cyan-600 hover:bg-cyan-500 text-white">
+                  Apply Crop
+                </Button>
+                <Button variant="ghost" size="sm" onClick={cancelCrop} className="flex-1 h-7 text-xs bg-slate-700 hover:bg-slate-600">
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="mt-3 text-xs text-slate-400 leading-relaxed">
             <div className="space-y-1">
               <div>Wheel: Zoom</div>
-              <div>Ctrl+Z / Ctrl+Shift+Z: Undo/Redo</div>
+              <div>Ctrl+Z / Ctrl+Y: Undo/Redo</div>
               <div>Ctrl+D: Duplicate</div>
               <div>Delete: Remove</div>
             </div>
@@ -875,11 +975,23 @@ export const DesignStudio = forwardRef((props, ref) => {
             <TabsContent value="properties" className="flex-1 overflow-hidden mt-3">
               <ScrollArea className="h-full">
                 {selectedObject ? (
-                  <PropertiesPanel
-                    selectedObject={selectedObject}
-                    onPropertyChange={handlePropertyChange}
-                    onRemoveBackground={removeBackground}
-                  />
+                  <>
+                    {selectedObject.type === "image" && !isCropping && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={startCrop} 
+                        className="w-full mb-3 bg-cyan-600 hover:bg-cyan-500 text-white"
+                      >
+                        Crop Image
+                      </Button>
+                    )}
+                    <PropertiesPanel
+                      selectedObject={selectedObject}
+                      onPropertyChange={handlePropertyChange}
+                      onRemoveBackground={removeBackground}
+                    />
+                  </>
                 ) : (
                   <div className="text-slate-400 text-sm">Select an object to edit</div>
                 )}

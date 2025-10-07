@@ -816,11 +816,11 @@ export const DesignStudio = forwardRef((props, ref) => {
 
       <div className="flex-1 flex flex-col">
         <ResizablePanelGroup direction="horizontal" className="flex-1">
-          <ResizablePanel defaultSize={80} minSize={60}>
+          <ResizablePanel defaultSize={85} minSize={70}>
             <ScrollArea className="h-full w-full">
               <div
                 ref={containerRef}
-                className="w-full h-full bg-muted/20 relative min-h-[800px] min-w-[1200px]"
+                className="w-full h-full bg-muted/20 relative min-h-[1200px] min-w-[1600px]"
                 style={{
                   backgroundImage: `
                     linear-gradient(rgba(0, 0, 0, 0.05) 1px, transparent 1px),
@@ -839,11 +839,11 @@ export const DesignStudio = forwardRef((props, ref) => {
 
           <ResizableHandle withHandle />
 
-          <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
+          <ResizablePanel defaultSize={15} minSize={12} maxSize={25}>
             <Tabs defaultValue="properties" className="h-full flex flex-col">
-              <TabsList className="w-full grid grid-cols-2 shrink-0">
-                <TabsTrigger value="properties">Properties</TabsTrigger>
-                <TabsTrigger value="filters">Filters</TabsTrigger>
+              <TabsList className="w-full grid grid-cols-2 shrink-0 h-9 text-xs">
+                <TabsTrigger value="properties" className="text-xs">Properties</TabsTrigger>
+                <TabsTrigger value="filters" className="text-xs">Filters</TabsTrigger>
               </TabsList>
               <TabsContent value="properties" className="flex-1 overflow-hidden mt-0">
                 <ScrollArea className="h-full">
@@ -867,7 +867,7 @@ export const DesignStudio = forwardRef((props, ref) => {
           </ResizablePanel>
         </ResizablePanelGroup>
 
-        <div className="h-32 border-t shrink-0 bg-card">
+        <div className="h-24 border-t shrink-0 bg-card">
           <PagesPanel
             pages={pages}
             currentPageId={currentPageId}

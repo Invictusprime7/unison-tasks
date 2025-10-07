@@ -210,7 +210,7 @@ export type Database = {
           title: string
           type: Database["public"]["Enums"]["document_type"]
           updated_at: string | null
-          user_id: string
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
@@ -218,7 +218,7 @@ export type Database = {
           title: string
           type?: Database["public"]["Enums"]["document_type"]
           updated_at?: string | null
-          user_id: string
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
@@ -226,9 +226,44 @@ export type Database = {
           title?: string
           type?: Database["public"]["Enums"]["document_type"]
           updated_at?: string | null
-          user_id?: string
+          user_id?: string | null
         }
         Relationships: []
+      }
+      file_access_tokens: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          file_id: string | null
+          id: string
+          session_id: string
+          token: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          file_id?: string | null
+          id?: string
+          session_id: string
+          token?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          file_id?: string | null
+          id?: string
+          session_id?: string
+          token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "file_access_tokens_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "files"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       file_attachments: {
         Row: {
@@ -759,7 +794,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      validate_file_share_token: {
+        Args: { _file_id: string; _token: string }
+        Returns: boolean
+      }
     }
     Enums: {
       blend_mode:

@@ -12,6 +12,7 @@ import { VersionHistory } from "./design-studio/VersionHistory";
 import { AITemplateGenerator } from "./AITemplateGenerator";
 import { ElementsPanel, type DesignElement } from "./design-studio/ElementsPanel";
 import { DesignSidebar } from "./DesignSidebar";
+import { MobileToolbar } from "./MobileToolbar";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateRenderer } from "@/utils/templateRenderer";
 import { HTMLExporter } from "@/utils/htmlExporter";
@@ -59,13 +60,17 @@ export const DesignStudio = forwardRef((props, ref) => {
   // Autosave
   const autosaveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize canvas
+  // Initialize canvas with responsive sizing
   useEffect(() => {
     if (!canvasRef.current || !containerRef.current) return;
 
+    const container = containerRef.current;
+    const maxWidth = Math.min(960, container.clientWidth);
+    const maxHeight = Math.min(540, container.clientHeight);
+
     const canvas = new FabricCanvas(canvasRef.current, {
-      width: 960,
-      height: 540,
+      width: maxWidth,
+      height: maxHeight,
       backgroundColor: "#ffffff",
     });
 
@@ -1141,7 +1146,7 @@ export const DesignStudio = forwardRef((props, ref) => {
   }));
 
   return (
-    <div className="w-full h-full min-h-screen bg-slate-900 text-slate-100 flex flex-col select-none">
+    <div className="w-full h-full flex flex-col bg-slate-900 text-slate-100">
       <input
         ref={fileInputRef}
         type="file"
@@ -1150,45 +1155,45 @@ export const DesignStudio = forwardRef((props, ref) => {
         onChange={handleImageUpload}
       />
 
-      {/* Top Toolbar */}
-      <div className="flex items-center gap-3 px-4 py-2 border-b border-slate-800 bg-slate-900">
-        <div className="flex items-center gap-2">
-          <span className="font-semibold text-sm">Design Studio</span>
-          <Button variant="ghost" size="sm" onClick={undo} disabled={history.length === 0} className="h-8 px-2 text-xs">
+      {/* Top Toolbar - Responsive */}
+      <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 border-b border-slate-800 bg-slate-900 overflow-x-auto">
+        <div className="flex items-center gap-1 md:gap-2 min-w-fit">
+          <span className="font-semibold text-xs md:text-sm whitespace-nowrap">Design Studio</span>
+          <Button variant="ghost" size="sm" onClick={undo} disabled={history.length === 0} className="h-7 md:h-8 px-1.5 md:px-2 text-xs">
             Undo
           </Button>
-          <Button variant="ghost" size="sm" onClick={redo} disabled={redoStack.length === 0} className="h-8 px-2 text-xs">
+          <Button variant="ghost" size="sm" onClick={redo} disabled={redoStack.length === 0} className="h-7 md:h-8 px-1.5 md:px-2 text-xs">
             Redo
           </Button>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto flex items-center gap-1 md:gap-2 flex-wrap">
           <Button 
             variant="ghost" 
             size="sm" 
             onClick={() => setShowAIGenerator(true)} 
-            className="h-8 px-3 text-xs bg-purple-600 hover:bg-purple-500 text-white"
+            className="h-7 md:h-8 px-2 md:px-3 text-xs bg-purple-600 hover:bg-purple-500 text-white whitespace-nowrap"
           >
             AI Generate
           </Button>
-          <Button variant="ghost" size="sm" onClick={exportCanvas} className="h-8 px-3 text-xs bg-cyan-600 hover:bg-cyan-500 text-white">
+          <Button variant="ghost" size="sm" onClick={exportCanvas} className="h-7 md:h-8 px-2 md:px-3 text-xs bg-cyan-600 hover:bg-cyan-500 text-white whitespace-nowrap">
             Export PNG
           </Button>
-          <Button variant="ghost" size="sm" onClick={exportCanvasJPEG} className="h-8 px-3 text-xs">
-            Export JPEG
+          <Button variant="ghost" size="sm" onClick={exportCanvasJPEG} className="hidden sm:inline-flex h-7 md:h-8 px-2 md:px-3 text-xs whitespace-nowrap">
+            JPEG
           </Button>
-          <Button variant="ghost" size="sm" onClick={exportToHTML} className="h-8 px-3 text-xs">
-            Export HTML
+          <Button variant="ghost" size="sm" onClick={exportToHTML} className="hidden md:inline-flex h-7 md:h-8 px-2 md:px-3 text-xs whitespace-nowrap">
+            HTML
           </Button>
-          <Button variant="ghost" size="sm" onClick={exportToReact} className="h-8 px-3 text-xs">
-            Export React
+          <Button variant="ghost" size="sm" onClick={exportToReact} className="hidden lg:inline-flex h-7 md:h-8 px-2 md:px-3 text-xs whitespace-nowrap">
+            React
           </Button>
         </div>
       </div>
 
-      {/* Work Area: 3-column grid */}
-      <div className="flex-1 grid grid-cols-[260px_1fr_320px] overflow-hidden">
-        {/* Left Sidebar - Elements & Layers */}
-        <aside className="border-r border-slate-800 bg-slate-950/40 overflow-hidden">
+      {/* Work Area - Responsive Grid */}
+      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_320px] overflow-hidden">
+        {/* Left Sidebar - Elements & Layers (Collapsible on mobile) */}
+        <aside className="hidden lg:flex border-r border-slate-800 bg-slate-950/40 overflow-hidden flex-col">
           <DesignSidebar
             onElementSelect={addElementToCanvas}
             onElementDragStart={(element) => {
@@ -1218,98 +1223,118 @@ export const DesignStudio = forwardRef((props, ref) => {
             onCancelCrop={cancelCrop}
           />
         </aside>
-          <div>
-            <div className="text-xs uppercase tracking-wide text-slate-400 mb-2">Add</div>
-            <div className="flex flex-col gap-2">
-              <Button variant="ghost" size="sm" onClick={addText} className="justify-start bg-slate-800 hover:bg-slate-700 h-9 text-sm">
-                Text
-              </Button>
-              <Button variant="ghost" size="sm" onClick={addRectangle} className="justify-start bg-slate-800 hover:bg-slate-700 h-9 text-sm">
-                Rectangle
-              </Button>
-              <Button variant="ghost" size="sm" onClick={addCircle} className="justify-start bg-slate-800 hover:bg-slate-700 h-9 text-sm">
-                Ellipse
-              </Button>
-              <Button variant="ghost" size="sm" onClick={addImage} className="justify-start bg-slate-800 hover:bg-slate-700 h-9 text-sm">
-                Upload Image
-              </Button>
-            </div>
-          </div>
 
 
-        {/* Canvas Center */}
-        <main className="relative bg-slate-900 flex items-center justify-center overflow-hidden">
+        {/* Canvas Center - Responsive */}
+        <main className="relative bg-slate-900 flex items-center justify-center overflow-auto p-2 md:p-4">
           <div
             ref={containerRef}
-            className="bg-white rounded-lg shadow-lg relative"
-            style={{ width: 960, height: 540 }}
+            className="bg-white rounded-lg shadow-lg relative mx-auto"
+            style={{ 
+              width: 'min(960px, 100%)',
+              height: 'min(540px, calc(100vh - 200px))',
+              maxWidth: '100%',
+            }}
           >
-            <canvas ref={canvasRef} />
+            <canvas ref={canvasRef} className="w-full h-full" />
           </div>
         </main>
 
-        {/* Right Sidebar - Inspector/Properties */}
-        <aside className="border-l border-slate-800 p-3 bg-slate-950/40 overflow-y-auto">
-          <div className="text-xs uppercase tracking-wide text-slate-400 mb-3">Properties</div>
-          <Tabs defaultValue="properties" className="h-full flex flex-col">
-            <TabsList className="w-full grid grid-cols-2 bg-slate-700">
+        {/* Right Sidebar - Properties & Filters (Hidden on smaller screens) */}
+        <aside className="hidden xl:flex border-l border-slate-800 bg-slate-950/40 overflow-hidden flex-col">
+          <Tabs defaultValue="properties" className="flex flex-col h-full">
+            <TabsList className="grid w-full grid-cols-2 bg-slate-900">
               <TabsTrigger value="properties" className="text-xs">Properties</TabsTrigger>
               <TabsTrigger value="filters" className="text-xs">Filters</TabsTrigger>
             </TabsList>
-            <TabsContent value="properties" className="flex-1 overflow-hidden mt-3">
-              <ScrollArea className="h-full">
-                {selectedObject ? (
-                  <>
-                    {selectedObject.type === "image" && !isCropping && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={startCrop} 
-                        className="w-full mb-3 bg-cyan-600 hover:bg-cyan-500 text-white"
-                      >
-                        Crop Image
-                      </Button>
+            <TabsContent value="properties" className="flex-1 overflow-y-auto m-0">
+              {selectedObject ? (
+                <div className="p-3 space-y-3">
+                  <div className="text-sm font-medium text-slate-200 mb-3">
+                    {selectedObject.type?.toUpperCase() || 'Object'} Properties
+                  </div>
+                  <div className="space-y-2 text-xs">
+                    {selectedObject.left !== undefined && (
+                      <div>X: {Math.round(selectedObject.left)}</div>
                     )}
-                    <PropertiesPanel
-                      selectedObject={selectedObject}
-                      onPropertyChange={handlePropertyChange}
-                      onRemoveBackground={removeBackground}
-                    />
-                  </>
-                ) : (
-                  <div className="text-slate-400 text-sm">Select an object to edit</div>
-                )}
-              </ScrollArea>
+                    {selectedObject.top !== undefined && (
+                      <div>Y: {Math.round(selectedObject.top)}</div>
+                    )}
+                    {selectedObject.width !== undefined && (
+                      <div>Width: {Math.round(selectedObject.width * (selectedObject.scaleX || 1))}</div>
+                    )}
+                    {selectedObject.height !== undefined && (
+                      <div>Height: {Math.round(selectedObject.height * (selectedObject.scaleY || 1))}</div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 text-xs text-slate-400">No object selected</div>
+              )}
             </TabsContent>
-            <TabsContent value="filters" className="flex-1 overflow-hidden mt-3">
-              <ScrollArea className="h-full">
-                {selectedObject && selectedObject.type === "image" ? (
-                  <FiltersPanel
-                    selectedObject={selectedObject}
-                    onFilterChange={applyFilter}
-                    onResetFilters={resetFilters}
-                  />
-                ) : (
-                  <div className="text-slate-400 text-sm">Select an image to apply filters</div>
-                )}
-              </ScrollArea>
+            <TabsContent value="filters" className="flex-1 overflow-y-auto m-0">
+              {selectedObject ? (
+                <div className="p-3 text-xs text-slate-400">
+                  Filters panel (select image to apply filters)
+                </div>
+              ) : (
+                <div className="p-3 text-xs text-slate-400">No object selected</div>
+              )}
             </TabsContent>
           </Tabs>
         </aside>
       </div>
 
-      <TemplateLibrary
-        open={showTemplateLibrary}
-        onOpenChange={setShowTemplateLibrary}
-        onLoadTemplate={handleTemplateLoad}
+
+      {/* Mobile Floating Toolbar */}
+      <MobileToolbar
+        onElementSelect={addElementToCanvas}
+        onElementDragStart={(element) => {
+          if (fabricCanvas) {
+            (fabricCanvas as any)._pendingElement = element;
+          }
+        }}
+        onAddText={addText}
+        onAddRectangle={addRectangle}
+        onAddCircle={addCircle}
+        onAddImage={addImage}
+        onDuplicate={duplicateSelected}
+        onBringForward={bringForward}
+        onSendBackward={sendBackward}
+        onDelete={deleteSelected}
+        selectedObject={selectedObject}
+        layers={fabricCanvas?.getObjects() || []}
+        onLayerSelect={(obj) => {
+          if (fabricCanvas) {
+            fabricCanvas.setActiveObject(obj);
+            fabricCanvas.renderAll();
+            setSelectedObject(obj);
+          }
+        }}
+        isCropping={isCropping}
+        onApplyCrop={applyCrop}
+        onCancelCrop={cancelCrop}
       />
 
+      <TemplateLibrary
+        open={showTemplateLibrary} 
+        onOpenChange={setShowTemplateLibrary}
+        onLoadTemplate={(data) => {
+          if (fabricCanvas && data) {
+            fabricCanvas.loadFromJSON(data, () => {
+              fabricCanvas.renderAll();
+              toast({ title: "Template loaded successfully" });
+            });
+          }
+        }}
+      />
+      
       <SaveTemplateDialog
         open={showSaveDialog}
         onOpenChange={setShowSaveDialog}
-        canvasData={getCanvasData()}
+        canvasData={fabricCanvas?.toJSON() || null}
       />
-
+      
       <VersionHistory
         open={showVersionHistory}
         onOpenChange={setShowVersionHistory}

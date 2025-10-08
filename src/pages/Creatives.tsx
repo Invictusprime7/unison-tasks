@@ -81,7 +81,7 @@ const Creatives = () => {
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
         {/* Content Cloud Section */}
         <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-          <CardHeader className="bg-slate-950 rounded-lg">
+          <CardHeader className="bg-slate-950 rounded-none">
             <CardTitle className="flex items-center gap-2 text-2xl text-slate-300">
               <Cloud className="h-6 w-6 text-primary" />
               Content Cloud

@@ -129,11 +129,11 @@ const Creatives = () => {
               <Image className="h-4 w-4 mr-2" />
               Design
             </TabsTrigger>
-            <TabsTrigger value="content" className="text-slate-100">
+            <TabsTrigger value="content" className="text-slate-950">
               <FileText className="h-4 w-4 mr-2" />
               Content
             </TabsTrigger>
-            <TabsTrigger value="media" className="text-slate-100">
+            <TabsTrigger value="media" className="text-slate-950 bg-slate-100">
               <Video className="h-4 w-4 mr-2" />
               Media
             </TabsTrigger>
@@ -205,7 +205,7 @@ const Creatives = () => {
                     </CardContent>
                   </Card>)}
               </div> : <Card>
-                <CardContent className="py-12 text-center text-muted-foreground bg-green-50">
+                <CardContent className="py-12 text-center text-muted-foreground bg-slate-100">
                   No content tasks found
                 </CardContent>
               </Card>}
@@ -227,7 +227,7 @@ const Creatives = () => {
                     </CardContent>
                   </Card>)}
               </div> : <Card>
-                <CardContent className="py-12 text-center text-muted-foreground bg-green-50">
+                <CardContent className="py-12 text-center text-muted-foreground bg-slate-100">
                   No media tasks found
                 </CardContent>
               </Card>}

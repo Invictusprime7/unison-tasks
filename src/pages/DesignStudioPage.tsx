@@ -31,8 +31,8 @@ const DesignStudioPage = () => {
   };
 
   return (
-    <div className="h-screen w-full flex flex-col bg-card overflow-hidden">
-      <header className="h-10 sm:h-12 border-b bg-background flex items-center justify-between px-2 sm:px-4 shrink-0 min-w-0">
+    <div className="h-screen w-full flex flex-col bg-gray-50 overflow-hidden">
+      <header className="h-10 sm:h-12 border-b border-gray-200 bg-white flex items-center justify-between px-2 sm:px-4 shrink-0 min-w-0">
         <div className="flex items-center gap-1 sm:gap-2 min-w-0 flex-shrink">
           <Button
             variant="ghost"

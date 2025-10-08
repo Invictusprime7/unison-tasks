@@ -1249,7 +1249,7 @@ export const DesignStudio = forwardRef((props, ref) => {
   }));
 
   return (
-    <div className="w-full h-full flex flex-col bg-slate-900 text-slate-100">
+    <div className="w-full h-full flex flex-col bg-gray-50 text-gray-900">
       <input
         ref={fileInputRef}
         type="file"
@@ -1259,9 +1259,9 @@ export const DesignStudio = forwardRef((props, ref) => {
       />
 
       {/* Top Toolbar - Responsive */}
-      <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 border-b border-slate-800 bg-slate-900 overflow-x-auto">
+      <div className="flex items-center gap-2 md:gap-3 px-2 md:px-4 py-2 border-b border-gray-200 bg-white overflow-x-auto">
         <div className="flex items-center gap-1 md:gap-2 min-w-fit">
-          <span className="font-semibold text-xs md:text-sm whitespace-nowrap">Design Studio</span>
+          <span className="font-semibold text-xs md:text-sm whitespace-nowrap text-gray-900">Design Studio</span>
           <Button variant="ghost" size="sm" onClick={undo} disabled={history.length === 0} className="h-7 md:h-8 px-1.5 md:px-2 text-xs">
             Undo
           </Button>
@@ -1296,7 +1296,7 @@ export const DesignStudio = forwardRef((props, ref) => {
       {/* Work Area - Responsive Grid */}
       <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_320px] overflow-hidden min-w-0">
         {/* Left Sidebar - Elements & Layers (Collapsible on mobile) */}
-        <aside className="hidden lg:flex border-r border-slate-800 bg-slate-950/40 overflow-hidden flex-col flex-shrink-0">
+        <aside className="hidden lg:flex border-r border-gray-200 bg-white overflow-hidden flex-col flex-shrink-0">
           <DesignSidebar
             onElementSelect={addElementToCanvas}
             onElementDragStart={(element) => {
@@ -1329,7 +1329,7 @@ export const DesignStudio = forwardRef((props, ref) => {
 
 
         {/* Canvas Center - Responsive */}
-        <main className="relative bg-slate-900 flex items-center justify-center overflow-auto p-2 md:p-4 min-w-0">
+        <main className="relative bg-gray-100 flex items-center justify-center overflow-auto p-2 md:p-4 min-w-0">
           <div
             ref={containerRef}
             className="bg-white rounded-lg shadow-lg relative mx-auto max-w-full"
@@ -1343,11 +1343,11 @@ export const DesignStudio = forwardRef((props, ref) => {
         </main>
 
         {/* Right Sidebar - Properties & Filters (Hidden on smaller screens) */}
-        <aside className="hidden xl:flex border-l border-slate-800 bg-slate-950/40 overflow-hidden flex-col flex-shrink-0">
+        <aside className="hidden xl:flex border-l border-gray-200 bg-white overflow-hidden flex-col flex-shrink-0">
           <Tabs defaultValue="properties" className="flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-2 bg-slate-900">
-              <TabsTrigger value="properties" className="text-xs">Properties</TabsTrigger>
-              <TabsTrigger value="filters" className="text-xs">Filters</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-white border-b border-gray-200">
+              <TabsTrigger value="properties" className="text-xs text-gray-700">Properties</TabsTrigger>
+              <TabsTrigger value="filters" className="text-xs text-gray-700">Filters</TabsTrigger>
             </TabsList>
             <TabsContent value="properties" className="flex-1 overflow-y-auto m-0">
               <PropertiesPanel

@@ -132,44 +132,44 @@ export const ElementsPanel = ({ onElementSelect, onElementDragStart }: ElementsP
   };
 
   const renderElementPreview = (element: DesignElement) => {
-    const baseClass = "w-full h-20 rounded-lg border-2 border-slate-700 cursor-move transition-all hover:border-cyan-500 hover:shadow-lg hover:shadow-cyan-500/20";
+    const baseClass = "w-full h-20 rounded-lg border-2 border-gray-300 cursor-move transition-all hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20";
     
     switch (element.type) {
       case 'frame':
         if (element.variant.includes('circle')) {
-          return <div className={`${baseClass} bg-slate-800 flex items-center justify-center`}>
-            <div className="w-12 h-12 rounded-full border-2 border-slate-500" />
+          return <div className={`${baseClass} bg-gray-50 flex items-center justify-center`}>
+            <div className="w-12 h-12 rounded-full border-2 border-gray-400" />
           </div>;
         }
-        return <div className={`${baseClass} bg-slate-800 flex items-center justify-center`}>
-          <div className={`w-16 h-16 ${element.variant.includes('rounded') ? 'rounded-lg' : 'rounded-none'} border-2 border-slate-500`} />
+        return <div className={`${baseClass} bg-gray-50 flex items-center justify-center`}>
+          <div className={`w-16 h-16 ${element.variant.includes('rounded') ? 'rounded-lg' : 'rounded-none'} border-2 border-gray-400`} />
         </div>;
       
       case 'grid':
         const gridCols = element.config.cols || 2;
-        return <div className={`${baseClass} bg-slate-800 p-2`}>
+        return <div className={`${baseClass} bg-gray-50 p-2`}>
           <div className={`grid grid-cols-${gridCols} gap-1 h-full`}>
             {Array(gridCols * (element.config.rows || 2)).fill(0).map((_, i) => (
-              <div key={i} className="bg-slate-600 rounded" />
+              <div key={i} className="bg-gray-300 rounded" />
             ))}
           </div>
         </div>;
       
       case 'shape':
-        return <div className={`${baseClass} bg-gradient-to-br from-slate-800 to-slate-900 flex items-center justify-center`}>
-          {element.variant === 'circle' && <Circle className="w-8 h-8 text-purple-400" fill="currentColor" />}
-          {element.variant === 'rectangle' && <Square className="w-8 h-8 text-blue-400" fill="currentColor" />}
-          {element.variant === 'triangle' && <div className="w-0 h-0 border-l-[16px] border-r-[16px] border-b-[28px] border-l-transparent border-r-transparent border-b-pink-400" />}
-          {element.variant === 'star' && <span className="text-3xl text-amber-400">★</span>}
-          {element.variant === 'hexagon' && <span className="text-3xl text-emerald-400">⬡</span>}
+        return <div className={`${baseClass} bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center`}>
+          {element.variant === 'circle' && <Circle className="w-8 h-8 text-purple-600" fill="currentColor" />}
+          {element.variant === 'rectangle' && <Square className="w-8 h-8 text-blue-600" fill="currentColor" />}
+          {element.variant === 'triangle' && <div className="w-0 h-0 border-l-[16px] border-r-[16px] border-b-[28px] border-l-transparent border-r-transparent border-b-pink-600" />}
+          {element.variant === 'star' && <span className="text-3xl text-amber-600">★</span>}
+          {element.variant === 'hexagon' && <span className="text-3xl text-emerald-600">⬡</span>}
         </div>;
       
       case 'mockup':
-        return <div className={`${baseClass} bg-slate-800 flex items-center justify-center`}>
-          {element.variant === 'phone' && <Smartphone className="w-8 h-8 text-slate-400" />}
-          {element.variant === 'laptop' && <MonitorPlay className="w-8 h-8 text-slate-400" />}
-          {element.variant === 'tablet' && <Smartphone className="w-10 h-10 text-slate-400" />}
-          {element.variant === 'desktop' && <MonitorPlay className="w-10 h-10 text-slate-400" />}
+        return <div className={`${baseClass} bg-gray-50 flex items-center justify-center`}>
+          {element.variant === 'phone' && <Smartphone className="w-8 h-8 text-gray-500" />}
+          {element.variant === 'laptop' && <MonitorPlay className="w-8 h-8 text-gray-500" />}
+          {element.variant === 'tablet' && <Smartphone className="w-10 h-10 text-gray-500" />}
+          {element.variant === 'desktop' && <MonitorPlay className="w-10 h-10 text-gray-500" />}
         </div>;
       
       default:
@@ -190,16 +190,16 @@ export const ElementsPanel = ({ onElementSelect, onElementDragStart }: ElementsP
   );
 
   return (
-    <div className="h-full flex flex-col bg-slate-950/40">
+    <div className="h-full flex flex-col bg-white">
       {/* Search */}
-      <div className="p-3 border-b border-slate-800 space-y-3">
+      <div className="p-3 border-b border-gray-200 space-y-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             placeholder="Search elements"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 bg-slate-900 border-slate-700 text-sm h-9"
+            className="pl-9 bg-white border-gray-300 text-sm h-9 text-gray-900"
           />
         </div>
 
@@ -208,29 +208,29 @@ export const ElementsPanel = ({ onElementSelect, onElementDragStart }: ElementsP
           value={activeCategory}
           onValueChange={(value: any) => setActiveCategory(value)}
         >
-          <SelectTrigger className="w-full bg-slate-900 border-slate-700 h-9 text-sm text-slate-200">
+          <SelectTrigger className="w-full bg-white border-gray-300 h-9 text-sm text-gray-700">
             <SelectValue placeholder="Select category">
               {(() => {
                 const currentCategory = categories.find(c => c.id === activeCategory);
                 if (!currentCategory) return "Select category";
                 const Icon = currentCategory.icon;
                 return (
-                  <div className="flex items-center gap-2 text-slate-200">
+                  <div className="flex items-center gap-2 text-gray-700">
                     <Icon className="w-4 h-4" />
-                    <span className="text-slate-200">{currentCategory.label}</span>
+                    <span className="text-gray-700">{currentCategory.label}</span>
                   </div>
                 );
               })()}
             </SelectValue>
           </SelectTrigger>
-          <SelectContent className="bg-slate-900 border-slate-700 z-50">
+          <SelectContent className="bg-white border-gray-300 z-50">
             {categories.map(({ id, label, icon: Icon }) => (
               <SelectItem 
                 key={id} 
                 value={id}
-                className="text-sm text-slate-200 focus:bg-slate-800 focus:text-slate-100 cursor-pointer hover:bg-slate-800"
+                className="text-sm text-gray-700 focus:bg-gray-100 focus:text-gray-900 cursor-pointer hover:bg-gray-50"
               >
-                <div className="flex items-center gap-2 text-slate-200">
+                <div className="flex items-center gap-2 text-gray-700">
                   <Icon className="w-4 h-4" />
                   <span>{label}</span>
                 </div>
@@ -262,7 +262,7 @@ export const ElementsPanel = ({ onElementSelect, onElementDragStart }: ElementsP
                 className="group"
               >
                 {renderElementPreview(element)}
-                <p className="text-xs text-slate-400 mt-1 text-center group-hover:text-cyan-400 transition-colors">
+                <p className="text-xs text-gray-500 mt-1 text-center group-hover:text-blue-600 transition-colors">
                   {item.name}
                 </p>
               </div>

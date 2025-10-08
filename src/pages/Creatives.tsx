@@ -205,7 +205,7 @@ const Creatives = () => {
                     </CardContent>
                   </Card>)}
               </div> : <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
+                <CardContent className="py-12 text-center text-muted-foreground bg-green-50">
                   No content tasks found
                 </CardContent>
               </Card>}
@@ -227,7 +227,7 @@ const Creatives = () => {
                     </CardContent>
                   </Card>)}
               </div> : <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
+                <CardContent className="py-12 text-center text-muted-foreground bg-green-50">
                   No media tasks found
                 </CardContent>
               </Card>}

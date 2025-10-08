@@ -183,7 +183,7 @@ const Creatives = () => {
                     </CardContent>
                   </Card>)}
               </div> : <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
+                <CardContent className="py-12 text-center text-muted-foreground bg-green-50">
                   No design tasks found
                 </CardContent>
               </Card>}

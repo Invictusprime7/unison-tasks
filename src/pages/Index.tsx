@@ -16,7 +16,7 @@ const Index = () => {
       }
     });
   }, [navigate]);
-  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 bg-green-100">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 bg-emerald-100">
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <CheckSquare className="h-8 w-8 text-primary" />
@@ -50,8 +50,8 @@ const Index = () => {
           </Button>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
-          <div className="text-center p-6 bg-background/50 rounded-lg border hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/creatives")}>
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16 bg-emerald-50">
+          <div onClick={() => navigate("/creatives")} className="text-center p-6 rounded-lg border hover:shadow-lg transition-shadow cursor-pointer bg-emerald-50">
             <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Sparkles className="h-8 w-8 text-primary" />
             </div>
@@ -61,7 +61,7 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="text-center p-6 bg-background/50 rounded-lg border hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/planning")}>
+          <div onClick={() => navigate("/planning")} className="text-center p-6 rounded-lg border hover:shadow-lg transition-shadow cursor-pointer bg-emerald-50">
             <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <CalendarDays className="h-8 w-8 text-primary" />
             </div>
@@ -71,7 +71,7 @@ const Index = () => {
             </p>
           </div>
 
-          <div className="text-center p-6 bg-background/50 rounded-lg border hover:shadow-lg transition-shadow cursor-pointer" onClick={() => navigate("/files")}>
+          <div onClick={() => navigate("/files")} className="text-center p-6 rounded-lg border hover:shadow-lg transition-shadow cursor-pointer bg-emerald-50">
             <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Shield className="h-8 w-8 text-primary" />
             </div>

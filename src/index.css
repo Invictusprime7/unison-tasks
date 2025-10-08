@@ -57,6 +57,9 @@ All colors MUST be HSL.
     --shadow-nebula: 0 8px 32px hsla(0 0% 0% / 0.1);
     --shadow-glow: 0 0 24px hsla(210 100% 50% / 0.15);
     --shadow-stellar: 0 4px 16px hsla(200 70% 40% / 0.1);
+    --shadow-neon-blue: 0 0 20px hsla(210 100% 50% / 0.5), 0 0 40px hsla(210 100% 50% / 0.3);
+    --shadow-neon-cyan: 0 0 20px hsla(180 100% 50% / 0.5), 0 0 40px hsla(180 100% 50% / 0.3);
+    --shadow-neon-purple: 0 0 20px hsla(270 100% 60% / 0.5), 0 0 40px hsla(270 100% 60% / 0.3);
   }
 
   .dark {
@@ -107,6 +110,9 @@ All colors MUST be HSL.
     --shadow-nebula: 0 12px 48px hsla(0 0% 0% / 0.8);
     --shadow-glow: 0 0 40px hsla(210 100% 60% / 0.3);
     --shadow-stellar: 0 4px 32px hsla(200 80% 50% / 0.2);
+    --shadow-neon-blue: 0 0 25px hsla(210 100% 60% / 0.6), 0 0 50px hsla(210 100% 60% / 0.4);
+    --shadow-neon-cyan: 0 0 25px hsla(180 100% 60% / 0.6), 0 0 50px hsla(180 100% 60% / 0.4);
+    --shadow-neon-purple: 0 0 25px hsla(270 100% 70% / 0.6), 0 0 50px hsla(270 100% 70% / 0.4);
   }
 }
 

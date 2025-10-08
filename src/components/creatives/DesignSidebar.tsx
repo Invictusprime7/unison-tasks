@@ -42,7 +42,7 @@ export const DesignSidebar = ({
 }: DesignSidebarProps) => {
   return (
     <Tabs defaultValue="elements" className="w-full h-full flex flex-col">
-      <TabsList className="w-full grid grid-cols-2 bg-white border-b-2 border-blue-400 shadow-sm shadow-blue-400/30 h-8">
+      <TabsList className="w-full grid grid-cols-2 bg-white border-b-2 border-primary h-8" style={{ boxShadow: 'var(--shadow-neon-blue)' }}>
         <TabsTrigger value="elements" className="text-[10px] sm:text-xs py-1 text-gray-700 data-[state=active]:shadow-blue-500/40">Elements</TabsTrigger>
         <TabsTrigger value="layers" className="text-[10px] sm:text-xs py-1 text-gray-700 data-[state=active]:shadow-blue-500/40">Layers</TabsTrigger>
       </TabsList>
@@ -99,11 +99,12 @@ export const DesignSidebar = ({
             {layers.map((obj: any, idx: number) => (
               <button
                 key={idx}
-                className={`text-left px-1.5 py-1 rounded border text-[10px] transition-all ${
+                className={`text-left px-1.5 py-1 rounded border-2 text-[10px] transition-all ${
                   selectedObject === obj
-                    ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-md shadow-blue-500/40'
-                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-blue-300 hover:shadow-sm hover:shadow-blue-400/20'
+                    ? 'border-primary bg-blue-50 text-blue-700'
+                    : 'border-gray-200 bg-white text-gray-700 hover:bg-gray-50 hover:border-primary'
                 }`}
+                style={selectedObject === obj ? { boxShadow: 'var(--shadow-neon-blue)' } : {}}
                 onClick={() => onLayerSelect(obj)}
               >
                 {idx + 1}. {obj.type || 'Object'}

@@ -31,7 +31,8 @@ export const MobileToolbar = (props: MobileToolbarProps) => {
         <SheetTrigger asChild>
           <Button 
             size="sm" 
-            className="h-10 w-10 rounded-full shadow-lg shadow-blue-500/50 bg-primary hover:bg-primary/80 hover:shadow-blue-600/60 p-0 border-2 border-blue-400"
+            className="h-10 w-10 rounded-full bg-primary hover:bg-primary/80 p-0 border-2 border-primary"
+            style={{ boxShadow: 'var(--shadow-neon-blue)' }}
           >
             <Layers className="h-4 w-4" />
           </Button>
@@ -46,7 +47,8 @@ export const MobileToolbar = (props: MobileToolbarProps) => {
         <SheetTrigger asChild>
           <Button 
             size="sm" 
-            className="h-10 w-10 rounded-full shadow-lg shadow-cyan-500/50 bg-cyan-600 hover:bg-cyan-500 hover:shadow-cyan-600/60 text-white p-0 border-2 border-cyan-400"
+            className="h-10 w-10 rounded-full bg-accent hover:bg-accent/80 text-white p-0 border-2 border-accent"
+            style={{ boxShadow: 'var(--shadow-neon-cyan)' }}
             disabled={!props.selectedObject}
           >
             <Settings className="h-4 w-4" />

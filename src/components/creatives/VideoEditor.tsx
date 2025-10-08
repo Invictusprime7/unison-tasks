@@ -88,7 +88,7 @@ export const VideoEditor = () => {
         </div>
 
         <div className="grid grid-cols-2 gap-2">
-          <Button variant="outline" disabled={!videoFile} className="bg-red-100">
+          <Button variant="outline" disabled={!videoFile} className="bg-slate-300 hover:bg-slate-200">
             <Scissors className="h-4 w-4 mr-2" />
             Trim Video
           </Button>

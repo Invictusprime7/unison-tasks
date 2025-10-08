@@ -3,20 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CheckSquare, Users, Zap, Shield, Sparkles, CalendarDays } from "lucide-react";
-
 const Index = () => {
   const navigate = useNavigate();
-
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       if (session) {
         navigate("/dashboard");
       }
     });
   }, [navigate]);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 bg-green-100">
       <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
         <div className="flex items-center gap-2">
           <CheckSquare className="h-8 w-8 text-primary" />
@@ -36,7 +36,7 @@ const Index = () => {
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-20">
+      <main className="container mx-auto px-4 py-20 bg-emerald-50">
         <div className="text-center max-w-3xl mx-auto mb-20">
           <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Collaborative Task Management for Modern Teams
@@ -114,8 +114,6 @@ const Index = () => {
           </div>
         </div>
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default Index;

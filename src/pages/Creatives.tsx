@@ -93,16 +93,16 @@ const Creatives = () => {
           <CardContent className="bg-slate-950">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <ImageEditor />
-              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary/50">
+              <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary/50 bg-slate-950">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 text-slate-100">
                       <Sparkles className="h-5 w-5 text-primary" />
                       Design Studio
                     </span>
                     <Maximize2 className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-slate-100">
                     Create stunning designs with professional tools
                   </CardDescription>
                 </CardHeader>
@@ -129,11 +129,11 @@ const Creatives = () => {
               <Image className="h-4 w-4 mr-2" />
               Design
             </TabsTrigger>
-            <TabsTrigger value="content">
+            <TabsTrigger value="content" className="text-slate-100">
               <FileText className="h-4 w-4 mr-2" />
               Content
             </TabsTrigger>
-            <TabsTrigger value="media">
+            <TabsTrigger value="media" className="text-slate-100">
               <Video className="h-4 w-4 mr-2" />
               Media
             </TabsTrigger>
@@ -160,7 +160,7 @@ const Creatives = () => {
                     </CardContent>
                   </Card>)}
               </div> : <Card>
-                <CardContent className="py-12 text-center bg-green-50">
+                <CardContent className="py-12 text-center bg-slate-100">
                   <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">No creative tasks found</p>
                 </CardContent>
@@ -183,7 +183,7 @@ const Creatives = () => {
                     </CardContent>
                   </Card>)}
               </div> : <Card>
-                <CardContent className="py-12 text-center text-muted-foreground bg-green-50">
+                <CardContent className="py-12 text-center text-muted-foreground bg-slate-100">
                   No design tasks found
                 </CardContent>
               </Card>}

@@ -49,19 +49,19 @@ export const VideoEditor = () => {
       setIsProcessing(false);
     }
   };
-  return <Card className="h-full">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+  return <Card className="h-full bg-slate-950">
+      <CardHeader className="bg-gray-950">
+        <CardTitle className="flex items-center gap-2 text-slate-100">
           <Video className="h-5 w-5 text-primary" />
           AI Video Editor
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-slate-100">
           Edit videos with AI-powered enhancements and tools
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 bg-gray-950">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Upload Video</label>
+          <label className="font-medium text-sm text-slate-100">Upload Video</label>
           <div className="flex items-center gap-2">
             <Input type="file" accept="video/*" onChange={handleVideoUpload} className="flex-1" />
             <Button variant="outline" size="icon">
@@ -83,7 +83,7 @@ export const VideoEditor = () => {
           </div>}
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">AI Enhancement</label>
+          <label className="font-medium text-sm text-slate-100">AI Enhancement</label>
           <Textarea placeholder="Describe how you want to enhance the video (e.g., improve lighting, add transitions, remove background noise)..." value={aiPrompt} onChange={e => setAiPrompt(e.target.value)} rows={3} />
         </div>
 

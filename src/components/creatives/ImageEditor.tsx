@@ -154,7 +154,7 @@ export const ImageEditor = () => {
           </div>}
 
         <div className="space-y-2">
-          <label className="text-sm font-medium">AI Image Generation</label>
+          <label className="font-medium text-sm text-slate-50">AI Image Generation</label>
           <Textarea placeholder="Describe the image you want to generate..." value={prompt} onChange={e => setPrompt(e.target.value)} rows={3} />
           <Button onClick={handleGenerateImage} disabled={isGenerating} className="w-full bg-red-100 text-slate-950">
             <Wand2 className="h-4 w-4 mr-2" />

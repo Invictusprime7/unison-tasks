@@ -25,18 +25,18 @@ interface MobileToolbarProps {
 
 export const MobileToolbar = (props: MobileToolbarProps) => {
   return (
-    <div className="lg:hidden fixed bottom-4 right-4 z-50 flex gap-2">
+    <div className="lg:hidden fixed bottom-2 right-2 z-50 flex gap-1.5">
       {/* Elements & Layers Drawer */}
       <Sheet>
         <SheetTrigger asChild>
           <Button 
-            size="lg" 
-            className="h-14 w-14 rounded-full shadow-lg bg-purple-600 hover:bg-purple-500"
+            size="sm" 
+            className="h-10 w-10 rounded-full shadow-lg bg-purple-600 hover:bg-purple-500 p-0"
           >
-            <Layers className="h-6 w-6" />
+            <Layers className="h-4 w-4" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[280px] p-0 bg-slate-950">
+        <SheetContent side="left" className="w-[85vw] max-w-[280px] p-0 bg-slate-950">
           <DesignSidebar {...props} />
         </SheetContent>
       </Sheet>
@@ -45,18 +45,18 @@ export const MobileToolbar = (props: MobileToolbarProps) => {
       <Sheet>
         <SheetTrigger asChild>
           <Button 
-            size="lg" 
-            className="h-14 w-14 rounded-full shadow-lg bg-cyan-600 hover:bg-cyan-500"
+            size="sm" 
+            className="h-10 w-10 rounded-full shadow-lg bg-cyan-600 hover:bg-cyan-500 p-0"
             disabled={!props.selectedObject}
           >
-            <Settings className="h-6 w-6" />
+            <Settings className="h-4 w-4" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-[280px] p-4 bg-slate-950">
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-slate-200">Properties</h3>
+        <SheetContent side="right" className="w-[85vw] max-w-[280px] p-3 bg-slate-950">
+          <div className="space-y-3">
+            <h3 className="text-xs font-medium text-slate-200">Properties</h3>
             {props.selectedObject ? (
-              <div className="space-y-2 text-xs text-slate-300">
+              <div className="space-y-1.5 text-[10px] text-slate-300">
                 <div>Type: {props.selectedObject.type?.toUpperCase()}</div>
                 {props.selectedObject.left !== undefined && (
                   <div>X: {Math.round(props.selectedObject.left)}</div>
@@ -72,7 +72,7 @@ export const MobileToolbar = (props: MobileToolbarProps) => {
                 )}
               </div>
             ) : (
-              <p className="text-xs text-slate-400">No object selected</p>
+              <p className="text-[10px] text-slate-400">No object selected</p>
             )}
           </div>
         </SheetContent>

@@ -77,8 +77,9 @@ export const DesignStudio = forwardRef((props, ref) => {
     if (!canvasRef.current || !containerRef.current) return;
 
     const container = containerRef.current;
-    const maxWidth = Math.min(960, container.clientWidth);
-    const maxHeight = Math.min(540, container.clientHeight);
+    const isMobile = window.innerWidth < 768;
+    const maxWidth = isMobile ? container.clientWidth - 16 : Math.min(960, container.clientWidth);
+    const maxHeight = isMobile ? Math.min(400, container.clientHeight - 100) : Math.min(540, container.clientHeight);
 
     const canvas = new FabricCanvas(canvasRef.current, {
       width: maxWidth,

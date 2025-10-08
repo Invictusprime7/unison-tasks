@@ -173,19 +173,20 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
 
   return (
     <div className="h-full w-full flex flex-col bg-background">
-      <div className="h-12 border-b bg-card flex items-center justify-between px-4">
-        <div className="panel__devices flex gap-2"></div>
-        <div className="flex gap-2">
+      <div className="h-9 sm:h-10 border-b bg-card flex items-center justify-between px-2 sm:px-4">
+        <div className="panel__devices flex gap-1"></div>
+        <div className="flex gap-1 sm:gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={() => setShowCode(!showCode)}
+            className="h-7 sm:h-8 px-2"
           >
-            {showCode ? <Eye className="h-4 w-4 mr-2" /> : <Code className="h-4 w-4 mr-2" />}
-            {showCode ? "Visual Editor" : "Code Editor"}
+            {showCode ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" /> : <Code className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />}
+            <span className="hidden sm:inline">{showCode ? "Visual" : "Code"}</span>
           </Button>
-          <Button size="sm" onClick={handleSave}>
-            Save Template
+          <Button size="sm" onClick={handleSave} className="h-7 sm:h-8 px-2 text-xs sm:text-sm">
+            Save
           </Button>
         </div>
       </div>
@@ -253,13 +254,13 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex">
-          <div className="flex-1 relative">
+        <div className="flex-1 flex flex-col sm:flex-row">
+          <div className="flex-1 relative min-h-[300px]">
             <div ref={editorRef} className="h-full w-full" />
           </div>
-          <div className="w-80 border-l bg-card">
-            <div className="panel__switcher border-b"></div>
-            <div className="panel__right h-full overflow-auto"></div>
+          <div className="w-full sm:w-64 md:w-80 border-t sm:border-l sm:border-t-0 bg-card max-h-[40vh] sm:max-h-none">
+            <div className="panel__switcher border-b text-xs"></div>
+            <div className="panel__right h-full overflow-auto text-xs"></div>
           </div>
         </div>
       )}

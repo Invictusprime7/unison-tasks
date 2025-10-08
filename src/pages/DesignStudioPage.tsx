@@ -32,32 +32,34 @@ const DesignStudioPage = () => {
 
   return (
     <div className="h-screen w-full flex flex-col bg-background">
-      <header className="h-14 border-b bg-card flex items-center justify-between px-4 shrink-0">
-        <div className="flex items-center gap-4">
+      <header className="h-10 sm:h-12 border-b bg-card flex items-center justify-between px-2 sm:px-4 shrink-0">
+        <div className="flex items-center gap-1 sm:gap-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={() => navigate("/creatives")}
+            className="h-7 sm:h-8 px-2"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
-          <h1 className="text-lg font-semibold">Design Studio</h1>
+          <h1 className="text-sm sm:text-lg font-semibold">Design Studio</h1>
         </div>
         <Button
           variant="outline"
           size="sm"
           onClick={() => setFileBrowserOpen(true)}
+          className="h-7 sm:h-8 px-2"
         >
-          <FolderOpen className="h-4 w-4 mr-2" />
-          Browse Files
+          <FolderOpen className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+          <span className="hidden sm:inline">Browse Files</span>
         </Button>
       </header>
 
       <Tabs value={activeEditor} onValueChange={(v) => setActiveEditor(v as "fabric" | "grapejs")} className="flex-1 flex flex-col">
-        <TabsList className="mx-4 mt-2 w-fit">
-          <TabsTrigger value="fabric">Canvas Editor</TabsTrigger>
-          <TabsTrigger value="grapejs">Web Builder</TabsTrigger>
+        <TabsList className="mx-2 sm:mx-4 mt-1 sm:mt-2 w-fit h-8">
+          <TabsTrigger value="fabric" className="text-xs sm:text-sm h-7 px-2 sm:px-3">Canvas</TabsTrigger>
+          <TabsTrigger value="grapejs" className="text-xs sm:text-sm h-7 px-2 sm:px-3">Web</TabsTrigger>
         </TabsList>
         
         <TabsContent value="fabric" className="flex-1 mt-0">

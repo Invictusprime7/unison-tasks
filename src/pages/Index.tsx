@@ -87,7 +87,7 @@ const Index = () => {
             <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Users className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Team Collaboration</h3>
+            <h3 className="text-xl font-semibold mb-2 text-slate-400">Team Collaboration</h3>
             <p className="text-muted-foreground">
               Invite team members, assign tasks, and work together seamlessly with real-time updates.
             </p>
@@ -97,7 +97,7 @@ const Index = () => {
             <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Zap className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Real-Time Updates</h3>
+            <h3 className="text-xl font-semibold mb-2 text-slate-400">Real-Time Updates</h3>
             <p className="text-muted-foreground">
               See changes instantly as your team updates tasks, comments, and project status.
             </p>
@@ -107,7 +107,7 @@ const Index = () => {
             <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Shield className="h-8 w-8 text-primary" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Secure & Private</h3>
+            <h3 className="text-xl font-semibold mb-2 text-slate-400">Secure & Private</h3>
             <p className="text-muted-foreground">
               Enterprise-grade security with row-level access control and encrypted data storage.
             </p>

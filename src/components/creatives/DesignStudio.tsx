@@ -1294,9 +1294,9 @@ export const DesignStudio = forwardRef((props, ref) => {
       </div>
 
       {/* Work Area - Responsive Grid */}
-      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_320px] overflow-hidden">
+      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_320px] overflow-hidden min-w-0">
         {/* Left Sidebar - Elements & Layers (Collapsible on mobile) */}
-        <aside className="hidden lg:flex border-r border-slate-800 bg-slate-950/40 overflow-hidden flex-col">
+        <aside className="hidden lg:flex border-r border-slate-800 bg-slate-950/40 overflow-hidden flex-col flex-shrink-0">
           <DesignSidebar
             onElementSelect={addElementToCanvas}
             onElementDragStart={(element) => {
@@ -1329,14 +1329,13 @@ export const DesignStudio = forwardRef((props, ref) => {
 
 
         {/* Canvas Center - Responsive */}
-        <main className="relative bg-slate-900 flex items-center justify-center overflow-auto p-2 md:p-4">
+        <main className="relative bg-slate-900 flex items-center justify-center overflow-auto p-2 md:p-4 min-w-0">
           <div
             ref={containerRef}
-            className="bg-white rounded-lg shadow-lg relative mx-auto"
+            className="bg-white rounded-lg shadow-lg relative mx-auto max-w-full"
             style={{ 
               width: 'min(960px, 100%)',
               height: 'min(540px, calc(100vh - 200px))',
-              maxWidth: '100%',
             }}
           >
             <canvas ref={canvasRef} className="w-full h-full" />
@@ -1344,7 +1343,7 @@ export const DesignStudio = forwardRef((props, ref) => {
         </main>
 
         {/* Right Sidebar - Properties & Filters (Hidden on smaller screens) */}
-        <aside className="hidden xl:flex border-l border-slate-800 bg-slate-950/40 overflow-hidden flex-col">
+        <aside className="hidden xl:flex border-l border-slate-800 bg-slate-950/40 overflow-hidden flex-col flex-shrink-0">
           <Tabs defaultValue="properties" className="flex flex-col h-full">
             <TabsList className="grid w-full grid-cols-2 bg-slate-900">
               <TabsTrigger value="properties" className="text-xs">Properties</TabsTrigger>

@@ -119,21 +119,21 @@ const Creatives = () => {
 
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input placeholder="Search creative tasks..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
+          <Input placeholder="Search creative tasks..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10 bg-slate-800" />
         </div>
 
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="all">All Tasks</TabsTrigger>
-            <TabsTrigger value="design">
+          <TabsList className="grid w-full grid-cols-4 bg-gray-950">
+            <TabsTrigger value="all" className="text-slate-950 bg-gray-800 hover:bg-gray-700">All Tasks</TabsTrigger>
+            <TabsTrigger value="design" className="text-gray-950 bg-gray-800 hover:bg-gray-700">
               <Image className="h-4 w-4 mr-2" />
               Design
             </TabsTrigger>
-            <TabsTrigger value="content" className="text-slate-950">
+            <TabsTrigger value="content" className="text-gray-950 bg-gray-800 hover:bg-gray-700">
               <FileText className="h-4 w-4 mr-2" />
               Content
             </TabsTrigger>
-            <TabsTrigger value="media" className="text-slate-950 bg-slate-100">
+            <TabsTrigger value="media" className="text-slate-950 bg-gray-800 hover:bg-gray-700">
               <Video className="h-4 w-4 mr-2" />
               Media
             </TabsTrigger>

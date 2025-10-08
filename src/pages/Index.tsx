@@ -16,11 +16,11 @@ const Index = () => {
       }
     });
   }, [navigate]);
-  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 bg-emerald-100">
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center bg-teal-100 rounded-none">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 bg-slate-950">
+      <nav className="container mx-auto px-4 py-6 flex justify-between items-center rounded-none bg-slate-950">
         <div className="flex items-center gap-2">
           <CheckSquare className="h-8 w-8 text-primary" />
-          <span className="text-2xl font-bold">Unison Tasks</span>
+          <span className="text-2xl font-bold text-slate-50">Unison Tasks</span>
         </div>
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => navigate("/creatives")}>
@@ -36,12 +36,12 @@ const Index = () => {
         </div>
       </nav>
 
-      <main className="container mx-auto px-4 py-20 bg-emerald-50">
+      <main className="container mx-auto px-4 py-20 bg-slate-950">
         <div className="text-center max-w-3xl mx-auto mb-20">
-          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-slate-400">
             Collaborative Task Management for Modern Teams
           </h1>
-          <p className="text-xl text-muted-foreground mb-8">
+          <p className="text-xl mb-8 text-slate-400">
             Create projects, assign tasks, collaborate in real-time, and track progress with analytics. 
             Built for distributed teams that need to stay in sync.
           </p>
@@ -50,7 +50,7 @@ const Index = () => {
           </Button>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16 bg-emerald-50">
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16 bg-gray-950">
           <div onClick={() => navigate("/creatives")} className="text-center p-6 rounded-lg border hover:shadow-lg transition-shadow cursor-pointer bg-emerald-50">
             <div className="bg-primary/10 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <Sparkles className="h-8 w-8 text-primary" />

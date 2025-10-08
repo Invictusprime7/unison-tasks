@@ -32,7 +32,7 @@ const Index = () => {
           <Button variant="ghost" onClick={() => navigate("/files")} className="text-slate-100 bg-slate-950 hover:bg-slate-800">
             Files
           </Button>
-          <Button onClick={() => navigate("/auth")}>Get Started</Button>
+          <Button onClick={() => navigate("/auth")} className="bg-emerald-50 text-gray-950">Get Started</Button>
         </div>
       </nav>
 
@@ -45,7 +45,7 @@ const Index = () => {
             Create projects, assign tasks, collaborate in real-time, and track progress with analytics. 
             Built for distributed teams that need to stay in sync.
           </p>
-          <Button size="lg" onClick={() => navigate("/auth")}>
+          <Button size="lg" onClick={() => navigate("/auth")} className="bg-emerald-50 text-gray-950">
             Start Free Trial
           </Button>
         </div>

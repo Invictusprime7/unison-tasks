@@ -23,13 +23,13 @@ const Index = () => {
           <span className="text-2xl font-bold text-slate-50">Unison Tasks</span>
         </div>
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate("/creatives")} className="text-base text-slate-100">
+          <Button variant="ghost" onClick={() => navigate("/creatives")} className="text-base text-slate-100 bg-gray-950 hover:bg-gray-800">
             Creatives
           </Button>
-          <Button variant="ghost" onClick={() => navigate("/planning")} className="text-slate-100">
+          <Button variant="ghost" onClick={() => navigate("/planning")} className="text-slate-100 bg-slate-950 hover:bg-slate-800">
             Planning
           </Button>
-          <Button variant="ghost" onClick={() => navigate("/files")} className="text-slate-100">
+          <Button variant="ghost" onClick={() => navigate("/files")} className="text-slate-100 bg-slate-950 hover:bg-slate-800">
             Files
           </Button>
           <Button onClick={() => navigate("/auth")}>Get Started</Button>

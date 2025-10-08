@@ -52,7 +52,7 @@ const Creatives = () => {
     media: creativeTasks?.filter(t => t.title.toLowerCase().includes("video") || t.title.toLowerCase().includes("image") || t.description?.toLowerCase().includes("media")) || []
   };
   return <div className="min-h-screen bg-slate-950">
-      <div className="border-b bg-slate-600">
+      <div className="border-b bg-gray-950">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
@@ -60,7 +60,7 @@ const Creatives = () => {
                 
                 Creative Tasks
               </h1>
-              <p className="mt-1 text-stone-950">
+              <p className="mt-1 text-base text-slate-300">
                 Manage your creative projects and ideas
               </p>
             </div>

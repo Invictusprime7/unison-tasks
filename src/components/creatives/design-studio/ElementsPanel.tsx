@@ -132,7 +132,7 @@ export const ElementsPanel = ({ onElementSelect, onElementDragStart }: ElementsP
   };
 
   const renderElementPreview = (element: DesignElement) => {
-    const baseClass = "w-full h-20 rounded-lg border-2 border-gray-300 cursor-move transition-all hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/20";
+    const baseClass = "w-full h-20 rounded-lg border-2 border-gray-300 cursor-move transition-all hover:border-blue-500 hover:shadow-lg hover:shadow-blue-500/50 shadow-blue-400/20";
     
     switch (element.type) {
       case 'frame':

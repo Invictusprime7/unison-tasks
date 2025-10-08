@@ -1296,7 +1296,7 @@ export const DesignStudio = forwardRef((props, ref) => {
       {/* Work Area - Responsive Grid */}
       <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_320px] overflow-hidden min-w-0">
         {/* Left Sidebar - Elements & Layers (Collapsible on mobile) */}
-        <aside className="hidden lg:flex border-r border-gray-200 bg-white overflow-hidden flex-col flex-shrink-0">
+        <aside className="hidden lg:flex border-r-2 border-blue-400 shadow-lg shadow-blue-400/20 bg-white overflow-hidden flex-col flex-shrink-0">
           <DesignSidebar
             onElementSelect={addElementToCanvas}
             onElementDragStart={(element) => {
@@ -1338,16 +1338,16 @@ export const DesignStudio = forwardRef((props, ref) => {
               height: 'min(540px, calc(100vh - 200px))',
             }}
           >
-            <canvas ref={canvasRef} className="w-full h-full" />
+            <canvas ref={canvasRef} className="w-full h-full border-2 border-blue-400 shadow-lg shadow-blue-500/30" />
           </div>
         </main>
 
         {/* Right Sidebar - Properties & Filters (Hidden on smaller screens) */}
-        <aside className="hidden xl:flex border-l border-gray-200 bg-white overflow-hidden flex-col flex-shrink-0">
+        <aside className="hidden xl:flex border-l-2 border-blue-400 shadow-lg shadow-blue-400/20 bg-white overflow-hidden flex-col flex-shrink-0">
           <Tabs defaultValue="properties" className="flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-2 bg-white border-b border-gray-200">
-              <TabsTrigger value="properties" className="text-xs text-gray-700">Properties</TabsTrigger>
-              <TabsTrigger value="filters" className="text-xs text-gray-700">Filters</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-white border-b-2 border-blue-400 shadow-sm shadow-blue-400/30">
+              <TabsTrigger value="properties" className="text-xs text-gray-700 data-[state=active]:shadow-blue-500/40">Properties</TabsTrigger>
+              <TabsTrigger value="filters" className="text-xs text-gray-700 data-[state=active]:shadow-blue-500/40">Filters</TabsTrigger>
             </TabsList>
             <TabsContent value="properties" className="flex-1 overflow-y-auto m-0">
               <PropertiesPanel

@@ -8,6 +8,8 @@ import { ArrowLeft, Search, Sparkles, Layout, Palette, Globe, Loader2 } from "lu
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateEditor } from "./TemplateEditor";
+import { getTemplateTrainingContext, saveTemplateTrainingData, recordTemplateUsage } from "@/utils/templateLearning";
+import { SimpleCanvasBuilder } from "./SimpleCanvasBuilder";
 
 interface WebDesignKitProps {
   open: boolean;
@@ -24,6 +26,7 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
     aesthetic: string;
     code: string;
   } | null>(null);
+  const [showBuildCanvas, setShowBuildCanvas] = useState(false);
 
   const templateCategories = {
     google: [
@@ -54,32 +57,74 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
   ) => {
     if (!isAI) {
       toast.success(`Selected: ${templateName} from ${source}`);
+      await recordTemplateUsage(templateName, aesthetic);
       return;
     }
 
     setGenerating(true);
+    
+    // Create a timeout promise for better UX
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Request timeout - please try again')), 30000);
+    });
+
     try {
-      const { data, error } = await supabase.functions.invoke("generate-template", {
-        body: { templateName, aesthetic, source },
+      toast.loading("Generating template...", { id: "template-generation" });
+      
+      // Get learning context from previous generations
+      const learningContext = await getTemplateTrainingContext(aesthetic, 5);
+      
+      const generationPromise = supabase.functions.invoke("generate-template", {
+        body: { 
+          templateName, 
+          aesthetic, 
+          source, 
+          learningContext: learningContext || undefined 
+        },
       });
+
+      // Race between generation and timeout
+      const { data, error } = await Promise.race([generationPromise, timeoutPromise]) as any;
 
       if (error) throw error;
 
       if (data.error) {
-        toast.error(data.error);
+        toast.error(data.error, { id: "template-generation" });
         return;
       }
+
+      // Save the generated template for future learning
+      await saveTemplateTrainingData({
+        name: templateName,
+        aesthetic: aesthetic,
+        source: source,
+        generatedCode: data.code,
+        designPatterns: [],
+        colorPalette: [],
+        layoutStructure: ''
+      });
+
+      await recordTemplateUsage(templateName, aesthetic);
 
       setCurrentTemplate({
         name: templateName,
         aesthetic: aesthetic,
         code: data.code,
       });
+      
+      // Automatically open editor and dismiss loading
       setEditorOpen(true);
-      toast.success("Template generated successfully!");
+      toast.success(
+        learningContext 
+          ? "Template generated with AI learning applied!" 
+          : "Template generated successfully!",
+        { id: "template-generation" }
+      );
+      
     } catch (error) {
       console.error("Error generating template:", error);
-      toast.error("Failed to generate template. Please try again.");
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate template. Please try again.";
+      toast.error(errorMessage, { id: "template-generation" });
     } finally {
       setGenerating(false);
     }
@@ -90,6 +135,27 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
     setCurrentTemplate(null);
   };
 
+  const handleBuildTemplate = () => {
+    if (currentTemplate) {
+      setShowBuildCanvas(true);
+      setEditorOpen(false);
+    }
+  };
+
+  const handleBuildCanvasBack = () => {
+    setShowBuildCanvas(false);
+    setEditorOpen(true);
+  };
+
+  if (showBuildCanvas && currentTemplate) {
+    return (
+      <SimpleCanvasBuilder 
+        template={currentTemplate}
+        onBack={handleBuildCanvasBack}
+      />
+    );
+  }
+
   if (editorOpen && currentTemplate) {
     return (
       <TemplateEditor
@@ -99,6 +165,7 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
         aesthetic={currentTemplate.aesthetic}
         generatedCode={currentTemplate.code}
         onBack={handleEditorBack}
+        onBuild={handleBuildTemplate}
       />
     );
   }
@@ -204,7 +271,7 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
                 <div>
                   <h3 className="font-semibold text-sm">AI-Generated Templates</h3>
                   <p className="text-sm text-muted-foreground mt-1">
-                    These templates are generated based on popular UI aesthetics and modern design trends
+                    These templates are generated based on popular UI aesthetics and modern design trends. Each generation learns from previous templates to create unique variations.
                   </p>
                 </div>
               </div>
@@ -218,22 +285,24 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
                     <CardDescription>{template.aesthetic}</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <Button
-                      className="w-full"
-                      onClick={() =>
-                        handleTemplateSelect(template.name, template.aesthetic, "AI", true)
-                      }
-                      disabled={generating}
-                    >
-                      {generating ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        "Generate & Use"
-                      )}
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        className="flex-1"
+                        onClick={() =>
+                          handleTemplateSelect(template.name, template.aesthetic, "AI", true)
+                        }
+                        disabled={generating}
+                      >
+                        {generating ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Generating...
+                          </>
+                        ) : (
+                          "Generate & Use"
+                        )}
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}

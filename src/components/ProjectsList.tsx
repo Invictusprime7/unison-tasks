@@ -13,7 +13,7 @@ interface Project {
 }
 
 interface ProjectsListProps {
-  userId: string;
+  userId: string | null;
 }
 
 export const ProjectsList = ({ userId }: ProjectsListProps) => {

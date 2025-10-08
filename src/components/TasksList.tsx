@@ -22,7 +22,7 @@ interface Task {
 
 interface TasksListProps {
   projectId: string;
-  userId: string;
+  userId: string | null;
 }
 
 export const TasksList = ({ projectId, userId }: TasksListProps) => {

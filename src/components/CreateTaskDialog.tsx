@@ -24,7 +24,7 @@ interface CreateTaskDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   projectId: string;
-  userId: string;
+  userId: string | null;
 }
 
 interface Profile {

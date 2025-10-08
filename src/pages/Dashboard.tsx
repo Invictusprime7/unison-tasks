@@ -75,13 +75,13 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <ProjectsList userId={user?.id || ""} />
+        <ProjectsList userId={user?.id || null} />
       </main>
 
       <CreateProjectDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
-        userId={user?.id || ""}
+        userId={user?.id || null}
       />
     </div>
   );

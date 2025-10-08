@@ -111,7 +111,7 @@ const Project = () => {
           </Button>
         </div>
 
-        {id && <TasksList projectId={id} userId={user?.id || ""} />}
+        {id && <TasksList projectId={id} userId={user?.id || null} />}
       </main>
 
       {id && (
@@ -119,7 +119,7 @@ const Project = () => {
           open={createDialogOpen}
           onOpenChange={setCreateDialogOpen}
           projectId={id}
-          userId={user?.id || ""}
+          userId={user?.id || null}
         />
       )}
     </div>

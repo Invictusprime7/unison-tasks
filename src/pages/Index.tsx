@@ -1,19 +1,9 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { CheckSquare, Users, Zap, Shield, Sparkles, CalendarDays } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const navigate = useNavigate();
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/dashboard");
-      }
-    });
-  }, [navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10">
@@ -23,6 +13,9 @@ const Index = () => {
           <span className="text-2xl font-bold">Unison Tasks</span>
         </div>
         <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={() => navigate("/dashboard")}>
+            Dashboard
+          </Button>
           <Button variant="ghost" onClick={() => navigate("/creatives")}>
             Creatives
           </Button>

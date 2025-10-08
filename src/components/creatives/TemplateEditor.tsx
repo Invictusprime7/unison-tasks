@@ -1,6 +1,6 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Download, ArrowLeft, Code, Eye, Copy, RefreshCw } from "lucide-react";
+import { Download, ArrowLeft, Code, Eye, Copy, RefreshCw, Wrench, Loader2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,6 +14,7 @@ interface TemplateEditorProps {
   aesthetic: string;
   generatedCode: string;
   onBack: () => void;
+  onBuild?: () => void;
 }
 
 export const TemplateEditor = ({
@@ -23,38 +24,180 @@ export const TemplateEditor = ({
   aesthetic,
   generatedCode,
   onBack,
+  onBuild,
 }: TemplateEditorProps) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [code, setCode] = useState(generatedCode);
   const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showCleanPreview, setShowCleanPreview] = useState(false);
+  const currentUrlRef = useRef<string | null>(null);
+  const lastCodeRef = useRef<string>('');
 
+  // Update code when generatedCode changes, but avoid unnecessary updates
   useEffect(() => {
-    setCode(generatedCode);
+    if (generatedCode && generatedCode !== lastCodeRef.current) {
+      setCode(generatedCode);
+      lastCodeRef.current = generatedCode;
+    }
   }, [generatedCode]);
 
+  // Auto-load preview when dialog opens
   useEffect(() => {
-    if (iframeRef.current && code) {
-      const iframe = iframeRef.current;
-      
-      // Wait for iframe to be ready
-      const updateIframe = () => {
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-        if (iframeDoc) {
-          iframeDoc.open();
-          iframeDoc.write(code);
-          iframeDoc.close();
+    if (open && code) {
+      // Small delay to ensure iframe is mounted
+      const timer = setTimeout(() => {
+        const iframe = iframeRef.current;
+        if (iframe) {
+          loadPreview();
         }
-      };
-
-      // If iframe is already loaded, update immediately
-      if (iframe.contentDocument?.readyState === 'complete') {
-        updateIframe();
-      } else {
-        // Otherwise wait for load
-        iframe.onload = updateIframe;
-      }
+      }, 100);
+      return () => clearTimeout(timer);
     }
-  }, [code]);
+  }, [open, code]);
+
+  const loadPreview = () => {
+    const iframe = iframeRef.current;
+    if (!iframe || !code) return;
+
+    // Skip loading if document is hidden (tab not active)
+    if (document.hidden) {
+      return;
+    }
+
+    // Clean up previous URL if exists
+    if (currentUrlRef.current) {
+      URL.revokeObjectURL(currentUrlRef.current);
+      currentUrlRef.current = null;
+    }
+
+    setIsLoading(true);
+
+    // Create clean HTML for preview (remove visible HTML tags if requested)
+    let previewCode = code;
+    if (showCleanPreview) {
+      previewCode = createCleanPreview(code);
+    }
+
+    // Create new blob URL
+    const blob = new Blob([previewCode], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    currentUrlRef.current = url;
+
+    // Set up timeout to prevent infinite loading
+    const timeoutId = setTimeout(() => {
+      setIsLoading(false);
+      console.warn('Iframe loading timeout - assuming loaded');
+    }, 3000); // Reduced to 3 seconds for faster UX
+
+    // Event handlers
+    const handleLoad = () => {
+      // Use requestAnimationFrame for smoother UI updates
+      requestAnimationFrame(() => {
+        setIsLoading(false);
+        clearTimeout(timeoutId);
+      });
+    };
+
+    const handleError = () => {
+      requestAnimationFrame(() => {
+        setIsLoading(false);
+        clearTimeout(timeoutId);
+        console.error('Failed to load iframe content');
+      });
+    };
+
+    // Add event listeners
+    iframe.addEventListener('load', handleLoad);
+    iframe.addEventListener('error', handleError);
+
+    // Set iframe source
+    iframe.src = url;
+
+    // Cleanup function
+    return () => {
+      clearTimeout(timeoutId);
+      iframe.removeEventListener('load', handleLoad);
+      iframe.removeEventListener('error', handleError);
+      if (currentUrlRef.current) {
+        URL.revokeObjectURL(currentUrlRef.current);
+        currentUrlRef.current = null;
+      }
+    };
+  };
+
+  // Create clean preview without visible HTML tags
+  const createCleanPreview = (htmlCode: string) => {
+    // Extract content from HTML and present it cleanly
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlCode;
+    
+    // Get all text content
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    
+    // Create a clean HTML structure
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${templateName} - Clean Preview</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            line-height: 1.6;
+            color: #333;
+            background: #f9f9f9;
+        }
+        .content {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .title {
+            color: #2563eb;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        .aesthetic {
+            color: #6b7280;
+            font-style: italic;
+        }
+        .text-content {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <div class="header">
+            <div class="title">${templateName}</div>
+            <div class="aesthetic">Style: ${aesthetic}</div>
+        </div>
+        <div class="text-content">${textContent || 'No text content found in template'}</div>
+    </div>
+</body>
+</html>`;
+  };
+
+  // Handle iframe content loading - trigger auto-load when code changes
+  useEffect(() => {
+    if (code) {
+      return loadPreview();
+    }
+  }, [code, showCleanPreview]); // Added showCleanPreview to dependencies
 
   const handleDownload = () => {
     const blob = new Blob([code], { type: "text/html" });
@@ -75,16 +218,46 @@ export const TemplateEditor = ({
   };
 
   const handleRefreshPreview = () => {
-    if (iframeRef.current) {
-      const iframe = iframeRef.current;
-      const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (iframeDoc) {
-        iframeDoc.open();
-        iframeDoc.write(code);
-        iframeDoc.close();
+    if (!code) return;
+    
+    setIsLoading(true);
+    toast.success("Refreshing preview...");
+    
+    // Use the same loadPreview function for consistency
+    setTimeout(() => {
+      loadPreview();
+    }, 100);
+  };
+
+  const handleExpandPreview = () => {
+    // Instead of expanding within the dialog, open the template in a new window
+    if (code) {
+      const blob = new Blob([code], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      
+      // Open in new window with appropriate size
+      const newWindow = window.open(
+        url, 
+        '_blank',
+        'width=1200,height=800,scrollbars=yes,resizable=yes,toolbar=no,menubar=no,location=no,status=no'
+      );
+      
+      if (newWindow) {
+        // Clean up the blob URL after a delay to allow the window to load
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+        }, 5000);
+        
+        toast.success("Template opened in new window!");
+      } else {
+        toast.error("Please allow popups to view the expanded preview");
       }
     }
-    toast.success("Preview refreshed!");
+    
+    // If onBuild is provided, still trigger it for backward compatibility
+    if (onBuild) {
+      onBuild();
+    }
   };
 
   return (
@@ -106,10 +279,53 @@ export const TemplateEditor = ({
                 <Copy className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Copy Code</span>
               </Button>
-              <Button variant="outline" size="sm" onClick={handleRefreshPreview} className="text-xs sm:text-sm h-8 sm:h-9">
-                <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Refresh</span>
+              {/* Manual refresh - only needed if auto-loading fails */}
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleRefreshPreview} 
+                disabled={isLoading} 
+                className="text-xs sm:text-sm h-8 sm:h-9 opacity-60 hover:opacity-100"
+                title="Manual refresh (auto-loading should work automatically)"
+              >
+                {isLoading ? (
+                  <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                )}
+                <span className="hidden sm:inline">{isLoading ? 'Loading...' : 'Refresh'}</span>
               </Button>
+              {isLoading && (
+                <Button variant="ghost" size="sm" onClick={() => setIsLoading(false)} className="text-xs sm:text-sm h-8 sm:h-9">
+                  Stop Loading
+                </Button>
+              )}
+              <Button 
+                variant={showCleanPreview ? "default" : "outline"} 
+                size="sm" 
+                onClick={() => setShowCleanPreview(!showCleanPreview)} 
+                className="text-xs sm:text-sm h-8 sm:h-9"
+                title={showCleanPreview ? "Show full HTML preview" : "Show clean preview without HTML tags"}
+              >
+                <Eye className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">{showCleanPreview ? 'HTML' : 'Clean'}</span>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={handleExpandPreview} 
+                className="text-xs sm:text-sm h-8 sm:h-9"
+                title="Open template in new window for full-screen preview"
+              >
+                <ExternalLink className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                <span className="hidden sm:inline">Open</span>
+              </Button>
+              {onBuild && (
+                <Button variant="default" size="sm" onClick={onBuild} className="text-xs sm:text-sm h-8 sm:h-9">
+                  <Wrench className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Build</span>
+                </Button>
+              )}
               <Button variant="outline" size="sm" onClick={handleDownload} className="text-xs sm:text-sm h-8 sm:h-9">
                 <Download className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
                 <span className="hidden sm:inline">Download</span>
@@ -131,13 +347,24 @@ export const TemplateEditor = ({
           </TabsList>
           
           <TabsContent value="preview" className="flex-1 mt-2 sm:mt-4 overflow-hidden">
-            <div className="h-full border rounded-lg overflow-hidden bg-white shadow-lg">
+            <div className="h-full border rounded-lg overflow-hidden bg-white shadow-lg relative">
+              {isLoading && (
+                <div className="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center z-10">
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                    <p className="text-sm text-gray-600">Loading preview...</p>
+                  </div>
+                </div>
+              )}
               <iframe
                 ref={iframeRef}
                 className="w-full h-full"
                 title="Template Preview"
                 sandbox="allow-scripts allow-same-origin allow-forms"
                 style={{ border: 'none', minHeight: '300px' }}
+                // Add additional attributes for better loading behavior
+                loading="eager"
+                referrerPolicy="no-referrer"
               />
             </div>
           </TabsContent>

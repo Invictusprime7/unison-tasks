@@ -8,11 +8,20 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarIcon, Plus, TrendingUp, Clock, ListTodo, Home } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format, startOfWeek, endOfWeek, isWithinInterval } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
 
 const TaskPlanning = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [timeframe, setTimeframe] = useState("week");
+
+  const handleNewTask = () => {
+    toast({
+      title: "Create New Task",
+      description: "Please go to Dashboard to create a new task within a project.",
+    });
+  };
 
   const { data: tasks, isLoading } = useQuery({
     queryKey: ["planning-tasks"],
@@ -85,7 +94,7 @@ const TaskPlanning = () => {
                 <Home className="h-4 w-4 mr-2" />
                 Home
               </Button>
-              <Button onClick={() => navigate("/dashboard")}>
+              <Button onClick={handleNewTask}>
                 <Plus className="h-4 w-4 mr-2" />
                 New Task
               </Button>
@@ -259,6 +268,9 @@ const TaskPlanning = () => {
           </Card>
         )}
       </div>
+
+      {/* Note: CreateTaskDialog requires a specific projectId, so we'll need to implement project selection
+          or redirect to dashboard for now. For better UX, user should create projects first. */}
     </div>
   );
 };

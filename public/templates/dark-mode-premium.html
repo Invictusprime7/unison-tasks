@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Mode Premium - Sleek & Elegant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #1a1a2e;
+            --secondary-bg: #16213e;
+            --card-bg: #0f3460;
+            --text-color: #e0e0e0;
+            --heading-color: #e94560;
+            --accent-color: #e94560;
+            --button-bg: linear-gradient(45deg, #e94560, #a81c3d);
+            --button-hover-bg: linear-gradient(45deg, #a81c3d, #e94560);
+            --border-color: #0f3460;
+            --shadow-color: rgba(0, 0, 0, 0.4);
+            --gradient-1: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            --gradient-2: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+            --font-family-primary: 'Poppins', sans-serif;
+            --font-family-secondary: 'Montserrat', sans-serif;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: var(--font-family-primary);
+            color: var(--text-color);
+            background: var(--primary-bg);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: radial-gradient(circle at top left, var(--secondary-bg) 0%, transparent 50%),
+                              radial-gradient(circle at bottom right, var(--card-bg) 0%, transparent 50%);
+            background-size: 100% 100%;
+        }
+        h1, h2, h3, h4, h5, h6 { font-family: var(--font-family-secondary); color: var(--heading-color); margin-bottom: .8rem; letter-spacing: .05rem; }
+        h1 { font-size: 2.2rem; font-weight: 700; }
+        h2 { font-size: 1.8rem; font-weight: 600; }
+        h3 { font-size: 1.5rem; font-weight: 600; }
+        p { margin-bottom: 1rem; }
+        a { color: var(--accent-color); text-decoration: none; transition: color .3s ease; }
+        a:hover { color: var(--text-color); }
+        .container { width: 100%; max-width: 1200px; margin: 0 auto; padding: 1rem; }
+        header { background: var(--secondary-bg); padding: 1rem 0; box-shadow: 0 4px 15px var(--shadow-color); position: sticky; top: 0; z-index: 1000; }
+        nav { display: flex; justify-content: space-between; align-items: center; padding: 0 1rem; }
+        .logo { font-family: var(--font-family-secondary); font-size: 1.8rem; font-weight: 700; color: var(--heading-color); text-shadow: 2px 2px 5px rgba(0,0,0,.3); }
+        .nav-links { list-style: none; display: none; padding: 0; }
+        .nav-links li { margin-left: 1.5rem; }
+        .nav-links a { color: var(--text-color); font-weight: 600; font-size: 1rem; padding: .5rem 1rem; position: relative; transition: all .3s ease; }
+        .nav-links a::after { content: ''; position: absolute; width: 0%; height: 2px; background-color: var(--accent-color); left: 0; bottom: -5px; transition: width .3s ease; }
+        .nav-links a:hover::after { width: 100%; }
+        .main-content { flex: 1; padding: 2rem 0; }
+        section { padding: 4rem 0; margin-bottom: 2rem; background: var(--gradient-2); border-radius: 12px; box-shadow: 0 8px 30px var(--shadow-color); transition: transform .3s ease, box-shadow .3s ease; }
+        section:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,.6); }
+        .hero { text-align: center; background: var(--gradient-1); padding: 6rem 1rem; border-radius: 0; box-shadow: inset 0 -10px 20px rgba(0,0,0,.5); margin-bottom: 0; border-bottom: 2px solid var(--accent-color); }
+        .hero h1 { font-size: 3rem; margin-bottom: 1rem; color: var(--heading-color); text-shadow: 3px 3px 8px rgba(0,0,0,.5); }
+        .hero p { font-size: 1.2rem; max-width: 800px; margin: 0 auto 2rem; color: var(--text-color); opacity: .9; }
+        .btn { display: inline-block; padding: 1rem 2rem; background: var(--button-bg); color: var(--text-color); font-weight: 600; border-radius: 50px; transition: all .3s ease; box-shadow: 0 5px 15px rgba(0,0,0,.4); border: none; cursor: pointer; min-width: 140px; text-align: center; text-transform: uppercase; letter-spacing: .08rem; font-size: 1rem; }
+        .btn:hover { background: var(--button-hover-bg); transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,.6); }
+        .feature-grid { display: grid; gap: 2rem; margin-top: 3rem; }
+        .feature-card, .testimonial-card { background: var(--card-bg); padding: 2rem; border-radius: 10px; box-shadow: 0 5px 20px var(--shadow-color); text-align: center; transition: transform .3s ease, box-shadow .3s ease; border: 1px solid rgba(255,255,255,.05); }
+        .feature-card:hover, .testimonial-card:hover { transform: translateY(-8px); box-shadow: 0 10px 30px rgba(0,0,0,.6); border: 1px solid var(--accent-color); }
+        .feature-card svg { width: 4rem; height: 4rem; margin-bottom: 1rem; color: var(--accent-color); filter: drop-shadow(0 2px 5px rgba(0,0,0,.5)); }
+        .feature-card h3 { color: var(--heading-color); font-size: 1.3rem; margin-bottom: .8rem; }
+        .testimonial-grid { display: grid; gap: 2rem; margin-top: 3rem; }
+        .testimonial-card p { font-style: italic; margin-bottom: 1.5rem; color: var(--text-color); }
+        .testimonial-author { font-weight: 600; color: var(--heading-color); }
+        .cta-section { text-align: center; padding: 4rem 1rem; background: var(--button-bg); border-radius: 12px; margin-top: 2rem; box-shadow: 0 8px 30px var(--shadow-color); }
+        .cta-section h2 { color: var(--text-color); margin-bottom: 1.5rem; text-shadow: 2px 2px 5px rgba(0,0,0,.3); }
+        footer { background: var(--secondary-bg); color: var(--text-color); text-align: center; padding: 2rem 1rem; margin-top: auto; box-shadow: 0 -4px 15px var(--shadow-color); border-top: 1px solid var(--border-color); }
+        .hamburger-menu { display: block; }
+        .hamburger { display: flex; flex-direction: column; justify-content: space-around; width: 30px; height: 25px; cursor: pointer; z-index: 1001; padding: 5px; box-sizing: content-box; }
+        .hamburger span { display: block; width: 100%; height: 3px; background-color: var(--text-color); border-radius: 3px; transition: all .3s ease; }
+        .nav-links.open { transform: translateX(0); }
+        .btn:focus, .nav-links a:focus, .feature-card:focus, .testimonial-card:focus, .hamburger:focus { outline: 2px solid var(--accent-color); outline-offset: 3px; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--secondary-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #e94560; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-50px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }
+        .animated-element { animation: fadeIn 1s ease-out forwards; opacity: 0; }
+        .animated-element:nth-child(even) { animation: slideInRight .8s ease-out forwards; }
+        .animated-element:nth-child(odd) { animation: slideInLeft .8s ease-out forwards; }
+        @media (max-width: 767px) {
+            h1 { font-size: 2.5rem; } h2 { font-size: 1.6rem; } h3 { font-size: 1.2rem; }
+            .hero { padding: 4rem 1rem; } .hero p { font-size: 1rem; }
+            .nav-links { position: fixed; top: 0; right: 0; width: 70vw; max-width: 300px; height: 100vh; background: var(--card-bg); flex-direction: column; justify-content: flex-start; padding-top: 6rem; transform: translateX(100%); transition: transform .3s ease-in-out; z-index: 999; box-shadow: -5px 0 15px var(--shadow-color); }
+            .nav-links li { margin: 1.5rem 0; }
+            .nav-links a { display: block; padding: 1rem 1.5rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,.1); }
+            .nav-links a:hover::after { width: 0%; }
+            .hamburger.is-active span:nth-child(1) { transform: translateY(11px) rotate(45deg); }
+            .hamburger.is-active span:nth-child(2) { opacity: 0; }
+            .hamburger.is-active span:nth-child(3) { transform: translateY(-11px) rotate(-45deg); }
+            .feature-grid, .testimonial-grid { grid-template-columns: 1fr; }
+        }
+        @media (min-width: 768px) {
+            .container { padding: 1.5rem; }
+            h1 { font-size: 3.5rem; } h2 { font-size: 2rem; } h3 { font-size: 1.4rem; }
+            .nav-links { display: flex; } .hamburger-menu { display: none; }
+            .hero { padding: 8rem 2rem; }
+            .feature-grid, .testimonial-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+        }
+        @media (min-width: 1024px) {
+            .container { padding: 2rem; }
+            h1 { font-size: 4rem; } h2 { font-size: 2.5rem; } h3 { font-size: 1.6rem; }
+            .hero { padding: 10rem 2rem; }
+            .feature-grid { grid-template-columns: repeat(3, 1fr); }
+            .testimonial-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+    </head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="#" class="logo" aria-label="Dark Mode Premium Logo">Premium AI</a>
+            <div class="hamburger-menu" role="button" aria-label="Toggle navigation menu" tabindex="0">
+                <div class="hamburger"><span></span><span></span><span></span></div>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#features">Features</a></li>
+                <li><a href="#about">About Us</a></li>
+                <li><a href="#testimonials">Testimonials</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#" class="btn try-now-btn">Try Now</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main class="main-content">
+        <section class="hero animated-element">
+            <div class="container">
+                <h1>Experience Premium AI Power. In Dark Mode.</h1>
+                <p>Unlock unparalleled productivity and creativity with our sleek, elegant dark mode AI platform. Designed for the modern professional.</p>
+                <a href="#contact" class="btn">Get Started Today</a>
+            </div>
+        </section>
+        <section id="features" class="container animated-element" style="animation-delay: .2s;">
+            <h2>Key Features</h2>
+            <div class="feature-grid">
+                <div class="feature-card animated-element" style="animation-delay: .4s;">
+                    <h3>Blazing Fast Performance</h3>
+                    <p>Leverage cutting-edge algorithms for instant results without compromise.</p>
+                </div>
+                <div class="feature-card animated-element" style="animation-delay: .6s;">
+                    <h3>Elegant Dark Interface</h3>
+                    <p>Reduced eye strain and a sophisticated look for extended use, day or night.</p>
+                </div>
+                <div class="feature-card animated-element" style="animation-delay: .8s;">
+                    <h3>Intuitive Control</h3>
+                    <p>Designed for ease of use, putting powerful AI at your fingertips with simplicity.</p>
+                </div>
+            </div>
+        </section>
+        <section id="about" class="container animated-element" style="animation-delay: .6s;">
+            <h2>About Our Vision</h2>
+            <p>At Premium AI, we believe in augmenting human potential through sophisticated artificial intelligence.</p>
+        </section>
+        <section id="testimonials" class="container animated-element" style="animation-delay: .8s;">
+            <h2>What Our Users Say</h2>
+            <div class="testimonial-grid">
+                <div class="testimonial-card animated-element" style="animation-delay: 1s;">
+                    <p>“The Dark Mode Premium AI is an absolute game-changer!”</p>
+                    <div class="testimonial-author">- Alex M., Software Engineer</div>
+                </div>
+                <div class="testimonial-card animated-element" style="animation-delay: 1.2s;">
+                    <p>“None combine elegance and power like this one.”</p>
+                    <div class="testimonial-author">- Sarah L., Data Scientist</div>
+                </div>
+            </div>
+        </section>
+        <section id="contact" class="container cta-section animated-element" style="animation-delay: 1.6s;">
+            <h2>Ready to Elevate Your Experience?</h2>
+            <p>Join thousands of professionals who have chosen the premium AI experience.</p>
+            <a href="#" class="btn">Start Your Premium Journey</a>
+        </section>
+    </main>
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Premium AI. All rights reserved.</p>
+            <p>Designed with Elegance by AI.</p>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const hamburger = document.querySelector('.hamburger-menu');
+            const navLinks = document.querySelector('.nav-links');
+            if (hamburger) {
+                hamburger.addEventListener('click', () => {
+                    navLinks.classList.toggle('open');
+                    hamburger.querySelector('.hamburger')?.classList.toggle('is-active');
+                    const isExpanded = navLinks.classList.contains('open');
+                    hamburger.setAttribute('aria-expanded', String(isExpanded));
+                });
+            }
+            const animated = document.querySelectorAll('.animated-element');
+            const observer = new IntersectionObserver((entries, obs) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        obs.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            animated.forEach(el => observer.observe(el));
+        });
+    </script>
+    </body>
+    </html>

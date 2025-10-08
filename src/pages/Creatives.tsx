@@ -65,7 +65,7 @@ const Creatives = () => {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => navigate("/")} className="text-base text-gray-950 bg-blue-950 hover:bg-blue-800">
+              <Button variant="outline" onClick={() => navigate("/")} className="text-base text-gray-950 bg-cyan-100">
                 <Home className="h-4 w-4 mr-2" />
                 Home
               </Button>

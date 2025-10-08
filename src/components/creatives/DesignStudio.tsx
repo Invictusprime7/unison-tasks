@@ -681,17 +681,11 @@ export const DesignStudio = forwardRef((props, ref) => {
 
   const handlePropertyChange = (property: string, value: any) => {
     if (!fabricCanvas || !selectedObject) return;
-    
-    // Update the fabric object
     selectedObject.set(property, value);
     selectedObject.setCoords();
     fabricCanvas.requestRenderAll();
-    
-    // Force state update by getting the active object again
-    const activeObj = fabricCanvas.getActiveObject();
-    if (activeObj) {
-      setSelectedObject(activeObj);
-    }
+    // Create a fresh reference to trigger re-render without losing focus
+    setSelectedObject({ ...selectedObject, [property]: value });
   };
 
   const removeBackground = (tolerance: number) => {
@@ -1334,13 +1328,13 @@ export const DesignStudio = forwardRef((props, ref) => {
 
 
         {/* Canvas Center - Responsive */}
-        <main className="relative bg-slate-900 flex items-center justify-center overflow-auto p-1 sm:p-2 md:p-4 pb-16 lg:pb-4">
+        <main className="relative bg-slate-900 flex items-center justify-center overflow-auto p-2 md:p-4">
           <div
             ref={containerRef}
-            className="bg-white rounded shadow-lg relative mx-auto"
+            className="bg-white rounded-lg shadow-lg relative mx-auto"
             style={{ 
               width: 'min(960px, 100%)',
-              height: 'min(540px, calc(100vh - 140px))',
+              height: 'min(540px, calc(100vh - 200px))',
               maxWidth: '100%',
             }}
           >
@@ -1404,12 +1398,6 @@ export const DesignStudio = forwardRef((props, ref) => {
         isCropping={isCropping}
         onApplyCrop={applyCrop}
         onCancelCrop={cancelCrop}
-        onPropertyChange={handlePropertyChange}
-        onStartCrop={startCrop}
-        onRemoveBackground={removeBackground}
-        onAlign={alignObjects}
-        onApplyFilter={applyFilter}
-        onResetFilters={resetFilters}
       />
 
       <TemplateLibrary

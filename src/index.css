@@ -8,54 +8,55 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Deep Space Light Mode - Cosmic Blues */
-    --background: 230 35% 95%;
-    --foreground: 240 80% 8%;
+    /* Black UI Light Mode */
+    --background: 0 0% 98%;
+    --foreground: 0 0% 5%;
 
-    --card: 225 30% 98%;
-    --card-foreground: 240 70% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 8%;
 
-    --popover: 225 30% 98%;
-    --popover-foreground: 240 70% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 8%;
 
-    --primary: 250 80% 45%;
+    --primary: 210 100% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 260 60% 85%;
-    --secondary-foreground: 260 80% 20%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 10%;
 
-    --muted: 240 25% 90%;
-    --muted-foreground: 240 20% 45%;
+    --muted: 0 0% 92%;
+    --muted-foreground: 0 0% 45%;
 
-    --accent: 280 85% 60%;
+    --accent: 200 90% 55%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 350 85% 55%;
+    --destructive: 0 85% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 240 20% 85%;
-    --input: 240 25% 90%;
-    --ring: 250 80% 50%;
+    --border: 0 0% 88%;
+    --input: 0 0% 92%;
+    --ring: 210 100% 50%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 230 30% 96%;
-    --sidebar-foreground: 240 60% 15%;
-    --sidebar-primary: 250 75% 50%;
+    --sidebar-background: 0 0% 96%;
+    --sidebar-foreground: 0 0% 15%;
+    --sidebar-primary: 210 100% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 260 50% 88%;
-    --sidebar-accent-foreground: 260 70% 20%;
-    --sidebar-border: 240 20% 88%;
-    --sidebar-ring: 250 75% 55%;
+    --sidebar-accent: 0 0% 90%;
+    --sidebar-accent-foreground: 0 0% 15%;
+    --sidebar-border: 0 0% 88%;
+    --sidebar-ring: 210 100% 55%;
 
-    /* Cosmic Gradients */
-    --gradient-nebula: linear-gradient(135deg, hsl(250 80% 45%) 0%, hsl(280 85% 60%) 100%);
-    --gradient-cosmic: linear-gradient(180deg, hsl(240 60% 15%) 0%, hsl(260 70% 25%) 100%);
-    --gradient-stellar: linear-gradient(90deg, hsl(250 80% 50%) 0%, hsl(210 80% 55%) 100%);
+    /* Light Theme Gradients */
+    --gradient-nebula: linear-gradient(135deg, hsl(0 0% 95%) 0%, hsl(210 30% 90%) 100%);
+    --gradient-cosmic: linear-gradient(180deg, hsl(0 0% 98%) 0%, hsl(0 0% 92%) 100%);
+    --gradient-stellar: linear-gradient(90deg, hsl(210 60% 85%) 0%, hsl(200 50% 85%) 100%);
     
-    /* Cosmic Shadows */
-    --shadow-nebula: 0 8px 32px hsla(250 80% 45% / 0.25);
-    --shadow-glow: 0 0 24px hsla(280 85% 60% / 0.4);
+    /* Light Shadows */
+    --shadow-nebula: 0 8px 32px hsla(0 0% 0% / 0.1);
+    --shadow-glow: 0 0 24px hsla(210 100% 50% / 0.15);
+    --shadow-stellar: 0 4px 16px hsla(200 70% 40% / 0.1);
   }
 
   .dark {

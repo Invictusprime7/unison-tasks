@@ -107,7 +107,7 @@ const Creatives = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button onClick={() => navigate("/design-studio")} className="w-full text-slate-50 bg-slate-700 hover:bg-slate-600">
+                  <Button onClick={() => navigate("/design-studio")} className="w-full text-slate-50 bg-cyan-950 hover:bg-cyan-800">
                     Open Full Studio
                   </Button>
                 </CardContent>

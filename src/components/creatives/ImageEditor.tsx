@@ -129,7 +129,7 @@ export const ImageEditor = () => {
     await handleSaveToFiles(imageUrl);
   };
   return <Card className="h-full">
-      <CardHeader>
+      <CardHeader className="bg-emerald-50">
         <CardTitle className="flex items-center gap-2">
           <Image className="h-5 w-5 text-primary" />
           AI Image Editor
@@ -156,7 +156,7 @@ export const ImageEditor = () => {
         <div className="space-y-2">
           <label className="text-sm font-medium">AI Image Generation</label>
           <Textarea placeholder="Describe the image you want to generate..." value={prompt} onChange={e => setPrompt(e.target.value)} rows={3} />
-          <Button onClick={handleGenerateImage} disabled={isGenerating} className="w-full bg-red-100">
+          <Button onClick={handleGenerateImage} disabled={isGenerating} className="w-full bg-red-100 text-slate-950">
             <Wand2 className="h-4 w-4 mr-2" />
             {isGenerating ? "Generating..." : "Generate Image"}
           </Button>

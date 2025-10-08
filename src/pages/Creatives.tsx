@@ -81,7 +81,7 @@ const Creatives = () => {
       <div className="max-w-7xl mx-auto px-6 py-8 space-y-6">
         {/* Content Cloud Section */}
         <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-          <CardHeader>
+          <CardHeader className="bg-green-50">
             <CardTitle className="flex items-center gap-2 text-2xl">
               <Cloud className="h-6 w-6 text-primary" />
               Content Cloud
@@ -90,7 +90,7 @@ const Creatives = () => {
               Access professional content creation tools with AI-powered features
             </CardDescription>
           </CardHeader>
-          <CardContent className="bg-gray-950">
+          <CardContent className="bg-green-50">
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               <ImageEditor />
               <Card className="group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary/50">
@@ -160,7 +160,7 @@ const Creatives = () => {
                     </CardContent>
                   </Card>)}
               </div> : <Card>
-                <CardContent className="py-12 text-center">
+                <CardContent className="py-12 text-center bg-green-50">
                   <Sparkles className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                   <p className="text-muted-foreground">No creative tasks found</p>
                 </CardContent>

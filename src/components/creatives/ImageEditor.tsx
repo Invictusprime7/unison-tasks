@@ -129,8 +129,8 @@ export const ImageEditor = () => {
     await handleSaveToFiles(imageUrl);
   };
   return <Card className="h-full">
-      <CardHeader className="bg-emerald-50">
-        <CardTitle className="flex items-center gap-2">
+      <CardHeader className="bg-slate-950">
+        <CardTitle className="flex items-center gap-2 text-slate-100">
           <Image className="h-5 w-5 text-primary" />
           AI Image Editor
         </CardTitle>
@@ -138,9 +138,9 @@ export const ImageEditor = () => {
           Generate and edit images with AI-powered tools
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 bg-slate-950">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Upload Image</label>
+          <label className="text-sm font-medium text-slate-50">Upload Image</label>
           <div className="flex items-center gap-2">
             <Input type="file" accept="image/*" onChange={handleImageUpload} className="flex-1" />
             <Button variant="outline" size="icon">

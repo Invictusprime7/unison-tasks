@@ -103,23 +103,23 @@ export const PropertiesPanel = ({
   if (!selectedObject) {
     return (
       <Card className="h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-sm">
-            <Settings className="h-4 w-4" />
+        <CardHeader className="pb-2">
+          <CardTitle className="flex items-center gap-2 text-xs">
+            <Settings className="h-3 w-3" />
             Properties
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-8">
+        <CardContent className="pt-2">
+          <p className="text-xs text-muted-foreground text-center py-4">
             Select an object to edit its properties
           </p>
-          <div className="text-xs text-muted-foreground mt-4 space-y-2 p-4 bg-muted/20 rounded-lg">
-            <p>💡 <strong>WYSIWYG Tips:</strong></p>
-            <ul className="list-disc list-inside space-y-1 ml-2">
-              <li>Double-click text to edit inline</li>
+          <div className="text-[10px] text-muted-foreground mt-2 space-y-1 p-2 bg-muted/20 rounded">
+            <p>💡 <strong>Tips:</strong></p>
+            <ul className="list-disc list-inside space-y-0.5 ml-1 text-[9px]">
+              <li>Double-click text to edit</li>
               <li>Drag corners to resize</li>
-              <li>Use toolbar colors for quick changes</li>
-              <li>Press Delete to remove objects</li>
+              <li>Use toolbar colors</li>
+              <li>Delete to remove</li>
               <li>Ctrl+D to duplicate</li>
             </ul>
           </div>
@@ -130,71 +130,71 @@ export const PropertiesPanel = ({
 
   return (
     <Card className="h-full overflow-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Settings className="h-4 w-4" />
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center gap-1.5 text-xs">
+          <Settings className="h-3 w-3" />
           Properties
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-2 pt-2">
         <Tabs defaultValue="position" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="position">Position</TabsTrigger>
-            <TabsTrigger value="style">Style</TabsTrigger>
-            <TabsTrigger value="text">Text</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 h-8">
+            <TabsTrigger value="position" className="text-[10px] px-1">Position</TabsTrigger>
+            <TabsTrigger value="style" className="text-[10px] px-1">Style</TabsTrigger>
+            <TabsTrigger value="text" className="text-[10px] px-1">Text</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="position" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="x-pos">X Position</Label>
+          <TabsContent value="position" className="space-y-2 mt-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="x-pos" className="text-[10px]">X Position</Label>
                 <Input
                   id="x-pos"
                   type="number"
                   value={localValues.left}
                   onChange={(e) => handleInputChange("left", parseInt(e.target.value) || 0)}
-                  className="h-9"
+                  className="h-7 text-xs"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="y-pos">Y Position</Label>
+              <div className="space-y-1">
+                <Label htmlFor="y-pos" className="text-[10px]">Y Position</Label>
                 <Input
                   id="y-pos"
                   type="number"
                   value={localValues.top}
                   onChange={(e) => handleInputChange("top", parseInt(e.target.value) || 0)}
-                  className="h-9"
+                  className="h-7 text-xs"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="width">Width</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="width" className="text-[10px]">Width</Label>
                 <Input
                   id="width"
                   type="number"
                   value={localValues.width}
                   onChange={(e) => handleInputChange("width", parseInt(e.target.value) || 0)}
-                  className="h-9"
+                  className="h-7 text-xs"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="height">Height</Label>
+              <div className="space-y-1">
+                <Label htmlFor="height" className="text-[10px]">Height</Label>
                 <Input
                   id="height"
                   type="number"
                   value={localValues.height}
                   onChange={(e) => handleInputChange("height", parseInt(e.target.value) || 0)}
-                  className="h-9"
+                  className="h-7 text-xs"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <Label htmlFor="rotation">Rotation</Label>
-                <span className="text-sm text-muted-foreground">{rotation}°</span>
+                <Label htmlFor="rotation" className="text-[10px]">Rotation</Label>
+                <span className="text-[10px] text-muted-foreground">{rotation}°</span>
               </div>
               <Slider
                 id="rotation"
@@ -211,10 +211,10 @@ export const PropertiesPanel = ({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <Label htmlFor="opacity">Opacity</Label>
-                <span className="text-sm text-muted-foreground">{opacityVal}%</span>
+                <Label htmlFor="opacity" className="text-[10px]">Opacity</Label>
+                <span className="text-[10px] text-muted-foreground">{opacityVal}%</span>
               </div>
               <Slider
                 id="opacity"
@@ -232,35 +232,35 @@ export const PropertiesPanel = ({
             </div>
 
             {selectedObject.type === "image" && (
-              <div className="space-y-3 pb-4 border-b">
-                <Label className="text-sm font-medium">Image Controls</Label>
-                <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2 pb-2 border-b">
+                <Label className="text-[10px] font-medium">Image Controls</Label>
+                <div className="grid grid-cols-2 gap-1.5">
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onPropertyChange("flipX", !selectedObject.flipX)}
-                    className="h-9 gap-2"
+                    className="h-7 gap-1 text-[10px] px-2"
                   >
-                    <FlipHorizontal className="h-4 w-4" />
+                    <FlipHorizontal className="h-3 w-3" />
                     Flip H
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onPropertyChange("flipY", !selectedObject.flipY)}
-                    className="h-9 gap-2"
+                    className="h-7 gap-1 text-[10px] px-2"
                   >
-                    <FlipVertical className="h-4 w-4" />
+                    <FlipVertical className="h-3 w-3" />
                     Flip V
                   </Button>
                   {onStartCrop && (
                     <Button
                       variant="outline"
                       size="sm"
-                      className="col-span-2 h-9 gap-2"
+                      className="col-span-2 h-7 gap-1 text-[10px]"
                       onClick={onStartCrop}
                     >
-                      <Crop className="h-4 w-4" />
+                      <Crop className="h-3 w-3" />
                       Crop Image
                     </Button>
                   )}
@@ -269,34 +269,34 @@ export const PropertiesPanel = ({
             )}
 
             {onAlign && (
-              <div className="space-y-3">
-                <Label className="text-sm font-medium">Alignment</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button variant="outline" size="sm" onClick={() => onAlign("left")} className="h-9 gap-1">
-                    <AlignLeft className="h-4 w-4" />
-                    Left
+              <div className="space-y-2">
+                <Label className="text-[10px] font-medium">Alignment</Label>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <Button variant="outline" size="sm" onClick={() => onAlign("left")} className="h-7 gap-0.5 text-[10px] px-1">
+                    <AlignLeft className="h-3 w-3" />
+                    L
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => onAlign("center-h")} className="h-9 gap-1">
-                    <AlignCenter className="h-4 w-4" />
-                    Center
+                  <Button variant="outline" size="sm" onClick={() => onAlign("center-h")} className="h-7 gap-0.5 text-[10px] px-1">
+                    <AlignCenter className="h-3 w-3" />
+                    C
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => onAlign("right")} className="h-9 gap-1">
-                    <AlignRight className="h-4 w-4" />
-                    Right
+                  <Button variant="outline" size="sm" onClick={() => onAlign("right")} className="h-7 gap-0.5 text-[10px] px-1">
+                    <AlignRight className="h-3 w-3" />
+                    R
                   </Button>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <Button variant="outline" size="sm" onClick={() => onAlign("top")} className="h-9 gap-1">
-                    <AlignHorizontalJustifyStart className="h-4 w-4 rotate-90" />
-                    Top
+                <div className="grid grid-cols-3 gap-1.5">
+                  <Button variant="outline" size="sm" onClick={() => onAlign("top")} className="h-7 gap-0.5 text-[10px] px-1">
+                    <AlignHorizontalJustifyStart className="h-3 w-3 rotate-90" />
+                    T
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => onAlign("center-v")} className="h-9 gap-1">
-                    <AlignVerticalJustifyCenter className="h-4 w-4" />
-                    Middle
+                  <Button variant="outline" size="sm" onClick={() => onAlign("center-v")} className="h-7 gap-0.5 text-[10px] px-1">
+                    <AlignVerticalJustifyCenter className="h-3 w-3" />
+                    M
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => onAlign("bottom")} className="h-9 gap-1">
-                    <AlignHorizontalJustifyEnd className="h-4 w-4 rotate-90" />
-                    Bottom
+                  <Button variant="outline" size="sm" onClick={() => onAlign("bottom")} className="h-7 gap-0.5 text-[10px] px-1">
+                    <AlignHorizontalJustifyEnd className="h-3 w-3 rotate-90" />
+                    B
                   </Button>
                 </div>
               </div>

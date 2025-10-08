@@ -17,7 +17,7 @@ const Index = () => {
     });
   }, [navigate]);
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-accent/10 bg-emerald-100">
-      <nav className="container mx-auto px-4 py-6 flex justify-between items-center">
+      <nav className="container mx-auto px-4 py-6 flex justify-between items-center bg-teal-100 rounded-none">
         <div className="flex items-center gap-2">
           <CheckSquare className="h-8 w-8 text-primary" />
           <span className="text-2xl font-bold">Unison Tasks</span>

@@ -42,7 +42,7 @@ export const DesignSidebar = ({
 }: DesignSidebarProps) => {
   return (
     <Tabs defaultValue="elements" className="w-full h-full flex flex-col">
-      <TabsList className="w-full grid grid-cols-2 bg-slate-900 border-b border-slate-800 h-8">
+      <TabsList className="w-full grid grid-cols-2 bg-background border-b border-border h-8">
         <TabsTrigger value="elements" className="text-[10px] sm:text-xs py-1">Elements</TabsTrigger>
         <TabsTrigger value="layers" className="text-[10px] sm:text-xs py-1">Layers</TabsTrigger>
       </TabsList>
@@ -56,13 +56,13 @@ export const DesignSidebar = ({
 
       <TabsContent value="layers" className="flex-1 m-0 p-2 overflow-y-auto space-y-2">
         <div>
-          <div className="text-[10px] uppercase tracking-wide text-slate-400 mb-1.5">Quick Add</div>
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">Quick Add</div>
           <div className="flex flex-col gap-1.5">
             <Button
               variant="ghost"
               size="sm"
               onClick={onAddText}
-              className="justify-start bg-slate-800 hover:bg-slate-700 h-7 text-xs px-2"
+              className="justify-start bg-secondary hover:bg-secondary/80 h-7 text-xs px-2"
             >
               Text
             </Button>
@@ -70,7 +70,7 @@ export const DesignSidebar = ({
               variant="ghost"
               size="sm"
               onClick={onAddRectangle}
-              className="justify-start bg-slate-800 hover:bg-slate-700 h-7 text-xs px-2"
+              className="justify-start bg-secondary hover:bg-secondary/80 h-7 text-xs px-2"
             >
               Rectangle
             </Button>
@@ -78,7 +78,7 @@ export const DesignSidebar = ({
               variant="ghost"
               size="sm"
               onClick={onAddCircle}
-              className="justify-start bg-slate-800 hover:bg-slate-700 h-7 text-xs px-2"
+              className="justify-start bg-secondary hover:bg-secondary/80 h-7 text-xs px-2"
             >
               Circle
             </Button>
@@ -86,7 +86,7 @@ export const DesignSidebar = ({
               variant="ghost"
               size="sm"
               onClick={onAddImage}
-              className="justify-start bg-slate-800 hover:bg-slate-700 h-7 text-xs px-2"
+              className="justify-start bg-secondary hover:bg-secondary/80 h-7 text-xs px-2"
             >
               Upload Image
             </Button>
@@ -94,15 +94,15 @@ export const DesignSidebar = ({
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-wide text-slate-400 mb-1.5">Layers</div>
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">Layers</div>
           <div className="flex flex-col gap-1 max-h-48 overflow-auto pr-1">
             {layers.map((obj: any, idx: number) => (
               <button
                 key={idx}
                 className={`text-left px-1.5 py-1 rounded border text-[10px] ${
                   selectedObject === obj
-                    ? 'border-cyan-400 bg-cyan-400/10 text-cyan-200'
-                    : 'border-slate-800 bg-slate-900 text-slate-300 hover:bg-slate-800'
+                    ? 'border-primary bg-primary/10 text-primary'
+                    : 'border-border bg-card text-foreground hover:bg-secondary'
                 }`}
                 onClick={() => onLayerSelect(obj)}
               >
@@ -113,13 +113,13 @@ export const DesignSidebar = ({
         </div>
 
         <div>
-          <div className="text-[10px] uppercase tracking-wide text-slate-400 mb-1.5">Actions</div>
+          <div className="text-[10px] uppercase tracking-wide text-muted-foreground mb-1.5">Actions</div>
           <div className="flex gap-1.5 flex-wrap">
             <Button
               variant="ghost"
               size="sm"
               onClick={onDuplicate}
-              className="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 hover:bg-slate-700 h-6"
+              className="px-1.5 py-0.5 text-[10px] rounded bg-secondary hover:bg-secondary/80 h-6"
             >
               Duplicate
             </Button>
@@ -127,7 +127,7 @@ export const DesignSidebar = ({
               variant="ghost"
               size="sm"
               onClick={onBringForward}
-              className="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 hover:bg-slate-700 h-6"
+              className="px-1.5 py-0.5 text-[10px] rounded bg-secondary hover:bg-secondary/80 h-6"
             >
               Forward
             </Button>
@@ -135,7 +135,7 @@ export const DesignSidebar = ({
               variant="ghost"
               size="sm"
               onClick={onSendBackward}
-              className="px-1.5 py-0.5 text-[10px] rounded bg-slate-800 hover:bg-slate-700 h-6"
+              className="px-1.5 py-0.5 text-[10px] rounded bg-secondary hover:bg-secondary/80 h-6"
             >
               Backward
             </Button>
@@ -143,7 +143,7 @@ export const DesignSidebar = ({
               variant="ghost"
               size="sm"
               onClick={onDelete}
-              className="px-1.5 py-0.5 text-[10px] rounded bg-red-600 hover:bg-red-500 h-6 text-white"
+              className="px-1.5 py-0.5 text-[10px] rounded bg-destructive hover:bg-destructive/80 h-6 text-destructive-foreground"
             >
               Delete
             </Button>
@@ -151,14 +151,14 @@ export const DesignSidebar = ({
         </div>
 
         {isCropping && (
-          <div className="p-1.5 bg-cyan-900/30 border border-cyan-700 rounded">
-            <div className="text-[10px] text-cyan-300 mb-1.5">Crop Mode Active</div>
+          <div className="p-1.5 bg-primary/10 border border-primary rounded">
+            <div className="text-[10px] text-primary mb-1.5">Crop Mode Active</div>
             <div className="flex gap-1.5">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onApplyCrop}
-                className="flex-1 h-6 text-[10px] bg-cyan-600 hover:bg-cyan-500 text-white"
+                className="flex-1 h-6 text-[10px] bg-primary hover:bg-primary/80 text-primary-foreground"
               >
                 Apply
               </Button>
@@ -166,7 +166,7 @@ export const DesignSidebar = ({
                 variant="ghost"
                 size="sm"
                 onClick={onCancelCrop}
-                className="flex-1 h-6 text-[10px] bg-slate-700 hover:bg-slate-600"
+                className="flex-1 h-6 text-[10px] bg-secondary hover:bg-secondary/80"
               >
                 Cancel
               </Button>

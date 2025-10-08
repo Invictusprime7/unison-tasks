@@ -65,11 +65,11 @@ const Creatives = () => {
               </p>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => navigate("/")} className="text-base text-gray-950 bg-cyan-100">
+              <Button variant="outline" onClick={() => navigate("/")} className="text-base bg-slate-950 hover:bg-slate-800 text-slate-100">
                 <Home className="h-4 w-4 mr-2" />
                 Home
               </Button>
-              <Button onClick={() => setSelectorOpen(true)} className="bg-teal-100 text-slate-950">
+              <Button onClick={() => setSelectorOpen(true)} className="text-slate-100 bg-gray-950 hover:bg-gray-800">
                 <Plus className="h-4 w-4 mr-2" />
                 New Creative Task
               </Button>

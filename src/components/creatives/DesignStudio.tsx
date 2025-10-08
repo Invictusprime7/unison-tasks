@@ -1236,8 +1236,15 @@ export const DesignStudio = forwardRef((props, ref) => {
     toast({ title: "React component exported successfully" });
   };
 
+  const loadTemplateInGrapeJS = (htmlCode: string, cssCode?: string) => {
+    // This will be called from the parent component
+    // We'll store the template code to pass to GrapeJS editor
+    return { html: htmlCode, css: cssCode || "" };
+  };
+
   useImperativeHandle(ref, () => ({
     addImageFromUrl,
+    loadTemplateInGrapeJS,
   }));
 
   return (

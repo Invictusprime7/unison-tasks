@@ -4,21 +4,31 @@ import { ArrowLeft, FolderOpen } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { DesignStudio } from "@/components/creatives/DesignStudio";
 import { FileBrowser } from "@/components/creatives/design-studio/FileBrowser";
+import { GrapeJSEditor } from "@/components/creatives/GrapeJSEditor";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DesignStudioPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [fileBrowserOpen, setFileBrowserOpen] = useState(false);
   const designStudioRef = useRef<any>(null);
+  const [templateHtml, setTemplateHtml] = useState("");
+  const [templateCss, setTemplateCss] = useState("");
+  const [activeEditor, setActiveEditor] = useState<"fabric" | "grapejs">("fabric");
 
   // Load template from navigation state if available
   useEffect(() => {
     const state = location.state as { templateCode?: string; templateName?: string; aesthetic?: string };
-    if (state?.templateCode && designStudioRef.current) {
-      // Load the HTML template into the design studio
-      designStudioRef.current?.loadHTMLTemplate?.(state.templateCode);
+    if (state?.templateCode) {
+      setTemplateHtml(state.templateCode);
+      setActiveEditor("grapejs");
     }
   }, [location.state]);
+
+  const handleTemplateSave = (html: string, css: string) => {
+    setTemplateHtml(html);
+    setTemplateCss(css);
+  };
 
   return (
     <div className="h-screen w-full flex flex-col bg-background">
@@ -44,9 +54,24 @@ const DesignStudioPage = () => {
         </Button>
       </header>
 
-      <div className="flex-1 overflow-hidden">
-        <DesignStudio ref={designStudioRef} />
-      </div>
+      <Tabs value={activeEditor} onValueChange={(v) => setActiveEditor(v as "fabric" | "grapejs")} className="flex-1 flex flex-col">
+        <TabsList className="mx-4 mt-2 w-fit">
+          <TabsTrigger value="fabric">Canvas Editor</TabsTrigger>
+          <TabsTrigger value="grapejs">Web Builder</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="fabric" className="flex-1 mt-0">
+          <DesignStudio ref={designStudioRef} />
+        </TabsContent>
+        
+        <TabsContent value="grapejs" className="flex-1 mt-0">
+          <GrapeJSEditor 
+            initialHtml={templateHtml}
+            initialCss={templateCss}
+            onSave={handleTemplateSave}
+          />
+        </TabsContent>
+      </Tabs>
 
       <FileBrowser 
         open={fileBrowserOpen} 

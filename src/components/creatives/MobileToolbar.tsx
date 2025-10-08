@@ -73,11 +73,11 @@ export const MobileToolbar = (props: MobileToolbarProps) => {
                 <span>Edit</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="bottom" className="h-[85vh] p-0 bg-slate-950">
+            <SheetContent side="bottom" className="h-[50vh] p-0 bg-slate-950">
               <SheetHeader className="px-4 py-3 border-b border-slate-800">
                 <SheetTitle className="text-slate-100">Edit {props.selectedObject.type || 'Object'}</SheetTitle>
               </SheetHeader>
-              <div className="h-[calc(85vh-60px)] overflow-y-auto">
+              <div className="h-[calc(50vh-60px)] overflow-y-auto">
                 <Tabs defaultValue="properties" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 bg-slate-900 rounded-none">
                     <TabsTrigger value="properties">Properties</TabsTrigger>

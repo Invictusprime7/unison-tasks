@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { 
   Plus, Layout, Type, Square, Eye, Play,
   Monitor, Tablet, Smartphone, ZoomIn, ZoomOut,
-  Sparkles, Code, Undo2, Redo2, Save, Keyboard, Zap
+  Sparkles, Code, Undo2, Redo2, Save, Keyboard, Zap,
+  ChevronsDown, ChevronsUp, ArrowDown, ArrowUp
 } from "lucide-react";
 import { toast } from "sonner";
 import { NavigationPanel } from "./web-builder/NavigationPanel";
@@ -59,6 +60,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [showPreview, setShowPreview] = useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // State management - template schema as source of truth
   const templateState = useTemplateState(fabricCanvas);
@@ -426,6 +428,45 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     setIsPanning(false);
   };
 
+  // Scroll navigation functions
+  const scrollToTop = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+      toast.success('Scrolled to top');
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+      toast.success('Scrolled to bottom');
+    }
+  };
+
+  const scrollUp = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        top: -300,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollDown = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        top: 300,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   // Handle touch gestures for mobile
   useEffect(() => {
     const container = canvasContainerRef.current;
@@ -708,11 +749,52 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             onMouseLeave={handleMouseUp}
             style={{ cursor: isPanning ? 'grabbing' : 'default' }}
           >
+            {/* Scroll Navigation Controls */}
+            <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2">
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={scrollToTop}
+                className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
+                title="Scroll to top"
+              >
+                <ChevronsUp className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={scrollUp}
+                className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
+                title="Scroll up"
+              >
+                <ArrowUp className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={scrollDown}
+                className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
+                title="Scroll down"
+              >
+                <ArrowDown className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="secondary"
+                size="icon"
+                onClick={scrollToBottom}
+                className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
+                title="Scroll to bottom"
+              >
+                <ChevronsDown className="h-5 w-5" />
+              </Button>
+            </div>
+            
             <div 
-              className="bg-white shadow-2xl overflow-y-auto overflow-x-hidden"
+              ref={scrollContainerRef}
+              className="bg-white shadow-2xl overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
               style={{ 
                 width: getCanvasWidth() * zoom,
-                minHeight: getCanvasHeight() * zoom,
+                height: '100%',
                 maxHeight: "none",
                 boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)",
                 transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,

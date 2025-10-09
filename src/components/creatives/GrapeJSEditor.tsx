@@ -25,7 +25,6 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
   const [activeTab, setActiveTab] = useState<"html" | "css">("html");
   const [aiPrompt, setAiPrompt] = useState("");
   const [isAiProcessing, setIsAiProcessing] = useState(false);
-  const [showAiAssistant, setShowAiAssistant] = useState(false);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -262,15 +261,6 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           <Button
             variant="outline"
             size="sm"
-            onClick={() => setShowAiAssistant(!showAiAssistant)}
-            className="h-7 sm:h-8 px-2"
-          >
-            <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-            <span className="hidden sm:inline">AI Assistant</span>
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
             onClick={() => setShowCode(!showCode)}
             className="h-7 sm:h-8 px-2"
           >
@@ -282,43 +272,6 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           </Button>
         </div>
       </div>
-
-      {/* AI Assistant Panel */}
-      {showAiAssistant && (
-        <div className="border-b bg-card p-3 flex-shrink-0">
-          <form onSubmit={handleAiAssist} className="flex gap-2">
-            <Input
-              type="text"
-              placeholder="Describe your design changes (e.g., 'make the header blue', 'add a contact form')"
-              value={aiPrompt}
-              onChange={(e) => setAiPrompt(e.target.value)}
-              disabled={isAiProcessing}
-              className="flex-1"
-            />
-            <Button 
-              type="submit" 
-              size="sm" 
-              disabled={isAiProcessing || !aiPrompt.trim()}
-              className="flex gap-2"
-            >
-              {isAiProcessing ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span className="hidden sm:inline">Processing...</span>
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4" />
-                  <span className="hidden sm:inline">Apply</span>
-                </>
-              )}
-            </Button>
-          </form>
-          <p className="text-xs text-muted-foreground mt-2">
-            💡 Try: "Add a hero section with a gradient background" or "Change all buttons to rounded corners"
-          </p>
-        </div>
-      )}
 
       {showCode ? (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
@@ -383,15 +336,52 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           </div>
         </div>
       ) : (
-        <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
-          {/* Left Sidebar - Web Components */}
-          <div className="w-full sm:w-64 border-b sm:border-r sm:border-b-0 bg-card max-h-[40vh] sm:max-h-none flex-shrink-0 overflow-hidden">
-            <WebComponentsPanel onComponentSelect={handleComponentSelect} />
+        <div className="flex-1 flex flex-col overflow-hidden min-h-0">
+          <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
+            {/* Left Sidebar - Web Components */}
+            <div className="w-full sm:w-64 border-b sm:border-r sm:border-b-0 bg-card max-h-[40vh] sm:max-h-none flex-shrink-0 overflow-hidden">
+              <WebComponentsPanel onComponentSelect={handleComponentSelect} />
+            </div>
+
+            {/* Center - Canvas */}
+            <div className="flex-1 relative min-h-[300px] overflow-hidden">
+              <div ref={editorRef} className="h-full w-full" />
+            </div>
           </div>
 
-          {/* Center - Canvas */}
-          <div className="flex-1 relative min-h-[300px] overflow-hidden">
-            <div ref={editorRef} className="h-full w-full" />
+          {/* AI Assistant - Always Visible at Bottom */}
+          <div className="border-t bg-card p-3 flex-shrink-0">
+            <form onSubmit={handleAiAssist} className="flex gap-2">
+              <div className="flex items-center gap-2 flex-1">
+                <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
+                <Input
+                  type="text"
+                  placeholder="Ask AI to create or modify your design (e.g., 'Create a modern landing page for a SaaS product')"
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  disabled={isAiProcessing}
+                  className="flex-1"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                size="sm" 
+                disabled={isAiProcessing || !aiPrompt.trim()}
+                className="flex gap-2"
+              >
+                {isAiProcessing ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="hidden sm:inline">Processing...</span>
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    <span className="hidden sm:inline">Generate</span>
+                  </>
+                )}
+              </Button>
+            </form>
           </div>
         </div>
       )}

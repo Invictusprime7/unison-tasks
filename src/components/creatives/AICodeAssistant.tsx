@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Canvas as FabricCanvas, Rect, Textbox } from 'fabric';
 import { Button } from '@/components/ui/button';
+import { CodeViewer } from './CodeViewer';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -16,8 +17,16 @@ import {
   ChevronDown,
   ChevronUp,
   Eye,
-  Layout
+  Layout,
+  Maximize2,
+  Code
 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -40,6 +49,8 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<'code' | 'design' | 'review'>('code');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [codeViewerOpen, setCodeViewerOpen] = useState(false);
+  const [currentCode, setCurrentCode] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -48,6 +59,17 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const extractCodeFromMessage = (content: string): string => {
+    const codeBlockRegex = /```(?:tsx|typescript|jsx|javascript)?\n([\s\S]*?)```/;
+    const match = content.match(codeBlockRegex);
+    return match ? match[1].trim() : content;
+  };
+
+  const openCodeViewer = (code: string) => {
+    setCurrentCode(extractCodeFromMessage(code));
+    setCodeViewerOpen(true);
+  };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -410,6 +432,15 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                                     <Button
                                       variant="ghost"
                                       size="sm"
+                                      onClick={() => openCodeViewer(codeContent)}
+                                      className="h-6 px-2"
+                                      title="Open in code viewer"
+                                    >
+                                      <Maximize2 className="w-3 h-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
                                       onClick={() => copyToClipboard(codeContent)}
                                       className="h-6 px-2"
                                     >
@@ -484,6 +515,32 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
           </div>
         </div>
       )}
+
+      {/* Code Viewer Dialog */}
+      <Dialog open={codeViewerOpen} onOpenChange={setCodeViewerOpen}>
+        <DialogContent className="max-w-6xl h-[80vh] p-0 gap-0">
+          <DialogHeader className="px-6 py-4 border-b">
+            <DialogTitle className="flex items-center gap-2">
+              <Code className="w-5 h-5" />
+              Code Viewer & Editor
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <CodeViewer
+              code={currentCode}
+              language="typescript"
+              onRender={(code) => {
+                renderComponentData({ 
+                  componentType: 'custom',
+                  elements: [],
+                  description: 'Custom code render'
+                });
+                setCodeViewerOpen(false);
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

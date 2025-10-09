@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
 import { webBlocks } from "./webBlocks";
 
 interface ComponentsLibraryProps {
@@ -8,8 +6,6 @@ interface ComponentsLibraryProps {
 }
 
 export const ComponentsLibrary = ({ onAddBlock }: ComponentsLibraryProps) => {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
-
   const groupedBlocks = webBlocks.reduce((acc, block) => {
     const key = block.subcategory || "Other";
     if (!acc[key]) acc[key] = [];
@@ -19,26 +15,6 @@ export const ComponentsLibrary = ({ onAddBlock }: ComponentsLibraryProps) => {
 
   return (
     <div className="w-80 bg-[#1a1a1a] border-r border-white/10 flex flex-col">
-      {/* Theme Toggle */}
-      <div className="p-3 border-b border-white/10 flex gap-2">
-        <Button
-          variant={theme === "light" ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setTheme("light")}
-          className="flex-1 text-white/70 hover:text-white h-8"
-        >
-          Light
-        </Button>
-        <Button
-          variant={theme === "dark" ? "secondary" : "ghost"}
-          size="sm"
-          onClick={() => setTheme("dark")}
-          className="flex-1 text-white/70 hover:text-white h-8"
-        >
-          Dark
-        </Button>
-      </div>
-
       {/* Components Grid */}
       <ScrollArea className="flex-1">
         <div className="p-3 space-y-4">

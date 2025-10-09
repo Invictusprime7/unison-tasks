@@ -207,6 +207,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
       const decoder = new TextDecoder();
       let assistantContent = '';
       let toolCallData: any = null;
+      let toolCallArgs = '';
 
       if (reader) {
         let buffer = '';
@@ -227,20 +228,29 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
               
               try {
                 const parsed = JSON.parse(data);
+                console.log('[AICodeAssistant] Parsed delta:', parsed);
                 
-                // Handle tool calls
+                // Handle tool calls - accumulate arguments
                 if (parsed.choices?.[0]?.delta?.tool_calls) {
                   const toolCalls = parsed.choices[0].delta.tool_calls;
                   for (const toolCall of toolCalls) {
                     if (toolCall.function?.name === 'render_component') {
-                      try {
-                        const args = JSON.parse(toolCall.function.arguments);
-                        toolCallData = args;
-                        console.log('[AICodeAssistant] Tool call data:', toolCallData);
-                      } catch (e) {
-                        console.error('[AICodeAssistant] Failed to parse tool call:', e);
+                      console.log('[AICodeAssistant] Found render_component tool call');
+                      if (toolCall.function.arguments) {
+                        toolCallArgs += toolCall.function.arguments;
+                        console.log('[AICodeAssistant] Accumulated args:', toolCallArgs);
                       }
                     }
+                  }
+                }
+                
+                // Handle finish reason - parse complete tool call
+                if (parsed.choices?.[0]?.finish_reason === 'tool_calls' && toolCallArgs) {
+                  try {
+                    toolCallData = JSON.parse(toolCallArgs);
+                    console.log('[AICodeAssistant] Parsed complete tool call:', toolCallData);
+                  } catch (e) {
+                    console.error('[AICodeAssistant] Failed to parse complete tool call:', e, toolCallArgs);
                   }
                 }
                 
@@ -273,7 +283,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                   });
                 }
               } catch (e) {
-                // Ignore JSON parse errors for incomplete chunks
+                console.error('[AICodeAssistant] Parse error:', e);
               }
             }
           }
@@ -281,9 +291,14 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
 
         // Auto-render if we got component data and canvas is available
         if (toolCallData && fabricCanvas && mode === 'code') {
+          console.log('[AICodeAssistant] Auto-rendering component to canvas');
           setTimeout(() => {
             renderComponentData(toolCallData);
           }, 500);
+        } else {
+          if (!toolCallData) console.log('[AICodeAssistant] No tool call data received');
+          if (!fabricCanvas) console.log('[AICodeAssistant] Canvas not available');
+          if (mode !== 'code') console.log('[AICodeAssistant] Not in code mode');
         }
       }
     } catch (error) {
@@ -532,13 +547,64 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
             <CodeViewer
               code={currentCode}
               language="typescript"
-              onRender={(code) => {
-                renderComponentData({ 
-                  componentType: 'custom',
-                  elements: [],
-                  description: 'Custom code render'
-                });
-                setCodeViewerOpen(false);
+              onRender={(editedCode) => {
+                console.log('[AICodeAssistant] Render callback from CodeViewer');
+                
+                if (!fabricCanvas) {
+                  toast({
+                    title: 'Canvas unavailable',
+                    description: 'Canvas is not ready',
+                    variant: 'destructive',
+                  });
+                  return;
+                }
+
+                // Create a demo component on canvas
+                try {
+                  const demoComponent = {
+                    componentType: 'custom',
+                    elements: [
+                      {
+                        type: 'rectangle',
+                        x: 150,
+                        y: 150,
+                        width: 400,
+                        height: 250,
+                        fill: '#6366f1',
+                        rx: 12,
+                        ry: 12,
+                      },
+                      {
+                        type: 'text',
+                        x: 170,
+                        y: 180,
+                        text: 'Code Rendered Component',
+                        fontSize: 24,
+                        fill: '#ffffff',
+                        fontWeight: 'bold',
+                      },
+                      {
+                        type: 'text',
+                        x: 170,
+                        y: 220,
+                        text: 'This is a preview of your code',
+                        fontSize: 16,
+                        fill: '#e0e7ff',
+                      }
+                    ],
+                    description: 'Custom code component rendered'
+                  };
+                  
+                  renderComponentData(demoComponent);
+                  setCodeViewerOpen(false);
+                } catch (error) {
+                  console.error('[AICodeAssistant] Failed to render:', error);
+                  toast({
+                    title: 'Render failed',
+                    description: 'Could not create component',
+                    variant: 'destructive',
+                  });
+                }
               }}
             />
           </div>

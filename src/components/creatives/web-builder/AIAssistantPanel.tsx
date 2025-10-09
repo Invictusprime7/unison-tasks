@@ -15,7 +15,7 @@ interface AIAssistantPanelProps {
   isOpen: boolean;
   onClose: () => void;
   fabricCanvas: FabricCanvas | null;
-  onTemplateGenerated?: (template: any, html: string, css: string) => void;
+  onTemplateGenerated?: (template: any) => void;
 }
 
 export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onClose, fabricCanvas, onTemplateGenerated }) => {

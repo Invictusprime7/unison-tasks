@@ -33,13 +33,11 @@ export interface AIResponse {
 export interface AITemplateResponse {
   template: AIGeneratedTemplate;
   explanation: string;
-  html?: string;
-  css?: string;
 }
 
 export const useWebBuilderAI = (
   fabricCanvas: FabricCanvas | null,
-  onTemplateGenerated?: (template: AIGeneratedTemplate, html: string, css: string) => void
+  onTemplateGenerated?: (template: AIGeneratedTemplate) => void
 ) => {
   const [loading, setLoading] = useState(false);
   const [lastResponse, setLastResponse] = useState<AIResponse | null>(null);
@@ -227,26 +225,9 @@ export const useWebBuilderAI = (
 
       const aiTemplateResponse = data as AITemplateResponse;
       
-      // Dual Rendering Pipeline:
-      // 1. Render template to Fabric Canvas (for editing)
-      const renderer = new TemplateRenderer(fabricCanvas);
-      await renderer.renderTemplate(aiTemplateResponse.template);
-      
-      // 2. Export template to HTML/CSS (for live preview)
-      const htmlExporter = new TemplateToHTMLExporter();
-      const html = htmlExporter.exportToHTML(aiTemplateResponse.template);
-      
-      // Extract CSS from HTML
-      const cssMatch = html.match(/<style>([\s\S]*?)<\/style>/);
-      const css = cssMatch ? cssMatch[1] : '';
-      
-      // Add HTML/CSS to response
-      aiTemplateResponse.html = html;
-      aiTemplateResponse.css = css;
-
-      // Notify parent component with template and HTML/CSS
+      // Notify parent - template state will handle dual rendering
       if (onTemplateGenerated) {
-        onTemplateGenerated(aiTemplateResponse.template, html, css);
+        onTemplateGenerated(aiTemplateResponse.template);
       }
 
       toast.success(aiTemplateResponse.explanation || 'Template generated successfully!');

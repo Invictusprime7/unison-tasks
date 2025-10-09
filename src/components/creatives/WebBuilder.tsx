@@ -796,11 +796,11 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         isOpen={aiPanelOpen} 
         onClose={() => setAiPanelOpen(false)}
         fabricCanvas={fabricCanvas}
-        onTemplateGenerated={async (template, html, css) => {
-          // Update template state (single source of truth)
+        onTemplateGenerated={async (template) => {
+          // Template state handles both canvas and HTML rendering
           await templateState.updateTemplate(template);
+          toast.success('Template rendered to canvas!');
           setShowPreview(true);
-          toast.success('Template rendered to canvas and preview!');
         }}
       />
 

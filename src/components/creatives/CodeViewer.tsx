@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Download, Play, Code2, Eye, Monitor } from 'lucide-react';
+import { Copy, Download, Play, Code2, Eye, Monitor, Maximize2, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { LiveCodePreview } from './LiveCodePreview';
@@ -25,6 +26,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
 }) => {
   const [code, setCode] = useState(initialCode || '');
   const [activeTab, setActiveTab] = useState<'code' | 'preview' | 'live' | 'component'>('code');
+  const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
   const { toast } = useToast();
 
   // Parse component for preview
@@ -200,12 +202,25 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
           />
         </TabsContent>
 
-        <TabsContent value="live" className="flex-1 m-0 p-0 data-[state=active]:flex">
-          <LiveHTMLPreview 
-            code={code}
-            autoRefresh={true}
-            className="w-full h-full"
-          />
+        <TabsContent value="live" className="flex-1 m-0 p-0 data-[state=active]:flex flex-col">
+          <div className="flex items-center justify-end px-4 py-2 border-b bg-muted/30">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsPreviewExpanded(true)}
+              className="h-8 px-2"
+            >
+              <Maximize2 className="w-4 h-4 mr-1" />
+              Expand
+            </Button>
+          </div>
+          <div className="flex-1">
+            <LiveHTMLPreview 
+              code={code}
+              autoRefresh={true}
+              className="w-full h-full"
+            />
+          </div>
         </TabsContent>
 
         <TabsContent value="preview" className="flex-1 m-0 p-4 overflow-auto bg-muted/10">
@@ -233,6 +248,35 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
           </div>
         </TabsContent>
       </Tabs>
+
+      {/* Expanded Preview Dialog */}
+      <Dialog open={isPreviewExpanded} onOpenChange={setIsPreviewExpanded}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] h-[95vh] p-0">
+          <DialogHeader className="px-6 py-4 border-b">
+            <div className="flex items-center justify-between">
+              <DialogTitle className="flex items-center gap-2">
+                <Monitor className="w-5 h-5" />
+                Live Preview - Expanded View
+              </DialogTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsPreviewExpanded(false)}
+                className="h-8 w-8 p-0"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <LiveHTMLPreview 
+              code={code}
+              autoRefresh={true}
+              className="w-full h-full"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

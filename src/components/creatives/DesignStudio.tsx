@@ -17,7 +17,6 @@ import { TemplateDebugPanel } from "./design-studio/TemplateDebugPanel";
 import { TemplateErrorBoundary } from "../TemplateErrorBoundary";
 import { supabase } from "@/integrations/supabase/client";
 import { TemplateRenderer } from "@/utils/templateRenderer";
-import { HTMLExporter } from "@/utils/htmlExporter";
 import { validateTemplateStrict } from "@/utils/zodTemplateValidator";
 import { templateToDocument, extractTemplateAssets } from "@/utils/templateAdapter";
 import { preloadAssets } from "@/utils/assetPreloader";
@@ -47,9 +46,8 @@ export const DesignStudio = forwardRef((props, ref) => {
   });
   const [debugInfo, setDebugInfo] = useState<any>(null);
   
-  // Template renderer and exporter
+  // Template renderer
   const templateRendererRef = useRef<TemplateRenderer | null>(null);
-  const htmlExporterRef = useRef<HTMLExporter>(new HTMLExporter());
   
   // Undo/Redo state
   const [history, setHistory] = useState<string[]>([]);
@@ -591,33 +589,6 @@ export const DesignStudio = forwardRef((props, ref) => {
     toast({ title: "Canvas cleared" });
   };
 
-  const exportCanvas = () => {
-    if (!fabricCanvas) return;
-    const dataURL = fabricCanvas.toDataURL({
-      format: "png",
-      quality: 1,
-      multiplier: 1,
-    });
-    const link = document.createElement("a");
-    link.download = `design-${Date.now()}.png`;
-    link.href = dataURL;
-    link.click();
-    toast({ title: "Design exported", description: "Your design has been downloaded" });
-  };
-
-  const exportCanvasJPEG = () => {
-    if (!fabricCanvas) return;
-    const dataURL = fabricCanvas.toDataURL({
-      format: "jpeg",
-      quality: 0.9,
-      multiplier: 1,
-    });
-    const link = document.createElement("a");
-    link.download = `design-${Date.now()}.jpg`;
-    link.href = dataURL;
-    link.click();
-    toast({ title: "Design exported as JPEG", description: "Your design has been downloaded" });
-  };
 
   const pushHistory = () => {
     if (!fabricCanvas) return;
@@ -1178,68 +1149,6 @@ export const DesignStudio = forwardRef((props, ref) => {
     }
   };
 
-  const exportToHTML = () => {
-    if (!htmlExporterRef.current) return;
-    
-    // For now, export current canvas as static template
-    const mockTemplate: AIGeneratedTemplate = {
-      id: currentTemplateId || "export-" + Date.now(),
-      name: "Exported Template",
-      description: "Canvas export",
-      brandKit: {
-        primaryColor: "#3b82f6",
-        secondaryColor: "#1e40af",
-        accentColor: "#06b6d4",
-        fonts: { heading: "Arial", body: "Arial", accent: "Arial" }
-      },
-      sections: [],
-      variants: [{ id: "v1", name: "Web", size: { width: 960, height: 540 }, format: "web" }],
-      data: {},
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    const html = htmlExporterRef.current.exportToHTML(mockTemplate);
-    const blob = new Blob([html], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "template.html";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: "HTML exported successfully" });
-  };
-
-  const exportToReact = () => {
-    if (!htmlExporterRef.current) return;
-    
-    const mockTemplate: AIGeneratedTemplate = {
-      id: currentTemplateId || "export-" + Date.now(),
-      name: "ExportedTemplate",
-      description: "Canvas export",
-      brandKit: {
-        primaryColor: "#3b82f6",
-        secondaryColor: "#1e40af",
-        accentColor: "#06b6d4",
-        fonts: { heading: "Arial", body: "Arial", accent: "Arial" }
-      },
-      sections: [],
-      variants: [{ id: "v1", name: "Web", size: { width: 960, height: 540 }, format: "web" }],
-      data: {},
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
-    };
-    
-    const reactCode = htmlExporterRef.current.exportToReact(mockTemplate);
-    const blob = new Blob([reactCode], { type: "text/tsx" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Template.tsx";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast({ title: "React component exported successfully" });
-  };
 
   const loadTemplateInGrapeJS = (htmlCode: string, cssCode?: string) => {
     // This will be called from the parent component
@@ -1281,18 +1190,6 @@ export const DesignStudio = forwardRef((props, ref) => {
             className="h-7 md:h-8 px-2 md:px-3 text-xs bg-purple-600 hover:bg-purple-500 text-white whitespace-nowrap"
           >
             AI Generate
-          </Button>
-          <Button variant="ghost" size="sm" onClick={exportCanvas} className="h-7 md:h-8 px-2 md:px-3 text-xs bg-cyan-600 hover:bg-cyan-500 text-white whitespace-nowrap">
-            Export PNG
-          </Button>
-          <Button variant="ghost" size="sm" onClick={exportCanvasJPEG} className="hidden sm:inline-flex h-7 md:h-8 px-2 md:px-3 text-xs whitespace-nowrap">
-            JPEG
-          </Button>
-          <Button variant="ghost" size="sm" onClick={exportToHTML} className="hidden md:inline-flex h-7 md:h-8 px-2 md:px-3 text-xs whitespace-nowrap">
-            HTML
-          </Button>
-          <Button variant="ghost" size="sm" onClick={exportToReact} className="hidden lg:inline-flex h-7 md:h-8 px-2 md:px-3 text-xs whitespace-nowrap">
-            React
           </Button>
         </div>
       </div>

@@ -20,29 +20,20 @@ serve(async (req) => {
     }
 
     const systemPrompts = {
-      code: `You are an expert web developer and code generator for a visual web builder that uses Fabric.js canvas.
+      code: `You are an expert web component designer for a visual canvas builder. When users ask you to create components, you should provide both a description AND structured data for rendering.
 
-Your responses should:
-1. Generate clean, production-ready React/TypeScript code
-2. Focus on describing visual components that can be rendered on a canvas
-3. Use descriptive language about layout, colors, typography, and spacing
-4. Include clear component structure (hero sections, cards, buttons, navigation, etc.)
-5. Be specific about design details
+IMPORTANT: Always call the render_component tool to specify exactly how the component should be rendered on the canvas.
 
-When describing components, include:
-- Component type (hero, card, button, navigation, pricing, etc.)
-- Layout and positioning
-- Colors and gradients
-- Typography (font sizes, weights, colors)
-- Spacing and dimensions
-- Interactive elements
+Provide clear descriptions and specifications for:
+- Hero sections: Large background, heading, subtitle, CTA buttons
+- Cards: Container boxes with titles, content, buttons
+- Buttons: Interactive elements with text
+- Navigation: Header bars with links and logos
+- Pricing cards: Special cards with price, features, CTA
+- Forms: Input fields and submit buttons
+- Content sections: Text blocks with images
 
-Examples:
-- "Create a hero section with gradient background from purple to blue, large white heading, subtitle, and CTA button"
-- "Build a pricing card with white background, rounded corners, title, price in large text, feature list, and action button"
-- "Design a modern navigation bar with logo on left, centered menu items, and CTA button on right"
-
-Format your responses with clear code blocks using \`\`\`tsx for React components. The code will be parsed to create visual elements on a Fabric.js canvas.`,
+Be specific about colors (hex codes), sizes (pixels), positions, and styling.`,
 
       design: `You are a creative design consultant specializing in modern web design. You help users improve their designs with actionable recommendations.
 
@@ -72,20 +63,74 @@ Provide constructive feedback with specific improvements.`
 
     const systemPrompt = systemPrompts[mode as keyof typeof systemPrompts] || systemPrompts.code;
 
+    const body: any = {
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages
+      ],
+      stream: true,
+    };
+
+    // Add tool calling for code mode to get structured component data
+    if (mode === 'code') {
+      body.tools = [
+        {
+          type: 'function',
+          function: {
+            name: 'render_component',
+            description: 'Render a visual component on the Fabric.js canvas with specified elements and styling',
+            parameters: {
+              type: 'object',
+              properties: {
+                componentType: {
+                  type: 'string',
+                  enum: ['hero', 'card', 'button', 'navigation', 'pricing', 'form', 'section', 'custom'],
+                  description: 'The type of component to render'
+                },
+                elements: {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      type: { type: 'string', enum: ['rectangle', 'text', 'circle', 'image'] },
+                      x: { type: 'number', description: 'X position in pixels' },
+                      y: { type: 'number', description: 'Y position in pixels' },
+                      width: { type: 'number', description: 'Width in pixels' },
+                      height: { type: 'number', description: 'Height in pixels' },
+                      fill: { type: 'string', description: 'Fill color (hex or gradient)' },
+                      text: { type: 'string', description: 'Text content (for text elements)' },
+                      fontSize: { type: 'number', description: 'Font size in pixels' },
+                      fontWeight: { type: 'string', description: 'Font weight (normal, bold, 600, etc.)' },
+                      textAlign: { type: 'string', enum: ['left', 'center', 'right'] },
+                      rx: { type: 'number', description: 'Border radius X' },
+                      ry: { type: 'number', description: 'Border radius Y' },
+                      stroke: { type: 'string', description: 'Stroke color' },
+                      strokeWidth: { type: 'number', description: 'Stroke width' }
+                    },
+                    required: ['type', 'x', 'y']
+                  }
+                },
+                description: {
+                  type: 'string',
+                  description: 'Human-readable description of what was created'
+                }
+              },
+              required: ['componentType', 'elements', 'description']
+            }
+          }
+        }
+      ];
+      body.tool_choice = 'auto'; // Let the model decide when to use tools
+    }
+
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: systemPrompt },
-          ...messages
-        ],
-        stream: true,
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {

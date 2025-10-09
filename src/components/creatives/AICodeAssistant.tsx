@@ -26,6 +26,7 @@ interface Message {
   content: string;
   timestamp: Date;
   hasCode?: boolean;
+  componentData?: any;
 }
 
 interface AICodeAssistantProps {
@@ -56,7 +57,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
     });
   };
 
-  const renderCodeToCanvas = (code: string) => {
+  const renderComponentData = (componentData: any) => {
     if (!fabricCanvas) {
       toast({
         title: 'Canvas not available',
@@ -67,177 +68,61 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
     }
 
     try {
-      // Parse the code to extract component structure
-      // This is a simplified example - in production, you'd want more sophisticated parsing
-      
-      // Example: Create a hero section based on common patterns
-      if (code.toLowerCase().includes('hero')) {
-        const heroRect = new Rect({
-          left: 50,
-          top: 50,
-          width: 1180,
-          height: 500,
-          fill: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-          selectable: true,
-          hasControls: true,
-        });
+      console.log('[AICodeAssistant] Rendering component:', componentData);
+      const { elements, description } = componentData;
 
-        const titleText = new Textbox('Welcome to Our Platform', {
-          left: 100,
-          top: 150,
-          width: 1080,
-          fontSize: 56,
-          fill: '#ffffff',
-          fontWeight: 'bold',
-          textAlign: 'center',
-          selectable: true,
-          editable: true,
-        });
-
-        const subtitleText = new Textbox('Build amazing things with our tools', {
-          left: 100,
-          top: 250,
-          width: 1080,
-          fontSize: 24,
-          fill: '#ffffff',
-          opacity: 0.9,
-          textAlign: 'center',
-          selectable: true,
-          editable: true,
-        });
-
-        fabricCanvas.add(heroRect, titleText, subtitleText);
-        fabricCanvas.renderAll();
-
+      if (!elements || elements.length === 0) {
         toast({
-          title: 'Component rendered',
-          description: 'Hero section added to canvas. Customize it as needed!',
+          title: 'No elements to render',
+          description: 'The component has no visual elements.',
+          variant: 'destructive',
         });
-      } else if (code.toLowerCase().includes('card') || code.toLowerCase().includes('pricing')) {
-        // Create a card/pricing component
-        const cardRect = new Rect({
-          left: 100,
-          top: 100,
-          width: 350,
-          height: 450,
-          fill: '#ffffff',
-          stroke: '#e2e8f0',
-          strokeWidth: 2,
-          rx: 12,
-          ry: 12,
-          selectable: true,
-          hasControls: true,
-        });
-
-        const cardTitle = new Textbox('Premium Plan', {
-          left: 130,
-          top: 140,
-          width: 290,
-          fontSize: 28,
-          fill: '#1a202c',
-          fontWeight: 'bold',
-          selectable: true,
-          editable: true,
-        });
-
-        const cardPrice = new Textbox('$29/mo', {
-          left: 130,
-          top: 200,
-          width: 290,
-          fontSize: 42,
-          fill: '#667eea',
-          fontWeight: 'bold',
-          selectable: true,
-          editable: true,
-        });
-
-        const cardDescription = new Textbox('Perfect for growing teams', {
-          left: 130,
-          top: 270,
-          width: 290,
-          fontSize: 16,
-          fill: '#718096',
-          selectable: true,
-          editable: true,
-        });
-
-        fabricCanvas.add(cardRect, cardTitle, cardPrice, cardDescription);
-        fabricCanvas.renderAll();
-
-        toast({
-          title: 'Component rendered',
-          description: 'Card component added to canvas!',
-        });
-      } else if (code.toLowerCase().includes('button')) {
-        // Create a button
-        const buttonRect = new Rect({
-          left: 150,
-          top: 150,
-          width: 200,
-          height: 56,
-          fill: '#667eea',
-          rx: 8,
-          ry: 8,
-          selectable: true,
-          hasControls: true,
-        });
-
-        const buttonText = new Textbox('Get Started', {
-          left: 185,
-          top: 165,
-          width: 130,
-          fontSize: 18,
-          fill: '#ffffff',
-          fontWeight: '600',
-          textAlign: 'center',
-          selectable: true,
-          editable: true,
-        });
-
-        fabricCanvas.add(buttonRect, buttonText);
-        fabricCanvas.renderAll();
-
-        toast({
-          title: 'Component rendered',
-          description: 'Button added to canvas!',
-        });
-      } else {
-        // Generic component - create a placeholder
-        const placeholderRect = new Rect({
-          left: 100,
-          top: 100,
-          width: 600,
-          height: 400,
-          fill: '#f7fafc',
-          stroke: '#cbd5e0',
-          strokeWidth: 2,
-          rx: 8,
-          ry: 8,
-          selectable: true,
-          hasControls: true,
-        });
-
-        const placeholderText = new Textbox('AI Generated Component\n\nCustomize this on the canvas!', {
-          left: 150,
-          top: 200,
-          width: 500,
-          fontSize: 20,
-          fill: '#2d3748',
-          textAlign: 'center',
-          selectable: true,
-          editable: true,
-        });
-
-        fabricCanvas.add(placeholderRect, placeholderText);
-        fabricCanvas.renderAll();
-
-        toast({
-          title: 'Component rendered',
-          description: 'Component structure added to canvas. Customize it!',
-        });
+        return;
       }
+
+      elements.forEach((element: any) => {
+        if (element.type === 'rectangle') {
+          const rect = new Rect({
+            left: element.x || 100,
+            top: element.y || 100,
+            width: element.width || 200,
+            height: element.height || 100,
+            fill: element.fill || '#3b82f6',
+            rx: element.rx || 0,
+            ry: element.ry || 0,
+            stroke: element.stroke,
+            strokeWidth: element.strokeWidth || 0,
+            selectable: true,
+            hasControls: true,
+            hasBorders: true,
+          });
+          fabricCanvas.add(rect);
+        } else if (element.type === 'text') {
+          const text = new Textbox(element.text || 'Text', {
+            left: element.x || 100,
+            top: element.y || 100,
+            width: element.width || 300,
+            fontSize: element.fontSize || 16,
+            fill: element.fill || '#000000',
+            fontWeight: element.fontWeight || 'normal',
+            textAlign: element.textAlign || 'left',
+            selectable: true,
+            editable: true,
+            hasControls: true,
+            hasBorders: true,
+          });
+          fabricCanvas.add(text);
+        }
+      });
+
+      fabricCanvas.renderAll();
+
+      toast({
+        title: 'Component rendered!',
+        description: description || 'Component added to canvas successfully.',
+      });
     } catch (error) {
-      console.error('Error rendering to canvas:', error);
+      console.error('[AICodeAssistant] Render error:', error);
       toast({
         title: 'Render failed',
         description: 'Could not render component to canvas.',
@@ -300,6 +185,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let assistantContent = '';
+      let toolCallData: any = null;
 
       if (reader) {
         let buffer = '';
@@ -320,6 +206,24 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
               
               try {
                 const parsed = JSON.parse(data);
+                
+                // Handle tool calls
+                if (parsed.choices?.[0]?.delta?.tool_calls) {
+                  const toolCalls = parsed.choices[0].delta.tool_calls;
+                  for (const toolCall of toolCalls) {
+                    if (toolCall.function?.name === 'render_component') {
+                      try {
+                        const args = JSON.parse(toolCall.function.arguments);
+                        toolCallData = args;
+                        console.log('[AICodeAssistant] Tool call data:', toolCallData);
+                      } catch (e) {
+                        console.error('[AICodeAssistant] Failed to parse tool call:', e);
+                      }
+                    }
+                  }
+                }
+                
+                // Handle regular content
                 const content = parsed.choices?.[0]?.delta?.content;
                 if (content) {
                   assistantContent += content;
@@ -333,6 +237,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                         ...lastMessage,
                         content: assistantContent,
                         hasCode,
+                        componentData: toolCallData,
                       };
                     } else {
                       newMessages.push({
@@ -340,6 +245,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                         content: assistantContent,
                         timestamp: new Date(),
                         hasCode,
+                        componentData: toolCallData,
                       });
                     }
                     return newMessages;
@@ -350,6 +256,13 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
               }
             }
           }
+        }
+
+        // Auto-render if we got component data and canvas is available
+        if (toolCallData && fabricCanvas && mode === 'code') {
+          setTimeout(() => {
+            renderComponentData(toolCallData);
+          }, 500);
         }
       }
     } catch (error) {
@@ -494,15 +407,6 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                                 <div className="flex items-center justify-between bg-muted-foreground/10 px-3 py-1 rounded-t">
                                   <span className="text-xs font-mono">{lang || 'code'}</span>
                                    <div className="flex gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => renderCodeToCanvas(codeContent)}
-                                      className="h-6 px-2"
-                                      title="Render to canvas"
-                                    >
-                                      <Layout className="w-3 h-3" />
-                                    </Button>
                                     <Button
                                       variant="ghost"
                                       size="sm"

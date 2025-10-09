@@ -20,7 +20,10 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
   const updateTimerRef = useRef<NodeJS.Timeout>();
 
   const renderPreview = () => {
-    if (!iframeRef.current || !code.trim()) return;
+    // Guard against undefined or empty code
+    if (!iframeRef.current || !code || typeof code !== 'string' || !code.trim()) {
+      return;
+    }
 
     setStatus('loading');
     setErrorMessage('');
@@ -67,7 +70,10 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
   };
 
   useEffect(() => {
-    if (!autoRefresh || !code.trim()) return;
+    // Guard against undefined or invalid code
+    if (!autoRefresh || !code || typeof code !== 'string' || !code.trim()) {
+      return;
+    }
 
     // Debounce updates
     if (updateTimerRef.current) {
@@ -121,15 +127,20 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
 };
 
 function buildHTMLDocument(html: string, css: string, javascript: string): string {
-  let bodyContent = html.trim();
+  // Guard against undefined values
+  const safeHtml = html || '';
+  const safeCss = css || '';
+  const safeJs = javascript || '';
+  
+  let bodyContent = safeHtml.trim();
   
   if (bodyContent.toLowerCase().includes('<!doctype') || bodyContent.toLowerCase().includes('<html')) {
     const existingStyles = bodyContent.match(/<style[^>]*>([\s\S]*?)<\/style>/gi) || [];
-    const allStyles = existingStyles.map(s => s.replace(/<\/?style[^>]*>/gi, '')).join('\n') + '\n' + css;
+    const allStyles = existingStyles.map(s => s.replace(/<\/?style[^>]*>/gi, '')).join('\n') + '\n' + safeCss;
     bodyContent = bodyContent.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
     bodyContent = bodyContent.replace('</head>', '<style>' + allStyles + '</style>\n</head>');
-    if (javascript) {
-      bodyContent = bodyContent.replace('</body>', '<script>\n' + javascript + '\n</script>\n</body>');
+    if (safeJs) {
+      bodyContent = bodyContent.replace('</body>', '<script>\n' + safeJs + '\n</script>\n</body>');
     }
     return bodyContent;
   }
@@ -151,7 +162,7 @@ function buildHTMLDocument(html: string, css: string, javascript: string): strin
     }
     img { max-width: 100%; height: auto; }
     button { cursor: pointer; font-family: inherit; }
-    ${css}
+    ${safeCss}
   </style>
   <script>
     window.addEventListener('error', function(e) {
@@ -172,7 +183,7 @@ function buildHTMLDocument(html: string, css: string, javascript: string): strin
 </head>
 <body>
   ${bodyContent}
-  ${javascript ? '<script>\n' + javascript + '\n</script>' : ''}
+  ${safeJs ? '<script>\n' + safeJs + '\n</script>' : ''}
 </body>
 </html>`;
 

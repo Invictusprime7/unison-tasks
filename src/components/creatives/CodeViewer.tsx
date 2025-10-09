@@ -23,18 +23,22 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
   onRender,
   className,
 }) => {
-  const [code, setCode] = useState(initialCode);
+  const [code, setCode] = useState(initialCode || '');
   const [activeTab, setActiveTab] = useState<'code' | 'preview' | 'live' | 'component'>('code');
   const { toast } = useToast();
 
   // Parse component for preview
-  const [componentData, setComponentData] = useState(() => parseComponentCode(initialCode));
+  const [componentData, setComponentData] = useState(() => {
+    const safeCode = initialCode || '';
+    return parseComponentCode(safeCode);
+  });
 
   // Update code when initialCode changes
   React.useEffect(() => {
-    setCode(initialCode);
-    setComponentData(parseComponentCode(initialCode));
-    console.log('[CodeViewer] Code updated:', initialCode.substring(0, 100));
+    const safeCode = initialCode || '';
+    setCode(safeCode);
+    setComponentData(parseComponentCode(safeCode));
+    console.log('[CodeViewer] Code updated:', safeCode.substring(0, 100));
   }, [initialCode]);
 
   const handleCopy = () => {

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Canvas as FabricCanvas, Rect, Textbox } from 'fabric';
 import Editor from '@monaco-editor/react';
+import { executeCanvasCode, getCanvasCodeExample } from '@/utils/canvasCodeRunner';
 import { Button } from '@/components/ui/button';
 import { CodeViewer } from './CodeViewer';
 import { LiveCodePreview } from './LiveCodePreview';
@@ -68,8 +69,27 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
     setCodeViewerOpen(true);
     toast({
       title: 'Code editor opened',
-      description: 'Edit and render your component',
+      description: 'Edit and render your code on the canvas',
     });
+  };
+
+  const handleCodeRender = async (code: string) => {
+    if (!fabricCanvas) {
+      throw new Error('Canvas not available');
+    }
+
+    console.log('[AICodeAssistant] Rendering code to canvas');
+    await executeCanvasCode(
+      code,
+      fabricCanvas,
+      () => {
+        console.log('[AICodeAssistant] Code executed successfully');
+      },
+      (error) => {
+        console.error('[AICodeAssistant] Code execution failed:', error);
+        throw error;
+      }
+    );
   };
 
   const copyToClipboard = (text: string) => {
@@ -582,65 +602,8 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
             <CodeViewer
               code={currentCode}
               language="typescript"
-              onRender={(editedCode) => {
-                console.log('[AICodeAssistant] Render callback from CodeViewer');
-                
-                if (!fabricCanvas) {
-                  toast({
-                    title: 'Canvas unavailable',
-                    description: 'Canvas is not ready',
-                    variant: 'destructive',
-                  });
-                  return;
-                }
-
-                // Create a demo component on canvas
-                try {
-                  const demoComponent = {
-                    componentType: 'custom',
-                    elements: [
-                      {
-                        type: 'rectangle',
-                        x: 150,
-                        y: 150,
-                        width: 400,
-                        height: 250,
-                        fill: '#6366f1',
-                        rx: 12,
-                        ry: 12,
-                      },
-                      {
-                        type: 'text',
-                        x: 170,
-                        y: 180,
-                        text: 'Code Rendered Component',
-                        fontSize: 24,
-                        fill: '#ffffff',
-                        fontWeight: 'bold',
-                      },
-                      {
-                        type: 'text',
-                        x: 170,
-                        y: 220,
-                        text: 'This is a preview of your code',
-                        fontSize: 16,
-                        fill: '#e0e7ff',
-                      }
-                    ],
-                    description: 'Custom code component rendered'
-                  };
-                  
-                  renderComponentData(demoComponent);
-                  setCodeViewerOpen(false);
-                } catch (error) {
-                  console.error('[AICodeAssistant] Failed to render:', error);
-                  toast({
-                    title: 'Render failed',
-                    description: 'Could not create component',
-                    variant: 'destructive',
-                  });
-                }
-              }}
+              onRender={handleCodeRender}
+              className="h-full"
             />
           </div>
         </DialogContent>

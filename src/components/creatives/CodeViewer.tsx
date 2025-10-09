@@ -10,7 +10,7 @@ import { LiveCodePreview } from './LiveCodePreview';
 interface CodeViewerProps {
   code: string;
   language?: string;
-  onRender?: (code: string) => void;
+  onRender?: (code: string) => Promise<void>;
   className?: string;
 }
 
@@ -54,19 +54,29 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
     });
   };
 
-  const handleRender = () => {
+  const handleRender = async () => {
     console.log('[CodeViewer] Rendering code to canvas:', code.substring(0, 100));
-    if (onRender) {
-      onRender(code);
-      toast({
-        title: 'Rendering...',
-        description: 'Converting code to canvas elements',
-      });
-    } else {
+    if (!onRender) {
       console.warn('[CodeViewer] No onRender callback provided');
       toast({
         title: 'Cannot render',
         description: 'Canvas connection not available',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      await onRender(code);
+      toast({
+        title: 'Rendered successfully!',
+        description: 'Your code is now on the canvas',
+      });
+    } catch (error) {
+      console.error('[CodeViewer] Render error:', error);
+      toast({
+        title: 'Render failed',
+        description: error instanceof Error ? error.message : 'Failed to execute code',
         variant: 'destructive',
       });
     }

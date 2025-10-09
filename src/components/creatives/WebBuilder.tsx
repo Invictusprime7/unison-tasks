@@ -396,7 +396,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           </div>
 
           {/* GrapeJS Editor Iframe */}
-          <div className="flex-1 overflow-hidden bg-[#0a0a0a]">
+          <div className="flex-1 overflow-hidden bg-[#0a0a0a] flex items-center justify-center">
             <iframe
               ref={grapeJS.iframeRef}
               srcDoc={grapeJsTemplate}

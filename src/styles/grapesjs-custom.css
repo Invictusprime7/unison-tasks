@@ -77,41 +77,9 @@
   border-color: hsl(var(--primary)) !important;
 }
 
-/* Blocks Panel */
+/* Blocks Panel - Hidden since we use custom hierarchical manager */
 .gjs-blocks-c {
-  background: hsl(var(--card)) !important;
-  padding: 16px !important;
-}
-
-.gjs-block {
-  background: hsl(var(--background)) !important;
-  border: 1px solid hsl(var(--border)) !important;
-  border-radius: 8px !important;
-  padding: 12px !important;
-  margin: 8px 4px !important;
-  transition: all 0.2s !important;
-  width: calc(50% - 8px) !important;
-  min-height: 80px !important;
-  box-sizing: border-box !important;
-}
-
-.gjs-block:hover {
-  border-color: hsl(var(--primary)) !important;
-  background: hsl(var(--accent)) !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-}
-
-.gjs-block__media {
-  color: hsl(var(--primary)) !important;
-  font-size: 32px !important;
-  margin-bottom: 8px !important;
-}
-
-.gjs-block-label {
-  color: hsl(var(--foreground)) !important;
-  font-size: 12px !important;
-  font-weight: 500 !important;
+  display: none !important;
 }
 
 /* Layers Panel */

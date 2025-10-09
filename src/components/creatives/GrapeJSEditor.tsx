@@ -14,6 +14,7 @@ import { TemplateGallery } from "./design-studio/TemplateGallery";
 import { ExportDialog } from "./design-studio/ExportDialog";
 import { DesignTokensPanel } from "./design-studio/DesignTokensPanel";
 import { LayoutControlsPanel } from "./design-studio/LayoutControlsPanel";
+import { HierarchicalBlockManager } from "./HierarchicalBlockManager";
 import { supabase } from "@/integrations/supabase/client";
 
 interface GrapeJSEditorProps {
@@ -775,9 +776,9 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">
           <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
-            {/* Left Sidebar - Web Components */}
+            {/* Left Sidebar - Hierarchical Block Manager */}
             <div className="w-full sm:w-64 border-b sm:border-r sm:border-b-0 bg-card max-h-[40vh] sm:max-h-none flex-shrink-0 overflow-hidden">
-              <WebComponentsPanel onComponentSelect={handleComponentSelect} />
+              <HierarchicalBlockManager editor={editor} />
             </div>
 
             {/* Center - Canvas */}

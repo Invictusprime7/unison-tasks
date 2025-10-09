@@ -170,20 +170,24 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     };
   }, []);
 
-  const handleTemplateGenerated = async (template: AIGeneratedTemplate) => {
+  const handleTemplateGenerated = async (template: any) => {
     if (!grapeJS.isReady) {
       toast.error('Editor not ready');
       return;
     }
 
     try {
-      // Convert template to GrapeJS components
-      const components = adapter.templateToGrapeJS(template);
-      
-      // Set components in GrapeJS
-      await grapeJS.setComponents(components);
-      
-      toast.success('Template rendered successfully!');
+      // Check if this is a quick design with GrapeJS components
+      if (template.grapeJSComponents) {
+        // Directly add GrapeJS components
+        await grapeJS.addComponents(template.grapeJSComponents);
+        toast.success('Design added to canvas!');
+      } else {
+        // Convert full template to GrapeJS components
+        const components = adapter.templateToGrapeJS(template);
+        await grapeJS.setComponents(components);
+        toast.success('Template rendered successfully!');
+      }
     } catch (error) {
       console.error('Error rendering template:', error);
       toast.error('Failed to render template');

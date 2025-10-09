@@ -27,8 +27,7 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
   ]);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
-  // Use null for fabricCanvas since we're using GrapeJS now
-  const { loading, generateTemplate } = useWebBuilderAI(
+  const { loading, generateTemplate, generateDesign } = useWebBuilderAI(
     null,
     onTemplateGenerated
   );
@@ -47,8 +46,40 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
     const userInput = input;
     setInput('');
 
-    // Always generate full templates for GrapeJS
-    const response = await generateTemplate(userInput);
+    // Detect if user wants full template or quick components
+    const isTemplateRequest = /\b(template|page|website|landing page|full design|complete design|entire page)\b/i.test(userInput);
+
+    let response;
+    if (isTemplateRequest) {
+      // Generate full template structure
+      response = await generateTemplate(userInput);
+    } else {
+      // Generate quick GrapeJS components
+      response = await generateDesign(userInput);
+      
+      // If we got GrapeJS components, notify parent directly
+      if (response && 'components' in response && onTemplateGenerated) {
+        // Create a simple template wrapper for GrapeJS components
+        const quickTemplate = {
+          id: crypto.randomUUID(),
+          name: 'Quick Design',
+          description: userInput,
+          brandKit: {
+            primaryColor: '#3b82f6',
+            secondaryColor: '#1e40af',
+            accentColor: '#06b6d4',
+            fonts: { heading: 'Inter', body: 'Inter', accent: 'Inter' }
+          },
+          sections: [],
+          variants: [{ id: 'v1', name: 'Desktop', size: { width: 1280, height: 800 }, format: 'web' as const }],
+          data: {},
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          grapeJSComponents: response.components // Pass GrapeJS components directly
+        };
+        onTemplateGenerated(quickTemplate as any);
+      }
+    }
 
     if (response) {
       const assistantMessage: Message = {

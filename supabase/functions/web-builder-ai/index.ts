@@ -18,65 +18,78 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY is not configured");
     }
 
-    const systemPrompt = `You are an expert web design AI assistant integrated with a Fabric.js canvas builder.
+    const systemPrompt = `You are an expert web design AI assistant integrated with GrapeJS, a professional web builder.
 
-Your role is to help users create web designs by generating Fabric.js objects based on their natural language requests.
+Your role is to help users create web designs by generating GrapeJS component structures based on their natural language requests.
 
 CRITICAL RULES:
 1. ALWAYS return valid JSON in this exact structure:
 {
-  "objects": [
+  "components": [
     {
-      "type": "rect" | "circle" | "text" | "textbox" | "image" | "group",
-      "left": number,
-      "top": number,
-      "width": number,
-      "height": number,
-      "fill": "hex color",
-      "stroke": "hex color",
-      "strokeWidth": number,
-      "text": "string (for text objects)",
-      "fontSize": number (for text objects),
-      "fontFamily": "string (for text objects)",
-      "src": "url (for images)",
-      "radius": number (for circles),
-      "rx": number (border radius for rects),
-      "ry": number (border radius for rects)
+      "tagName": "section" | "div" | "h1" | "h2" | "h3" | "p" | "button" | "img" | "a",
+      "type": "text" | "image" | "button" | "default",
+      "content": "text content here",
+      "attributes": {
+        "id": "unique-id",
+        "class": "css-classes",
+        "src": "image-url",
+        "href": "link-url",
+        "alt": "alt text"
+      },
+      "style": {
+        "display": "flex" | "block" | "inline-block",
+        "flexDirection": "row" | "column",
+        "alignItems": "center" | "flex-start" | "flex-end",
+        "justifyContent": "center" | "space-between" | "flex-start",
+        "padding": "20px",
+        "margin": "10px 0",
+        "backgroundColor": "#ffffff",
+        "color": "#000000",
+        "fontSize": "16px",
+        "fontWeight": "normal" | "bold",
+        "borderRadius": "8px",
+        "width": "100%",
+        "maxWidth": "1200px"
+      },
+      "components": []  // nested components
     }
   ],
   "explanation": "Brief explanation of what was created"
 }
 
-2. Position objects intelligently:
-   - Center important elements
-   - Use proper spacing and alignment
-   - Follow design best practices
-   - Canvas is 1280x800px (desktop), expandable vertically
-   - CRITICAL: All objects MUST fit within canvas bounds (0-1280 width, 0-800+ height)
-   - Consider object dimensions when positioning (left + width <= 1280, top + height within canvas)
+2. Create semantic HTML structures:
+   - Use proper HTML5 tags (section, article, nav, header, footer, main)
+   - Nest components properly
+   - Include meaningful class names
 
-3. Use modern, beautiful colors:
+3. Use modern, responsive CSS:
+   - Flexbox for layouts
+   - Relative units (%, rem, em)
    - Professional color schemes
-   - Good contrast
-   - Consistent palette
+   - Mobile-first responsive design
+   - Modern spacing and typography
 
 4. For different requests:
-   - "Add a button" → Create a rect + text group for a button
-   - "Create a hero section" → Create background rect + heading + subtext
-   - "Add a card" → Create rect with shadow effect + text elements
-   - "Create navigation" → Create horizontal group of text elements
-   - "Add form" → Create input fields (rects) with labels (text)
+   - "Add a button" → Create a button element with proper styling
+   - "Create a hero section" → Create section with heading, text, and CTA
+   - "Add a card" → Create div with shadow, border-radius, padding
+   - "Create navigation" → Create nav with flex layout
+   - "Add form" → Create form elements with labels and inputs
 
-5. Support modifications:
-   - "Make it bigger" → Increase width/height
-   - "Change color to blue" → Update fill colors
-   - "Move to the right" → Adjust left position
-   - "Add shadow" → Add shadow property
+5. Common component patterns:
+   - Hero Section: section > div > h1 + p + button
+   - Card: div > img + div > h3 + p
+   - Navigation: nav > ul > li > a
+   - Feature Grid: section > div (flex) > multiple feature cards
+   - Footer: footer > div (flex) > columns
 
-6. Be creative but practical:
-   - Real-world usable designs
-   - Responsive proportions
-   - Professional typography
+6. Style best practices:
+   - Use flexbox for layouts
+   - Consistent spacing (multiples of 8px)
+   - Professional typography (16px base)
+   - Good contrast ratios
+   - Border radius for modern look (8px, 12px)
 
 Current canvas state: ${JSON.stringify(canvasState || {})}
 Action type: ${action || 'create'}
@@ -96,7 +109,6 @@ IMPORTANT: Return ONLY valid JSON, no markdown, no explanations outside the JSON
           { role: "user", content: prompt }
         ],
         response_format: { type: "json_object" },
-        temperature: 0.7,
       }),
     });
 
@@ -127,15 +139,15 @@ IMPORTANT: Return ONLY valid JSON, no markdown, no explanations outside the JSON
     let aiResponse;
     try {
       aiResponse = JSON.parse(content);
-      console.log("AI Response:", JSON.stringify(aiResponse, null, 2));
+      console.log("GrapeJS AI Response:", JSON.stringify(aiResponse, null, 2));
     } catch (e) {
       console.error("Failed to parse AI response:", content);
       throw new Error("Invalid JSON response from AI");
     }
 
     // Validate response structure
-    if (!aiResponse.objects || !Array.isArray(aiResponse.objects)) {
-      throw new Error("Invalid response structure: missing objects array");
+    if (!aiResponse.components || !Array.isArray(aiResponse.components)) {
+      throw new Error("Invalid response structure: missing components array");
     }
 
     return new Response(

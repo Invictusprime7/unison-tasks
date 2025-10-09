@@ -1,19 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { bundleCode, extractImageSources, resolveAssetPath } from '@/utils/codeBundler';
 
 interface LiveHTMLPreviewProps {
-  html: string;
-  css: string;
-  javascript?: string;
+  code: string;
   className?: string;
   autoRefresh?: boolean;
 }
 
 export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
-  html,
-  css,
-  javascript = '',
+  code,
   className,
   autoRefresh = true,
 }) => {
@@ -23,7 +20,7 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
   const updateTimerRef = useRef<NodeJS.Timeout>();
 
   const renderPreview = () => {
-    if (!iframeRef.current) return;
+    if (!iframeRef.current || !code.trim()) return;
 
     setStatus('loading');
     setErrorMessage('');
@@ -36,8 +33,16 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
         throw new Error('Cannot access iframe document');
       }
 
+      // Bundle the code (handles TS/JS/HTML/React)
+      const bundled = bundleCode(code);
+      console.log('[LiveHTMLPreview] Bundled code:', bundled);
+
       // Build complete HTML document
-      const completeHTML = buildHTMLDocument(html, css, javascript);
+      const completeHTML = buildHTMLDocument(
+        bundled.html || code,
+        bundled.css,
+        bundled.javascript
+      );
 
       // Write to iframe
       iframeDoc.open();
@@ -62,7 +67,7 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
   };
 
   useEffect(() => {
-    if (!autoRefresh) return;
+    if (!autoRefresh || !code.trim()) return;
 
     // Debounce updates
     if (updateTimerRef.current) {
@@ -78,7 +83,7 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
         clearTimeout(updateTimerRef.current);
       }
     };
-  }, [html, css, javascript, autoRefresh]);
+  }, [code, autoRefresh]);
 
   return (
     <div className={cn('relative w-full h-full', className)}>
@@ -115,112 +120,51 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
   );
 };
 
-/**
- * Build complete HTML document with embedded styles and scripts
- */
 function buildHTMLDocument(html: string, css: string, javascript: string): string {
-  // Clean and prepare HTML
   let bodyContent = html.trim();
   
-  // If HTML already contains doctype and html tags, use it as-is (but update styles)
   if (bodyContent.toLowerCase().includes('<!doctype') || bodyContent.toLowerCase().includes('<html')) {
-    // Extract existing styles if any
     const existingStyles = bodyContent.match(/<style[^>]*>([\s\S]*?)<\/style>/gi) || [];
     const allStyles = existingStyles.map(s => s.replace(/<\/?style[^>]*>/gi, '')).join('\n') + '\n' + css;
-    
-    // Remove old style tags and add new consolidated one
     bodyContent = bodyContent.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-    bodyContent = bodyContent.replace('</head>', `<style>${allStyles}</style>\n</head>`);
-    
-    // Add script if provided
+    bodyContent = bodyContent.replace('</head>', '<style>' + allStyles + '</style>\n</head>');
     if (javascript) {
-      bodyContent = bodyContent.replace('</body>', `<script>${javascript}</script>\n</body>`);
+      bodyContent = bodyContent.replace('</body>', '<script>\n' + javascript + '\n</script>\n</body>');
     }
-    
     return bodyContent;
   }
 
-  // Build from scratch
-  return `<!DOCTYPE html>
+  const doc = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
   <title>Live Preview</title>
   <style>
-    /* Reset and base styles */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       line-height: 1.6;
       color: #1f2937;
       background: #ffffff;
       padding: 20px;
-      min-height: 100vh;
     }
-    
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-    
-    button {
-      cursor: pointer;
-    }
-    
-    /* User styles */
+    img { max-width: 100%; height: auto; }
+    button { cursor: pointer; font-family: inherit; }
     ${css}
   </style>
-  
   <script>
-    // Global error handler
-    window.addEventListener('error', function(event) {
-      console.error('Preview Error:', event.error || event);
-      
-      // Create error display
-      const errorDiv = document.createElement('div');
-      errorDiv.style.cssText = \`
-        position: fixed;
-        top: 10px;
-        left: 10px;
-        right: 10px;
-        background: #fee;
-        border: 2px solid #fcc;
-        border-radius: 8px;
-        padding: 16px;
-        color: #c33;
-        font-family: monospace;
-        font-size: 12px;
-        z-index: 999999;
-        max-height: 200px;
-        overflow: auto;
-      \`;
-      errorDiv.innerHTML = \`
-        <strong>⚠️ Error:</strong><br>
-        \${event.error?.message || event.message || 'Unknown error'}
-        <br><br>
-        <small style="color: #666;">\${event.error?.stack || ''}</small>
-      \`;
-      
-      document.body.insertBefore(errorDiv, document.body.firstChild);
-      
-      // Prevent default error handling
-      event.preventDefault();
+    window.addEventListener('error', function(e) {
+      console.error('Error:', e.error);
+      const div = document.createElement('div');
+      div.style.cssText = 'position:fixed;top:10px;left:10px;right:10px;background:#fee;border:2px solid #fcc;padding:16px;border-radius:8px;color:#c33;z-index:999999;';
+      div.textContent = '⚠️ Error: ' + (e.error?.message || e.message);
+      document.body.insertBefore(div, document.body.firstChild);
     });
-    
-    // Prevent accidental navigation
     document.addEventListener('DOMContentLoaded', function() {
       document.querySelectorAll('a').forEach(function(link) {
         link.addEventListener('click', function(e) {
-          if (!link.href || link.href === '#') {
-            e.preventDefault();
-          }
+          if (!link.href || link.href === '#') e.preventDefault();
         });
       });
     });
@@ -228,8 +172,9 @@ function buildHTMLDocument(html: string, css: string, javascript: string): strin
 </head>
 <body>
   ${bodyContent}
-  
-  ${javascript ? `<script>\n${javascript}\n</script>` : ''}
+  ${javascript ? '<script>\n' + javascript + '\n</script>' : ''}
 </body>
 </html>`;
+
+  return doc;
 }

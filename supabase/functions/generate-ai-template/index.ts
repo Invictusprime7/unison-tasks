@@ -18,78 +18,145 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY not configured");
     }
 
-    const systemPrompt = `You are an expert design template generator. Create beautiful, production-ready templates with actual visual content.
+    const systemPrompt = `You are an expert web template generator for a Web Builder canvas. Create beautiful, production-ready web page templates.
 
-Your templates MUST use the new Zod-validated schema:
+Your templates MUST use this exact schema:
 {
-  "name": "string",
-  "description": "string",
-  "category": "social-media|web|presentation|print",
-  "frames": [
+  "name": "Template Name",
+  "description": "Brief description",
+  "industry": "web",
+  "brandKit": {
+    "primaryColor": "#3b82f6",
+    "secondaryColor": "#1e40af",
+    "accentColor": "#06b6d4",
+    "fonts": {
+      "heading": "Inter",
+      "body": "Inter",
+      "accent": "Inter"
+    }
+  },
+  "sections": [
     {
-      "id": "frame-1",
-      "name": "Main Frame",
-      "width": 1080,
-      "height": 1080,
-      "background": "#ffffff",
-      "layout": "free|flex-column|flex-row|grid",
-      "gap": 20,
-      "padding": 40,
-      "layers": [
+      "id": "section-hero",
+      "name": "Hero Section",
+      "type": "hero",
+      "constraints": {
+        "width": { "mode": "fill" },
+        "height": { "mode": "fixed", "value": 600 },
+        "padding": { "top": 60, "right": 80, "bottom": 60, "left": 80 },
+        "gap": 24,
+        "flexDirection": "column",
+        "alignItems": "center",
+        "justifyContent": "center"
+      },
+      "components": [
         {
-          "type": "shape|text|image",
-          "x": 0,
-          "y": 0,
-          "width": 200,
-          "height": 100,
-          "rotation": 0,
-          "opacity": 1,
-          "visible": true,
-          "locked": false,
-          // For text layers:
-          "content": "Text content",
-          "fontFamily": "Inter",
-          "fontSize": 48,
-          "fontWeight": "bold|normal",
-          "fontStyle": "normal|italic",
-          "textAlign": "left|center|right",
-          "color": "#000000",
-          "lineHeight": 1.2,
-          "letterSpacing": 0,
-          // For image layers:
-          "src": "https://images.unsplash.com/...",
-          "fit": "cover|contain|fill",
-          "filters": [],
-          "borderRadius": 0,
-          // For shape layers:
-          "shape": "rectangle|circle|ellipse",
-          "fill": "#3b82f6",
-          "stroke": "#000000",
-          "strokeWidth": 0,
-          "borderRadius": 8
+          "id": "hero-title",
+          "type": "text",
+          "name": "Hero Title",
+          "constraints": {
+            "width": { "mode": "hug" },
+            "height": { "mode": "hug" }
+          },
+          "dataBinding": {
+            "field": "title",
+            "type": "text",
+            "defaultValue": "Welcome to Our Platform"
+          },
+          "style": {
+            "backgroundColor": "transparent",
+            "opacity": 1
+          },
+          "fabricProps": {
+            "fontSize": 56,
+            "fontFamily": "Inter",
+            "fontWeight": "bold",
+            "fill": "#1e293b"
+          }
+        },
+        {
+          "id": "hero-subtitle",
+          "type": "text",
+          "name": "Subtitle",
+          "constraints": {
+            "width": { "mode": "hug" },
+            "height": { "mode": "hug" }
+          },
+          "dataBinding": {
+            "field": "subtitle",
+            "type": "text",
+            "defaultValue": "Build amazing things with our tools"
+          },
+          "style": {
+            "backgroundColor": "transparent",
+            "opacity": 1
+          },
+          "fabricProps": {
+            "fontSize": 24,
+            "fontFamily": "Inter",
+            "fill": "#64748b"
+          }
+        },
+        {
+          "id": "hero-button",
+          "type": "button",
+          "name": "CTA Button",
+          "constraints": {
+            "width": { "mode": "fixed", "value": 200 },
+            "height": { "mode": "fixed", "value": 60 }
+          },
+          "dataBinding": {
+            "field": "ctaText",
+            "type": "text",
+            "defaultValue": "Get Started"
+          },
+          "style": {
+            "backgroundColor": "#3b82f6",
+            "borderRadius": 8,
+            "opacity": 1
+          },
+          "fabricProps": {
+            "fontSize": 18,
+            "fontFamily": "Inter",
+            "fontWeight": "600",
+            "fill": "#ffffff"
+          }
         }
       ]
     }
-  ]
+  ],
+  "variants": [
+    {
+      "id": "v1",
+      "name": "Desktop",
+      "size": { "width": 1280, "height": 800 },
+      "format": "web"
+    }
+  ],
+  "data": {
+    "title": "Your Title Here",
+    "subtitle": "Your subtitle here",
+    "ctaText": "Get Started"
+  }
 }
 
 CRITICAL REQUIREMENTS:
-1. ALWAYS create multiple visible layers - minimum 5 layers per frame
-2. Use real Unsplash image URLs: https://images.unsplash.com/photo-{id}?w=800&q=80
-3. Create visual hierarchy: backgrounds, images, text overlays, shapes
-4. Use proper colors (hex format like #3b82f6)
-5. Set appropriate dimensions and positions
-6. Use layouts: "free" for absolute positioning, "flex-column" for vertical stacks
-7. Create professional designs inspired by Canva, Figma templates
+1. Create COMPLETE sections with MULTIPLE components (minimum 3-5 components per section)
+2. Use component types: "text", "image", "shape", "button", "container"
+3. Always include proper constraints (width/height modes: "fill", "hug", "fixed")
+4. Set fabricProps for styling (fontSize, fontFamily, fill color, fontWeight)
+5. Use dataBinding to make content dynamic
+6. Create proper layout with padding, gap, flexDirection, alignItems, justifyContent
+7. Use realistic content and professional color schemes
+8. For images, use Unsplash URLs: https://images.unsplash.com/photo-{id}?w=800&q=80
 
-EXAMPLE TEMPLATE FOR E-COMMERCE:
-- Background shape (full frame, gradient color)
-- Hero image layer (product photo from Unsplash)
-- Text layers: brand name, product title, price, description
-- Shape layers: colored accent boxes, decorative elements
-- Call-to-action button (shape + text)
+EXAMPLE WEB SECTIONS TO CREATE:
+- Hero: Large heading, subtitle, CTA button, optional background image
+- Features: Grid of feature cards with icons, titles, descriptions
+- CTA: Call-to-action section with compelling text and button
+- Footer: Links, social icons, copyright text
 
-Make it visually stunning and immediately usable!`;
+Make templates production-ready with real content, proper spacing, and visual hierarchy!`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -101,7 +168,7 @@ Make it visually stunning and immediately usable!`;
         model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: prompt.description }
+          { role: "user", content: prompt }
         ],
         response_format: { type: "json_object" }
       }),

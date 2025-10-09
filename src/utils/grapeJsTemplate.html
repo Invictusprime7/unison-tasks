@@ -11,16 +11,27 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
+      background: #f5f5f5;
     }
     #gjs {
       height: 100%;
       width: 100%;
       border: 0;
     }
-    .gjs-block {
-      width: auto;
-      height: auto;
-      min-height: 48px;
+    .gjs-cv-canvas {
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+    }
+    .gjs-cv-canvas__frames {
+      width: 900px !important;
+      max-width: 100%;
+      margin: 0 auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    .gjs-frame {
+      max-width: 900px;
+      margin: 0 auto;
     }
   </style>
 </head>
@@ -36,16 +47,16 @@
       width: 'auto',
       storageManager: false,
       panels: { defaults: [] },
+      canvas: {
+        styles: [],
+        scripts: [],
+      },
       deviceManager: {
         devices: [
           { name: 'Desktop', width: '' },
           { name: 'Tablet', width: '768px', widthMedia: '992px' },
           { name: 'Mobile', width: '320px', widthMedia: '480px' },
         ]
-      },
-      canvas: {
-        styles: [],
-        scripts: [],
       }
     });
 

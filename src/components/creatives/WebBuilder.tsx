@@ -16,6 +16,7 @@ import { ExportDialog } from "./design-studio/ExportDialog";
 import { webBlocks } from "./web-builder/webBlocks";
 import { useKeyboardShortcuts, defaultWebBuilderShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useCanvasHistory } from "@/hooks/useCanvasHistory";
+import { ChevronLeft, ChevronRight, PanelLeftClose, PanelRightClose } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -43,6 +44,8 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [exportHtml, setExportHtml] = useState("");
   const [exportCss, setExportCss] = useState("");
+  const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
 
   // History management
   const history = useCanvasHistory(fabricCanvas);
@@ -53,8 +56,8 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     const canvasElement = canvasRef.current;
     
     const canvas = new FabricCanvas(canvasElement, {
-      width: 1200,
-      height: 800,
+      width: 1920,
+      height: 1080,
       backgroundColor: "#1a1a1a",
     });
 
@@ -216,7 +219,15 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     switch (device) {
       case "tablet": return 768;
       case "mobile": return 375;
-      default: return 1200;
+      default: return 1920;
+    }
+  };
+
+  const getCanvasHeight = () => {
+    switch (device) {
+      case "tablet": return 1024;
+      case "mobile": return 667;
+      default: return 1080;
     }
   };
 
@@ -417,8 +428,21 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
 
       {/* Main Content */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Navigation Panel */}
-        <NavigationPanel />
+        {/* Left Navigation Panel - Collapsible */}
+        {!leftPanelCollapsed && <NavigationPanel />}
+        
+        {/* Left Panel Toggle */}
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setLeftPanelCollapsed(!leftPanelCollapsed)}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 h-12 w-6 rounded-r-md rounded-l-none bg-[#1a1a1a] border-l-0 border border-white/10 text-white/70 hover:text-white hover:bg-[#252525]"
+            title={leftPanelCollapsed ? "Show left panel" : "Hide left panel"}
+          >
+            {leftPanelCollapsed ? <ChevronRight className="h-4 w-4" /> : <ChevronLeft className="h-4 w-4" />}
+          </Button>
+        </div>
 
         {/* Center Canvas Area */}
         <div className="flex-1 flex flex-col bg-[#0a0a0a]">
@@ -453,17 +477,17 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                 Mobile
               </Button>
             </div>
-            <span className="text-sm text-white/50">{getCanvasWidth()}px</span>
+            <span className="text-sm text-white/50">{getCanvasWidth()}×{getCanvasHeight()}px</span>
           </div>
 
           {/* Canvas */}
-          <div className="flex-1 overflow-auto p-8 flex items-center justify-center">
+          <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
             <div 
-              className="bg-white"
+              className="bg-white shadow-2xl"
               style={{ 
                 width: getCanvasWidth() * zoom,
-                height: 800 * zoom,
-                boxShadow: "0 0 0 1px rgba(255,255,255,0.1)"
+                height: getCanvasHeight() * zoom,
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)"
               }}
             >
               <canvas ref={canvasRef} />
@@ -498,12 +522,27 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           </div>
         </div>
 
-        {/* Right Properties Panel */}
-        <WebPropertiesPanel 
-          fabricCanvas={fabricCanvas}
-          selectedObject={selectedObject}
-          onUpdate={() => fabricCanvas?.renderAll()}
-        />
+        {/* Right Properties Panel - Collapsible */}
+        {/* Right Panel Toggle */}
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 h-12 w-6 rounded-l-md rounded-r-none bg-[#1a1a1a] border-r-0 border border-white/10 text-white/70 hover:text-white hover:bg-[#252525]"
+            title={rightPanelCollapsed ? "Show properties panel" : "Hide properties panel"}
+          >
+            {rightPanelCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+          </Button>
+        </div>
+        
+        {!rightPanelCollapsed && (
+          <WebPropertiesPanel 
+            fabricCanvas={fabricCanvas}
+            selectedObject={selectedObject}
+            onUpdate={() => fabricCanvas?.renderAll()}
+          />
+        )}
       </div>
 
       {/* AI Assistant Panel */}

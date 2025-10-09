@@ -282,12 +282,6 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           <div className="flex-1 relative min-h-[300px] overflow-hidden">
             <div ref={editorRef} className="h-full w-full" />
           </div>
-
-          {/* Right Sidebar - Properties */}
-          <div className="w-full sm:w-64 md:w-72 border-t sm:border-l sm:border-t-0 bg-card max-h-[40vh] sm:max-h-none flex-shrink-0 overflow-hidden">
-            <div className="panel__switcher border-b text-xs overflow-x-auto"></div>
-            <div className="panel__right h-full overflow-auto text-xs"></div>
-          </div>
         </div>
       )}
     </div>

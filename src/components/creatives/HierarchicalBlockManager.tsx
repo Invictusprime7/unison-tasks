@@ -166,13 +166,13 @@ export const HierarchicalBlockManager = ({ editor }: HierarchicalBlockManagerPro
       <div className="flex-1 overflow-auto">
         <Accordion type="multiple" defaultValue={["basics"]} className="w-full">
           {Object.entries(filteredCategories).map(([categoryKey, category]: [string, any]) => {
-            const CategoryIcon = category.icon;
+            const Icon = category.icon;
             
             return (
               <AccordionItem key={categoryKey} value={categoryKey} className="border-b border-border/50">
                 <AccordionTrigger className="px-3 py-2.5 hover:bg-muted/50 text-sm font-medium">
                   <div className="flex items-center gap-2">
-                    <CategoryIcon className="h-4 w-4 text-muted-foreground" />
+                    {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
                     <span>{category.label}</span>
                   </div>
                 </AccordionTrigger>
@@ -185,7 +185,7 @@ export const HierarchicalBlockManager = ({ editor }: HierarchicalBlockManagerPro
                         <AccordionItem key={subKey} value={subKey} className="border-none">
                           <AccordionTrigger className="px-6 py-2 hover:bg-muted/30 text-sm">
                             <div className="flex items-center gap-2">
-                              <SubIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                              {SubIcon && <SubIcon className="h-3.5 w-3.5 text-muted-foreground" />}
                               <span className="text-muted-foreground">{subcategory.label}</span>
                             </div>
                           </AccordionTrigger>

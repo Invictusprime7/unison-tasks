@@ -1294,7 +1294,40 @@ export const DesignStudio = forwardRef((props, ref) => {
       </div>
 
       {/* Work Area - Responsive Grid */}
-      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[1fr] xl:grid-cols-[1fr_320px] overflow-hidden min-w-0">
+      <div className="flex-1 flex flex-col lg:grid lg:grid-cols-[280px_1fr] xl:grid-cols-[280px_1fr_320px] overflow-hidden min-w-0">
+        {/* Left Sidebar - Elements & Layers (Collapsible on mobile) */}
+        <aside className="hidden lg:flex border-r-2 border-blue-400 shadow-lg shadow-blue-400/20 bg-white overflow-hidden flex-col flex-shrink-0">
+          <DesignSidebar
+            onElementSelect={addElementToCanvas}
+            onElementDragStart={(element) => {
+              if (fabricCanvas) {
+                (fabricCanvas as any)._pendingElement = element;
+              }
+            }}
+            onAddText={addText}
+            onAddRectangle={addRectangle}
+            onAddCircle={addCircle}
+            onAddImage={addImage}
+            onDuplicate={duplicateSelected}
+            onBringForward={bringForward}
+            onSendBackward={sendBackward}
+            onDelete={deleteSelected}
+            selectedObject={selectedObject}
+            layers={fabricCanvas?.getObjects() || []}
+            onLayerSelect={(obj) => {
+              if (fabricCanvas) {
+                fabricCanvas.setActiveObject(obj);
+                fabricCanvas.renderAll();
+                setSelectedObject(obj);
+              }
+            }}
+            isCropping={isCropping}
+            onApplyCrop={applyCrop}
+            onCancelCrop={cancelCrop}
+          />
+        </aside>
+
+
         {/* Canvas Center - Responsive */}
         <main className="relative bg-gray-100 flex items-center justify-center overflow-auto p-2 md:p-4 min-w-0">
           <div

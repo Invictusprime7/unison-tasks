@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { NavigationPanel } from "./web-builder/NavigationPanel";
 import { ComponentsLibrary } from "./web-builder/ComponentsLibrary";
 import { WebPropertiesPanel } from "./web-builder/WebPropertiesPanel";
-import { WebLayersPanel } from "./web-builder/WebLayersPanel";
 import { AIAssistantPanel } from "./web-builder/AIAssistantPanel";
 import { CodePreviewDialog } from "./web-builder/CodePreviewDialog";
 import { webBlocks } from "./web-builder/webBlocks";
@@ -411,20 +410,12 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           </div>
         </div>
 
-        {/* Right Side - Layers and Properties */}
-        <div className="flex">
-          <WebLayersPanel
-            fabricCanvas={fabricCanvas}
-            selectedObject={selectedObject}
-            onDelete={handleDelete}
-            onDuplicate={handleDuplicate}
-          />
-          <WebPropertiesPanel 
-            fabricCanvas={fabricCanvas}
-            selectedObject={selectedObject}
-            onUpdate={() => fabricCanvas?.renderAll()}
-          />
-        </div>
+        {/* Right Properties Panel */}
+        <WebPropertiesPanel 
+          fabricCanvas={fabricCanvas}
+          selectedObject={selectedObject}
+          onUpdate={() => fabricCanvas?.renderAll()}
+        />
       </div>
 
       {/* AI Assistant Panel */}

@@ -51,10 +51,14 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
       pluginsOpts: {
         [gjsPresetWebpage as any]: {
           blocksBasicOpts: {
-            blocks: ["column1", "column2", "column3", "text", "link", "image", "video"],
-            flexGrid: true,
+            blocks: [], // Remove all basic blocks
+            flexGrid: false,
           },
-          blocks: ["link-block", "quote", "text-basic"],
+          blocks: [], // Remove all preset blocks
+          modalImportTitle: 'Import Template',
+          modalImportButton: 'Import',
+          modalImportLabel: '',
+          importPlaceholder: '',
         },
       },
       storageManager: false,

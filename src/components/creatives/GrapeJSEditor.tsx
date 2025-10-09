@@ -5,7 +5,7 @@ import "@/styles/grapesjs-custom.css";
 import gjsPresetWebpage from "grapesjs-preset-webpage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Code, Eye, Sparkles, Send, Loader2, Save, FolderOpen, Download, Palette, LayoutGrid } from "lucide-react";
+import { Code, Eye, Sparkles, Send, Loader2, Save, FolderOpen, Download, Palette, LayoutGrid, Monitor, Tablet, Smartphone } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
 import { toast } from "sonner";
 import { WebComponentsPanel } from "./design-studio/WebComponentsPanel";
@@ -110,20 +110,20 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
             buttons: [
               {
                 id: "device-desktop",
-                label: "Desktop",
+                label: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/></svg><span style="margin-left: 6px;">Desktop</span>`,
                 command: "set-device-desktop",
                 active: true,
                 togglable: false,
               },
               {
                 id: "device-tablet",
-                label: "Tablet",
+                label: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="16" height="20" x="4" y="2" rx="2" ry="2"/><line x1="12" x2="12.01" y1="18" y2="18"/></svg><span style="margin-left: 6px;">Tablet</span>`,
                 command: "set-device-tablet",
                 togglable: false,
               },
               {
                 id: "device-mobile",
-                label: "Mobile",
+                label: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/></svg><span style="margin-left: 6px;">Mobile</span>`,
                 command: "set-device-mobile",
                 togglable: false,
               },

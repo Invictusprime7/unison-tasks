@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { AICodeAssistant } from "./AICodeAssistant";
 import { Canvas as FabricCanvas } from "fabric";
 import { Button } from "@/components/ui/button";
 import { 
@@ -1024,6 +1025,9 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* AI Code Assistant - Bottom Panel */}
+      <AICodeAssistant />
     </div>
   );
 };

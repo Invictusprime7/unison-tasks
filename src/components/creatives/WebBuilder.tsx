@@ -37,6 +37,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [activeMode, setActiveMode] = useState<"insert" | "layout" | "text" | "vector">("insert");
   const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [zoom, setZoom] = useState(0.5);
+  const [canvasHeight, setCanvasHeight] = useState(1440);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [codePreviewOpen, setCodePreviewOpen] = useState(false);
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
@@ -59,7 +60,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     
     const canvas = new FabricCanvas(canvasElement, {
       width: 1920,
-      height: 1440,
+      height: canvasHeight,
       backgroundColor: "#1a1a1a",
     });
 
@@ -90,7 +91,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
       setFabricCanvas(null);
       setSelectedObject(null);
     };
-  }, []);
+  }, [canvasHeight]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
@@ -146,11 +147,37 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     },
   ]);
 
+  // Auto-adjust canvas height based on content
+  const updateCanvasHeight = () => {
+    if (!fabricCanvas) return;
+    
+    const objects = fabricCanvas.getObjects();
+    if (objects.length === 0) {
+      setCanvasHeight(1440);
+      return;
+    }
+    
+    let maxBottom = 1440; // Minimum height
+    objects.forEach((obj: any) => {
+      const objBottom = (obj.top || 0) + (obj.height || 0) * (obj.scaleY || 1);
+      if (objBottom > maxBottom) {
+        maxBottom = objBottom;
+      }
+    });
+    
+    // Add padding at the bottom
+    const newHeight = Math.max(1440, Math.ceil(maxBottom + 200));
+    if (newHeight !== canvasHeight) {
+      setCanvasHeight(newHeight);
+    }
+  };
+
   // Save to history when objects change
   useEffect(() => {
     if (!fabricCanvas) return;
 
     const handleObjectModified = () => {
+      updateCanvasHeight();
       setTimeout(() => history.save(), 100);
     };
 
@@ -163,7 +190,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
       fabricCanvas.off("object:removed", handleObjectModified);
       fabricCanvas.off("object:modified", handleObjectModified);
     };
-  }, [fabricCanvas, history]);
+  }, [fabricCanvas, history, canvasHeight]);
 
   const handleDelete = () => {
     if (!fabricCanvas || !selectedObject) return;
@@ -227,9 +254,9 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
 
   const getCanvasHeight = () => {
     switch (device) {
-      case "tablet": return 1024;
-      case "mobile": return 667;
-      default: return 1440;
+      case "tablet": return Math.max(1024, canvasHeight);
+      case "mobile": return Math.max(667, canvasHeight);
+      default: return canvasHeight;
     }
   };
 
@@ -528,7 +555,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                 Mobile
               </Button>
             </div>
-            <span className="text-sm text-white/50">{getCanvasWidth()}×{getCanvasHeight()}px</span>
+            <span className="text-sm text-white/50">{getCanvasWidth()}×{getCanvasHeight()}px (dynamic)</span>
           </div>
 
           {/* Canvas - Scrollable like a real website */}

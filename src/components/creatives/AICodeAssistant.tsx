@@ -60,15 +60,14 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
     }
   }, [messages]);
 
-  const extractCodeFromMessage = (content: string): string => {
-    const codeBlockRegex = /```(?:tsx|typescript|jsx|javascript)?\n([\s\S]*?)```/;
-    const match = content.match(codeBlockRegex);
-    return match ? match[1].trim() : content;
-  };
-
   const openCodeViewer = (code: string) => {
-    setCurrentCode(extractCodeFromMessage(code));
+    console.log('[AICodeAssistant] Opening code viewer with code:', code.substring(0, 100));
+    setCurrentCode(code);
     setCodeViewerOpen(true);
+    toast({
+      title: 'Code editor opened',
+      description: 'Edit and render your component',
+    });
   };
 
   const copyToClipboard = (text: string) => {
@@ -420,29 +419,33 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                         <div className="space-y-2">
                           {message.content.split('```').map((part, i) => {
                             if (i % 2 === 0) {
-                              return <p key={i} className="whitespace-pre-wrap m-0">{part}</p>;
+                              return part ? <p key={i} className="whitespace-pre-wrap m-0">{part}</p> : null;
                             }
-                            const [lang, ...code] = part.split('\n');
-                            const codeContent = code.join('\n');
+                            const lines = part.split('\n');
+                            const lang = lines[0].trim();
+                            const codeContent = lines.slice(1).join('\n').trim();
+                            
                             return (
                               <div key={i} className="relative group">
                                 <div className="flex items-center justify-between bg-muted-foreground/10 px-3 py-1 rounded-t">
                                   <span className="text-xs font-mono">{lang || 'code'}</span>
-                                   <div className="flex gap-1">
+                                  <div className="flex gap-1">
                                     <Button
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => openCodeViewer(codeContent)}
                                       className="h-6 px-2"
-                                      title="Open in code viewer"
+                                      title="Open in full editor"
                                     >
-                                      <Maximize2 className="w-3 h-3" />
+                                      <Maximize2 className="w-3 h-3 mr-1" />
+                                      <span className="text-xs">Edit</span>
                                     </Button>
                                     <Button
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => copyToClipboard(codeContent)}
                                       className="h-6 px-2"
+                                      title="Copy code"
                                     >
                                       <Copy className="w-3 h-3" />
                                     </Button>

@@ -320,7 +320,7 @@
   color: hsl(var(--foreground)) !important;
 }
 
-/* Device buttons styling - Clean and visible with icons */
+/* Device buttons styling - Clean and visible */
 .gjs-pn-devices-c {
   display: flex;
   gap: 8px;
@@ -329,20 +329,10 @@
 
 .gjs-pn-devices-c .gjs-pn-btn {
   padding: 6px 16px !important;
-  min-width: 100px !important;
+  min-width: 80px !important;
   justify-content: center !important;
   font-size: 13px !important;
   height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
-}
-
-.gjs-pn-devices-c .gjs-pn-btn svg {
-  flex-shrink: 0;
-}
-
-.gjs-pn-devices-c .gjs-pn-btn span {
-  display: inline-block;
 }
 
 /* Hide GrapeJS watermark/logo */

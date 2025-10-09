@@ -46,6 +46,8 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [exportCss, setExportCss] = useState("");
   const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const mainContainerRef = useRef<HTMLDivElement>(null);
 
   // History management
   const history = useCanvasHistory(fabricCanvas);
@@ -308,8 +310,39 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     }
   };
 
+  const toggleFullscreen = async () => {
+    if (!mainContainerRef.current) return;
+
+    try {
+      if (!document.fullscreenElement) {
+        await mainContainerRef.current.requestFullscreen();
+        setIsFullscreen(true);
+        toast.success('Entered fullscreen preview');
+      } else {
+        await document.exitFullscreen();
+        setIsFullscreen(false);
+        toast.success('Exited fullscreen');
+      }
+    } catch (error) {
+      console.error('Error toggling fullscreen:', error);
+      toast.error('Failed to toggle fullscreen');
+    }
+  };
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   return (
-    <div className="flex flex-col h-screen bg-[#0a0a0a]">
+    <div ref={mainContainerRef} className="flex flex-col h-screen bg-[#0a0a0a]">
       {/* Top Toolbar */}
       <div className="h-14 bg-[#1a1a1a] border-b border-white/10 flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
@@ -415,9 +448,14 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             <Code className="h-4 w-4 mr-2" />
             Code
           </Button>
-          <Button variant="ghost" size="sm" className="text-white/70 hover:text-white">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleFullscreen}
+            className="text-white/70 hover:text-white"
+          >
             <Eye className="h-4 w-4 mr-2" />
-            Preview
+            {isFullscreen ? 'Exit Preview' : 'Preview'}
           </Button>
           <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
             <Play className="h-4 w-4 mr-2" />

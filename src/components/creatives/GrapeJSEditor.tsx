@@ -652,61 +652,83 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
 
   return (
     <div className="h-full w-full flex flex-col bg-background overflow-hidden">
-      <div className="h-9 sm:h-10 border-b bg-card flex items-center justify-between px-2 sm:px-4 flex-shrink-0 min-w-0">
-        <div className="panel__devices flex gap-1 min-w-0"></div>
-        <div className="flex gap-1 sm:gap-2 flex-shrink-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowTokensPanel(!showTokensPanel)}
-              className="h-7 sm:h-8 px-2"
-            >
-              <Palette className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Tokens</span>
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowLayoutPanel(!showLayoutPanel)}
-              className="h-7 sm:h-8 px-2"
-            >
-              <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Layout</span>
-            </Button>
-            <Button
-            variant="outline"
+      {/* Top Toolbar - Fixed height and clean layout */}
+      <div className="h-14 border-b bg-card flex items-center justify-between px-4 flex-shrink-0 z-10">
+        {/* Left: Device Switcher */}
+        <div className="panel__devices flex gap-2"></div>
+        
+        {/* Right: Action Buttons */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowTokensPanel(!showTokensPanel)}
+            className="h-9 gap-2"
+          >
+            <Palette className="h-4 w-4" />
+            <span>Tokens</span>
+          </Button>
+          
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowLayoutPanel(!showLayoutPanel)}
+            className="h-9 gap-2"
+          >
+            <LayoutGrid className="h-4 w-4" />
+            <span>Layout</span>
+          </Button>
+          
+          <div className="w-px h-6 bg-border mx-1"></div>
+          
+          <Button
+            variant="ghost"
             size="sm"
             onClick={() => setGalleryOpen(true)}
-            className="h-7 sm:h-8 px-2"
+            className="h-9 gap-2"
           >
-            <FolderOpen className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Templates</span>
+            <FolderOpen className="h-4 w-4" />
+            <span>Templates</span>
           </Button>
+          
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={handleExport}
-            className="h-7 sm:h-8 px-2"
+            className="h-9 gap-2"
           >
-            <Download className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Export</span>
+            <Download className="h-4 w-4" />
+            <span>Export</span>
           </Button>
+          
           <Button
-            variant="outline"
+            variant="ghost"
             size="sm"
             onClick={() => setShowCode(!showCode)}
-            className="h-7 sm:h-8 px-2"
+            className="h-9 gap-2"
           >
-            {showCode ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" /> : <Code className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />}
-            <span className="hidden sm:inline">{showCode ? "Visual" : "Code"}</span>
+            {showCode ? (
+              <>
+                <Eye className="h-4 w-4" />
+                <span>Visual</span>
+              </>
+            ) : (
+              <>
+                <Code className="h-4 w-4" />
+                <span>Code</span>
+              </>
+            )}
           </Button>
+          
+          <div className="w-px h-6 bg-border mx-1"></div>
+          
           <Button 
             size="sm" 
             onClick={() => setSaveDialogOpen(true)} 
-            className="h-7 sm:h-8 px-2 text-xs sm:text-sm"
+            className="h-9 gap-2"
           >
-            <Save className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Save</span>
+            <Save className="h-4 w-4" />
+            <span>Save</span>
           </Button>
         </div>
       </div>

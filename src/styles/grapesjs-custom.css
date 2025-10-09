@@ -5,36 +5,42 @@
   display: none;
 }
 
-/* Main Canvas Styling - Fixed spacing and borders */
+/* Main Canvas Styling - Fixed spacing and no overlap */
 .gjs-cv-canvas {
   background: hsl(var(--muted) / 0.3) !important;
   top: 0 !important;
-  padding: 20px !important;
+  padding: 16px !important;
   box-sizing: border-box !important;
   overflow: auto !important;
+  position: relative !important;
 }
 
 .gjs-cv-canvas__frames {
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .gjs-frame-wrapper {
   margin: 0 auto !important;
   padding: 0 !important;
   box-sizing: border-box !important;
-  border: 1px solid hsl(var(--border)) !important;
+  border: 2px solid hsl(var(--border)) !important;
   background: #fff !important;
+  border-radius: 4px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
 }
 
 .gjs-frame {
   border: none !important;
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
   margin: 0 !important;
   padding: 0 !important;
   box-sizing: border-box !important;
   display: block !important;
+  width: 100% !important;
+  height: 100% !important;
 }
 
 /* Panels - Modern Look */
@@ -314,16 +320,19 @@
   color: hsl(var(--foreground)) !important;
 }
 
-/* Device buttons styling */
+/* Device buttons styling - Clean and visible */
 .gjs-pn-devices-c {
   display: flex;
-  gap: 4px;
+  gap: 8px;
+  align-items: center;
 }
 
 .gjs-pn-devices-c .gjs-pn-btn {
-  padding: 8px 12px !important;
-  min-width: 90px !important;
+  padding: 6px 16px !important;
+  min-width: 80px !important;
   justify-content: center !important;
+  font-size: 13px !important;
+  height: 36px !important;
 }
 
 /* Hide GrapeJS watermark/logo */

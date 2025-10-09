@@ -381,16 +381,17 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
 
     const handleWheel = (e: WheelEvent) => {
       // Only zoom if Ctrl key is pressed
-      if (!e.ctrlKey) return;
-      
-      e.preventDefault();
-      const delta = e.deltaY > 0 ? 0.9 : 1.1;
-      const newZoom = Math.max(0.1, Math.min(2, zoom * delta));
-      setZoom(newZoom);
-      if (fabricCanvas) {
-        fabricCanvas.setZoom(newZoom);
-        fabricCanvas.renderAll();
+      if (e.ctrlKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? 0.9 : 1.1;
+        const newZoom = Math.max(0.1, Math.min(2, zoom * delta));
+        setZoom(newZoom);
+        if (fabricCanvas) {
+          fabricCanvas.setZoom(newZoom);
+          fabricCanvas.renderAll();
+        }
       }
+      // If Ctrl is not pressed, allow normal scrolling (do nothing)
     };
 
     container.addEventListener('wheel', handleWheel, { passive: false });

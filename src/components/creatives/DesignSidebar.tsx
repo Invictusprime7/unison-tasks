@@ -43,9 +43,8 @@ export const DesignSidebar = ({
 }: DesignSidebarProps) => {
   return (
     <Tabs defaultValue="elements" className="w-full h-full flex flex-col">
-      <TabsList className="w-full grid grid-cols-4 bg-white border-b-2 border-primary h-8 text-[10px]" style={{ boxShadow: 'var(--shadow-neon-blue)' }}>
+      <TabsList className="w-full grid grid-cols-3 bg-white border-b-2 border-primary h-8 text-[10px]" style={{ boxShadow: 'var(--shadow-neon-blue)' }}>
         <TabsTrigger value="elements" className="text-[10px] py-1 text-gray-700">Design</TabsTrigger>
-        <TabsTrigger value="web" className="text-[10px] py-1 text-gray-700">Web</TabsTrigger>
         <TabsTrigger value="layers" className="text-[10px] py-1 text-gray-700">Layers</TabsTrigger>
         <TabsTrigger value="export" className="text-[10px] py-1 text-gray-700">Export</TabsTrigger>
       </TabsList>
@@ -55,12 +54,6 @@ export const DesignSidebar = ({
           onElementSelect={onElementSelect}
           onElementDragStart={onElementDragStart}
         />
-      </TabsContent>
-
-      <TabsContent value="web" className="flex-1 m-0 overflow-hidden">
-        <div className="p-4 text-sm text-muted-foreground">
-          Web components are available in the Web Builder. Switch to the Web tab in the main toolbar to access GrapeJS editor with web components.
-        </div>
       </TabsContent>
 
       <TabsContent value="export" className="flex-1 m-0 overflow-hidden">

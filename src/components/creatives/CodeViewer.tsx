@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { LiveCodePreview } from './LiveCodePreview';
 import { HTMLComponentPreview } from './HTMLComponentPreview';
+import { LiveHTMLPreview } from './LiveHTMLPreview';
 import { parseComponentCode } from '@/utils/componentRenderer';
 
 interface CodeViewerProps {
@@ -187,16 +188,22 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
         </TabsContent>
 
 
-        <TabsContent value="component" className="flex-1 m-0 p-0 data-[state=active]:flex bg-muted/10">
-          <HTMLComponentPreview 
+        <TabsContent value="component" className="flex-1 m-0 p-0 data-[state=active]:flex">
+          <LiveHTMLPreview 
             html={componentData.html}
             css={componentData.css}
+            autoRefresh={true}
             className="w-full h-full"
           />
         </TabsContent>
 
         <TabsContent value="live" className="flex-1 m-0 p-0 data-[state=active]:flex">
-          <LiveCodePreview code={code} autoRefresh={true} />
+          <LiveHTMLPreview 
+            html={componentData.html}
+            css={componentData.css}
+            autoRefresh={true}
+            className="w-full h-full"
+          />
         </TabsContent>
 
         <TabsContent value="preview" className="flex-1 m-0 p-4 overflow-auto bg-muted/10">

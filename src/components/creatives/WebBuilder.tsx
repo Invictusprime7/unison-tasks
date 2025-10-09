@@ -168,6 +168,15 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             <Code className="h-4 w-4 mr-2" />
             Code
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setAiPanelOpen(true)}
+            className="text-white/70 hover:text-white"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Assistant
+          </Button>
           <Button variant="ghost" size="sm" className="text-white/70 hover:text-white">
             <Eye className="h-4 w-4 mr-2" />
             Preview
@@ -284,6 +293,9 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           selectedObject={selectedObject}
         />
       </div>
+
+      {/* AI Assistant Panel */}
+      <AIAssistantPanel isOpen={aiPanelOpen} onClose={() => setAiPanelOpen(false)} />
 
       {/* Code Preview Dialog */}
       <CodePreviewDialog

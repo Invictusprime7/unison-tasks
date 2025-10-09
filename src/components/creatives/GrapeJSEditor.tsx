@@ -364,7 +364,7 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           </div>
 
           {/* AI Assistant - Always Visible at Bottom */}
-          <div className={`border-t bg-card p-3 flex-shrink-0 ${isFullscreen ? 'fixed bottom-0 left-0 right-0 z-[10050]' : ''}`}>
+          <div className={`border-t bg-card p-3 flex-shrink-0 ${isFullscreen ? 'fixed bottom-0 left-0 right-0 z-[99999] shadow-lg' : ''}`}>
             <form onSubmit={handleAiAssist} className="flex gap-2">
               <div className="flex items-center gap-2 flex-1">
                 <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />

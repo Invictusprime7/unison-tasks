@@ -1,113 +1,80 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { supabase } from "@/integrations/supabase/client";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface SaveTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  canvasData: any;
+  onSave: (data: {
+    name: string;
+    description: string;
+    isPublic: boolean;
+  }) => Promise<void>;
+  isLoading?: boolean;
 }
 
-export const SaveTemplateDialog = ({ open, onOpenChange, canvasData }: SaveTemplateDialogProps) => {
+export const SaveTemplateDialog = ({
+  open,
+  onOpenChange,
+  onSave,
+  isLoading = false,
+}: SaveTemplateDialogProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isPublic, setIsPublic] = useState(false);
-  const queryClient = useQueryClient();
 
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const { data, error } = await supabase
-        .from("design_templates")
-        .insert({
-          user_id: user.id,
-          name,
-          description: description || null,
-          canvas_data: canvasData,
-          is_public: isPublic,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // Create initial version
-      const { error: versionError } = await supabase
-        .from("template_versions")
-        .insert({
-          template_id: data.id,
-          version_number: 1,
-          canvas_data: canvasData,
-          created_by: user.id,
-        });
-
-      if (versionError) throw versionError;
-
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["design-templates"] });
-      toast.success("Template saved successfully");
-      setName("");
-      setDescription("");
-      setIsPublic(false);
-      onOpenChange(false);
-    },
-    onError: (error) => {
-      toast.error("Failed to save template");
-      console.error(error);
-    },
-  });
-
-  const handleSave = () => {
-    if (!name.trim()) {
-      toast.error("Please enter a template name");
-      return;
-    }
-    saveMutation.mutate();
+  const handleSave = async () => {
+    if (!name.trim()) return;
+    
+    await onSave({ name, description, isPublic });
+    setName("");
+    setDescription("");
+    setIsPublic(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Save Template</DialogTitle>
+          <DialogDescription>
+            Save your design as a template for future use
+          </DialogDescription>
         </DialogHeader>
-
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
             <Label htmlFor="name">Template Name *</Label>
             <Input
               id="name"
-              placeholder="My Design Template"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              placeholder="My Awesome Design"
             />
           </div>
-
-          <div className="space-y-2">
+          <div className="grid gap-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              placeholder="Describe your template..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
+              placeholder="Describe your template..."
               rows={3}
             />
           </div>
-
           <div className="flex items-center justify-between">
-            <Label htmlFor="public">Make template public</Label>
+            <Label htmlFor="public">Make Public</Label>
             <Switch
               id="public"
               checked={isPublic}
@@ -115,13 +82,12 @@ export const SaveTemplateDialog = ({ open, onOpenChange, canvasData }: SaveTempl
             />
           </div>
         </div>
-
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={saveMutation.isPending}>
-            {saveMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <Button onClick={handleSave} disabled={!name.trim() || isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save Template
           </Button>
         </DialogFooter>

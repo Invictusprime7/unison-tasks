@@ -1416,7 +1416,38 @@ export const DesignStudio = forwardRef((props, ref) => {
       <SaveTemplateDialog
         open={showSaveDialog}
         onOpenChange={setShowSaveDialog}
-        canvasData={fabricCanvas?.toJSON() || null}
+        onSave={async (data) => {
+          if (!fabricCanvas) return;
+          
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            
+            if (!user) {
+              toast({ title: "Please sign in to save templates", variant: "destructive" });
+              return;
+            }
+
+            const canvasData = fabricCanvas.toJSON();
+
+            const { error } = await supabase
+              .from('design_templates')
+              .insert({
+                user_id: user.id,
+                name: data.name,
+                description: data.description,
+                is_public: data.isPublic,
+                canvas_data: canvasData,
+              });
+
+            if (error) throw error;
+
+            toast({ title: "Template saved successfully" });
+            setShowSaveDialog(false);
+          } catch (error: any) {
+            console.error("Error saving template:", error);
+            toast({ title: "Failed to save template", variant: "destructive" });
+          }
+        }}
       />
       
       <VersionHistory

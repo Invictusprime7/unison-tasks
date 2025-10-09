@@ -4,10 +4,13 @@ import "grapesjs/dist/css/grapes.min.css";
 import gjsPresetWebpage from "grapesjs-preset-webpage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Code, Eye, Sparkles, Send, Loader2 } from "lucide-react";
+import { Code, Eye, Sparkles, Send, Loader2, Save, FolderOpen, Download } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
 import { toast } from "sonner";
 import { WebComponentsPanel } from "./design-studio/WebComponentsPanel";
+import { SaveTemplateDialog } from "./design-studio/SaveTemplateDialog";
+import { TemplateGallery } from "./design-studio/TemplateGallery";
+import { ExportDialog } from "./design-studio/ExportDialog";
 import { supabase } from "@/integrations/supabase/client";
 
 interface GrapeJSEditorProps {
@@ -26,6 +29,10 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
   const [aiPrompt, setAiPrompt] = useState("");
   const [isAiProcessing, setIsAiProcessing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -181,13 +188,73 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
     }
   };
 
-  const handleSave = () => {
+  const handleQuickSave = () => {
     if (!editor) return;
     
     const html = editor.getHtml();
     const css = editor.getCss();
     onSave?.(html, css);
-    toast("Template saved successfully");
+    toast("Changes saved");
+  };
+
+  const handleSaveAsTemplate = async (data: {
+    name: string;
+    description: string;
+    isPublic: boolean;
+  }) => {
+    if (!editor) return;
+    
+    setIsSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("Please sign in to save templates");
+        return;
+      }
+
+      const html = editor.getHtml();
+      const css = editor.getCss();
+
+      const { error } = await supabase
+        .from('design_templates')
+        .insert({
+          user_id: user.id,
+          name: data.name,
+          description: data.description,
+          is_public: data.isPublic,
+          canvas_data: { html, css },
+        });
+
+      if (error) throw error;
+
+      toast.success("Template saved successfully");
+      setSaveDialogOpen(false);
+    } catch (error: any) {
+      console.error("Error saving template:", error);
+      toast.error("Failed to save template");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleLoadTemplate = (html: string, css: string) => {
+    if (!editor) return;
+
+    try {
+      editor.setComponents(html);
+      editor.setStyle(css);
+      setHtmlCode(html);
+      setCssCode(css);
+    } catch (error) {
+      console.error("Error loading template:", error);
+      toast.error("Failed to load template");
+    }
+  };
+
+  const handleExport = () => {
+    if (!editor) return;
+    setExportDialogOpen(true);
   };
 
   const handleComponentSelect = (component: any) => {
@@ -275,14 +342,37 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           <Button
             variant="outline"
             size="sm"
+            onClick={() => setGalleryOpen(true)}
+            className="h-7 sm:h-8 px-2"
+          >
+            <FolderOpen className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Templates</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleExport}
+            className="h-7 sm:h-8 px-2"
+          >
+            <Download className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Export</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
             onClick={() => setShowCode(!showCode)}
             className="h-7 sm:h-8 px-2"
           >
             {showCode ? <Eye className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" /> : <Code className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />}
             <span className="hidden sm:inline">{showCode ? "Visual" : "Code"}</span>
           </Button>
-          <Button size="sm" onClick={handleSave} className="h-7 sm:h-8 px-2 text-xs sm:text-sm">
-            Save
+          <Button 
+            size="sm" 
+            onClick={() => setSaveDialogOpen(true)} 
+            className="h-7 sm:h-8 px-2 text-xs sm:text-sm"
+          >
+            <Save className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Save</span>
           </Button>
         </div>
       </div>
@@ -399,6 +489,26 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           </div>
         </div>
       )}
+
+      <SaveTemplateDialog
+        open={saveDialogOpen}
+        onOpenChange={setSaveDialogOpen}
+        onSave={handleSaveAsTemplate}
+        isLoading={isSaving}
+      />
+
+      <TemplateGallery
+        open={galleryOpen}
+        onOpenChange={setGalleryOpen}
+        onLoadTemplate={handleLoadTemplate}
+      />
+
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        html={htmlCode}
+        css={cssCode}
+      />
     </div>
   );
 };

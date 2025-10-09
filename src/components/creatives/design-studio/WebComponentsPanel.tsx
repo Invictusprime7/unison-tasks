@@ -82,6 +82,65 @@ const BUTTONS = [
       borderRadius: 20,
     }
   },
+  {
+    type: 'gradient-btn',
+    name: 'Gradient Button',
+    preview: 'Explore',
+    config: {
+      text: 'Explore',
+      width: 180,
+      height: 48,
+      fill: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      textColor: '#ffffff',
+      fontSize: 16,
+      fontWeight: 'bold',
+      borderRadius: 12,
+    }
+  },
+  {
+    type: 'ghost-btn',
+    name: 'Ghost Button',
+    preview: 'Cancel',
+    config: {
+      text: 'Cancel',
+      width: 140,
+      height: 42,
+      fill: 'transparent',
+      textColor: '#6b7280',
+      fontSize: 14,
+      borderRadius: 8,
+    }
+  },
+  {
+    type: 'danger-btn',
+    name: 'Danger Button',
+    preview: 'Delete',
+    config: {
+      text: 'Delete',
+      width: 160,
+      height: 44,
+      fill: '#ef4444',
+      textColor: '#ffffff',
+      fontSize: 15,
+      fontWeight: 'bold',
+      borderRadius: 8,
+    }
+  },
+  {
+    type: 'success-btn',
+    name: 'Success Button',
+    preview: 'Confirm',
+    config: {
+      text: 'Confirm',
+      width: 160,
+      height: 44,
+      fill: '#10b981',
+      textColor: '#ffffff',
+      fontSize: 15,
+      fontWeight: 'bold',
+      borderRadius: 8,
+    }
+  },
 ];
 
 const INPUTS = [
@@ -191,6 +250,58 @@ const CARDS = [
       shadow: '0 4px 8px rgba(0,0,0,0.08)',
     }
   },
+  {
+    type: 'blog-card',
+    name: 'Blog Card',
+    preview: '📝',
+    config: {
+      width: 360,
+      height: 280,
+      fill: '#ffffff',
+      stroke: '#e5e7eb',
+      strokeWidth: 1,
+      borderRadius: 12,
+      shadow: '0 2px 8px rgba(0,0,0,0.1)',
+    }
+  },
+  {
+    type: 'team-card',
+    name: 'Team Member',
+    preview: '👤',
+    config: {
+      width: 300,
+      height: 340,
+      fill: '#ffffff',
+      stroke: '#e5e7eb',
+      strokeWidth: 1,
+      borderRadius: 16,
+      shadow: '0 4px 12px rgba(0,0,0,0.08)',
+    }
+  },
+  {
+    type: 'stats-card',
+    name: 'Stats Card',
+    preview: '📊',
+    config: {
+      width: 240,
+      height: 160,
+      fill: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      borderRadius: 12,
+      shadow: '0 8px 16px rgba(102,126,234,0.3)',
+    }
+  },
+  {
+    type: 'image-card',
+    name: 'Image Card',
+    preview: '🖼️',
+    config: {
+      width: 320,
+      height: 420,
+      fill: '#000000',
+      borderRadius: 12,
+      shadow: '0 4px 12px rgba(0,0,0,0.15)',
+    }
+  },
 ];
 
 const SECTIONS = [
@@ -235,6 +346,50 @@ const SECTIONS = [
       width: 1200,
       height: 250,
       fill: '#111827',
+      borderRadius: 0,
+    }
+  },
+  {
+    type: 'about-section',
+    name: 'About Section',
+    preview: 'About',
+    config: {
+      width: 1200,
+      height: 450,
+      fill: '#f9fafb',
+      borderRadius: 0,
+    }
+  },
+  {
+    type: 'pricing-section',
+    name: 'Pricing Section',
+    preview: '💰',
+    config: {
+      width: 1200,
+      height: 500,
+      fill: '#ffffff',
+      borderRadius: 0,
+    }
+  },
+  {
+    type: 'testimonial-section',
+    name: 'Testimonials',
+    preview: '💬',
+    config: {
+      width: 1200,
+      height: 400,
+      fill: '#f3f4f6',
+      borderRadius: 0,
+    }
+  },
+  {
+    type: 'gallery-section',
+    name: 'Gallery',
+    preview: '🖼️',
+    config: {
+      width: 1200,
+      height: 450,
+      fill: '#000000',
       borderRadius: 0,
     }
   },
@@ -328,6 +483,13 @@ const ICONS = [
   { type: 'cart-icon', name: 'Cart', preview: '🛒', icon: ShoppingCart, config: { width: 32, height: 32, fill: '#06b6d4' } },
   { type: 'user-icon', name: 'User', preview: '👤', icon: User, config: { width: 32, height: 32, fill: '#6b7280' } },
   { type: 'message-icon', name: 'Message', preview: '💬', icon: MessageSquare, config: { width: 32, height: 32, fill: '#ec4899' } },
+  { type: 'video-icon', name: 'Video', preview: '📹', icon: Video, config: { width: 32, height: 32, fill: '#f97316' } },
+  { type: 'file-icon', name: 'File', preview: '📄', icon: FileText, config: { width: 32, height: 32, fill: '#64748b' } },
+  { type: 'download-icon', name: 'Download', preview: '⬇️', icon: Download, config: { width: 32, height: 32, fill: '#22c55e' } },
+  { type: 'upload-icon', name: 'Upload', preview: '⬆️', icon: Upload, config: { width: 32, height: 32, fill: '#3b82f6' } },
+  { type: 'share-icon', name: 'Share', preview: '🔗', icon: Share2, config: { width: 32, height: 32, fill: '#06b6d4' } },
+  { type: 'zap-icon', name: 'Zap', preview: '⚡', icon: Zap, config: { width: 32, height: 32, fill: '#eab308' } },
+  { type: 'payment-icon', name: 'Payment', preview: '💳', icon: CreditCard, config: { width: 32, height: 32, fill: '#10b981' } },
 ];
 
 export const WebComponentsPanel = ({ onComponentSelect }: WebComponentsPanelProps) => {

@@ -47,9 +47,10 @@ interface Message {
 interface AICodeAssistantProps {
   className?: string;
   fabricCanvas?: FabricCanvas | null;
+  onCodeGenerated?: (code: string) => void;
 }
 
-export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fabricCanvas }) => {
+export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fabricCanvas, onCodeGenerated }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -325,6 +326,15 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                 if (content) {
                   assistantContent += content;
                   const hasCode = assistantContent.includes('```');
+                  
+                  // Extract code from markdown code blocks and send to parent
+                  if (hasCode && onCodeGenerated) {
+                    const codeMatch = assistantContent.match(/```(?:html|jsx|tsx|javascript)?\n([\s\S]*?)```/);
+                    if (codeMatch && codeMatch[1]) {
+                      onCodeGenerated(codeMatch[1].trim());
+                    }
+                  }
+                  
                   setMessages(prev => {
                     const newMessages = [...prev];
                     const lastMessage = newMessages[newMessages.length - 1];

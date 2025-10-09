@@ -64,9 +64,53 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [showPreview, setShowPreview] = useState(false);
   const [viewMode, setViewMode] = useState<'canvas' | 'code' | 'split'>('canvas');
-  const [editorCode, setEditorCode] = useState('');
-  const [previewCode, setPreviewCode] = useState('');
+  const [editorCode, setEditorCode] = useState('<!-- AI-generated code will appear here -->\n<div style="padding: 40px; text-align: center;">\n  <h1>Welcome to AI Web Builder</h1>\n  <p>Use the AI Code Assistant to generate components</p>\n</div>');
+  const [previewCode, setPreviewCode] = useState('<!-- AI-generated code will appear here -->\n<div style="padding: 40px; text-align: center;">\n  <h1>Welcome to AI Web Builder</h1>\n  <p>Use the AI Code Assistant to generate components</p>\n</div>');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle AI code generation
+  const handleAICodeGenerated = (code: string) => {
+    console.log('[WebBuilder] AI code received:', code.substring(0, 100));
+    setEditorCode(code);
+    setPreviewCode(code);
+    setViewMode('code'); // Switch to code view to show the generated code
+    toast('AI Code Generated!', {
+      description: 'Edit in Monaco and render to canvas',
+    });
+  };
+
+  // Render code from Monaco to Fabric.js canvas
+  const handleRenderToCanvas = async () => {
+    if (!fabricCanvas) {
+      toast('Canvas not ready', {
+        description: 'Please wait for canvas to initialize',
+      });
+      return;
+    }
+
+    try {
+      toast('Rendering to canvas...', {
+        description: 'Converting code to Fabric.js objects',
+      });
+
+      // Import the component renderer
+      const { parseComponentCode, renderComponentToCanvas } = await import('@/utils/componentRenderer');
+      
+      const component = parseComponentCode(editorCode);
+      await renderComponentToCanvas(component, fabricCanvas);
+      
+      setViewMode('canvas'); // Switch to canvas view to see the result
+      
+      toast('Rendered successfully!', {
+        description: 'Your code is now on the Fabric.js canvas',
+      });
+    } catch (error) {
+      console.error('[WebBuilder] Render error:', error);
+      toast('Render failed', {
+        description: error instanceof Error ? error.message : 'Failed to render to canvas',
+      });
+    }
+  };
 
   // State management - template schema as source of truth
   const templateState = useTemplateState(fabricCanvas);
@@ -843,9 +887,19 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
               <div className="w-full h-full flex gap-4">
                 {/* Monaco Editor */}
                 <div className="flex-1 bg-[#1e1e1e] rounded-lg overflow-hidden border border-white/10">
-                  <div className="h-10 bg-[#2d2d2d] border-b border-white/10 flex items-center px-4">
-                    <FileCode className="w-4 h-4 text-white/70 mr-2" />
-                    <span className="text-sm text-white/70">Code Editor</span>
+                  <div className="h-10 bg-[#2d2d2d] border-b border-white/10 flex items-center justify-between px-4">
+                    <div className="flex items-center">
+                      <FileCode className="w-4 h-4 text-white/70 mr-2" />
+                      <span className="text-sm text-white/70">Monaco Code Editor</span>
+                    </div>
+                    <Button
+                      size="sm"
+                      onClick={handleRenderToCanvas}
+                      className="h-7 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    >
+                      <Play className="w-3 h-3 mr-1" />
+                      Render to Canvas
+                    </Button>
                   </div>
                   <Editor
                     height="calc(100% - 40px)"
@@ -869,6 +923,10 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                       formatOnPaste: true,
                       formatOnType: true,
                       padding: { top: 16, bottom: 16 },
+                      suggestOnTriggerCharacters: true,
+                      quickSuggestions: true,
+                      autoClosingBrackets: 'always',
+                      autoClosingQuotes: 'always',
                     }}
                   />
                 </div>
@@ -877,7 +935,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                 <div className="flex-1 bg-white rounded-lg overflow-hidden border border-white/10">
                   <div className="h-10 bg-muted border-b flex items-center px-4">
                     <Eye className="w-4 h-4 text-muted-foreground mr-2" />
-                    <span className="text-sm text-muted-foreground">Live Preview</span>
+                    <span className="text-sm text-muted-foreground">Live HTML Preview</span>
                   </div>
                   <div className="h-[calc(100%-40px)]">
                     <LiveHTMLPreview 
@@ -909,9 +967,19 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                 <div className="flex-1 flex flex-col gap-4">
                   {/* Monaco Editor */}
                   <div className="flex-1 bg-[#1e1e1e] rounded-lg overflow-hidden border border-white/10">
-                    <div className="h-10 bg-[#2d2d2d] border-b border-white/10 flex items-center px-4">
-                      <FileCode className="w-4 h-4 text-white/70 mr-2" />
-                      <span className="text-sm text-white/70">Code Editor</span>
+                    <div className="h-10 bg-[#2d2d2d] border-b border-white/10 flex items-center justify-between px-4">
+                      <div className="flex items-center">
+                        <FileCode className="w-4 h-4 text-white/70 mr-2" />
+                        <span className="text-sm text-white/70">Monaco Editor</span>
+                      </div>
+                      <Button
+                        size="sm"
+                        onClick={handleRenderToCanvas}
+                        className="h-7 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                      >
+                        <Play className="w-3 h-3 mr-1" />
+                        Update Canvas
+                      </Button>
                     </div>
                     <Editor
                       height="calc(100% - 40px)"
@@ -931,6 +999,10 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                         automaticLayout: true,
                         tabSize: 2,
                         wordWrap: 'on',
+                        suggestOnTriggerCharacters: true,
+                        quickSuggestions: true,
+                        autoClosingBrackets: 'always',
+                        autoClosingQuotes: 'always',
                       }}
                     />
                   </div>
@@ -1175,7 +1247,10 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
       </Dialog>
 
       {/* AI Code Assistant - Bottom Panel */}
-      <AICodeAssistant fabricCanvas={fabricCanvas} />
+      <AICodeAssistant 
+        fabricCanvas={fabricCanvas}
+        onCodeGenerated={handleAICodeGenerated}
+      />
     </div>
   );
 };

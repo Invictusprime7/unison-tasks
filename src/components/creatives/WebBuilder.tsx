@@ -864,21 +864,139 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
               </div>
             )}
             
-            {/* Canvas Mode */}
+            {/* Canvas Mode - AI Live Preview with Monaco Editor */}
             {viewMode === 'canvas' && (
-              <div 
-                ref={scrollContainerRef}
-                className="bg-white shadow-2xl overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
-                style={{ 
-                  width: getCanvasWidth() * zoom,
-                  height: '100%',
-                  maxHeight: "none",
-                  boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)",
-                  transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
-                  transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-                }}
-              >
-                <canvas ref={canvasRef} />
+              <div className="w-full h-full flex gap-4">
+                {/* Main Live Preview Area */}
+                <div className="flex-1 flex flex-col bg-white rounded-lg overflow-hidden border border-white/10 shadow-2xl">
+                  <div className="h-12 bg-muted border-b flex items-center justify-between px-4">
+                    <div className="flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-muted-foreground">AI Generated Live Preview</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleRenderToCanvas}
+                        className="h-8"
+                      >
+                        <Play className="w-3 h-3 mr-1" />
+                        Render to Fabric.js
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(editorCode);
+                          toast('Code copied to clipboard!');
+                        }}
+                        className="h-8"
+                      >
+                        <Copy className="w-3 h-3 mr-1" />
+                        Copy
+                      </Button>
+                    </div>
+                  </div>
+                  <div 
+                    ref={scrollContainerRef}
+                    className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+                  >
+                    <LiveHTMLPreview 
+                      code={previewCode}
+                      autoRefresh={true}
+                      className="w-full h-full"
+                    />
+                  </div>
+                </div>
+
+                {/* Monaco Editor Panel - Powerful Editing Framework */}
+                <div className="w-[600px] flex flex-col bg-[#1e1e1e] rounded-lg overflow-hidden border border-white/10">
+                  <div className="h-12 bg-[#2d2d2d] border-b border-white/10 flex items-center justify-between px-4">
+                    <div className="flex items-center gap-2">
+                      <FileCode className="w-4 h-4 text-white/70" />
+                      <span className="text-sm font-medium text-white/70">Monaco Code Editor</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setViewMode('split')}
+                        className="h-7 text-white/70 hover:text-white"
+                      >
+                        <Layout className="w-3 h-3 mr-1" />
+                        Split View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => setViewMode('code')}
+                        className="h-7 text-white/70 hover:text-white"
+                      >
+                        <Maximize2 className="w-3 h-3 mr-1" />
+                        Fullscreen
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 overflow-hidden">
+                    <Editor
+                      height="100%"
+                      defaultLanguage="html"
+                      language="html"
+                      value={editorCode}
+                      onChange={(value) => {
+                        setEditorCode(value || '');
+                        setPreviewCode(value || '');
+                      }}
+                      theme="vs-dark"
+                      options={{
+                        minimap: { enabled: true },
+                        fontSize: 14,
+                        lineNumbers: 'on',
+                        roundedSelection: true,
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        tabSize: 2,
+                        wordWrap: 'on',
+                        formatOnPaste: true,
+                        formatOnType: true,
+                        padding: { top: 16, bottom: 16 },
+                        suggestOnTriggerCharacters: true,
+                        quickSuggestions: {
+                          other: true,
+                          comments: true,
+                          strings: true,
+                        },
+                        parameterHints: { enabled: true },
+                        autoClosingBrackets: 'always',
+                        autoClosingQuotes: 'always',
+                        autoIndent: 'full',
+                        bracketPairColorization: { enabled: true },
+                        cursorBlinking: 'smooth',
+                        cursorSmoothCaretAnimation: 'on',
+                        smoothScrolling: true,
+                        snippetSuggestions: 'inline',
+                        folding: true,
+                        foldingHighlight: true,
+                        showFoldingControls: 'always',
+                      }}
+                    />
+                  </div>
+
+                  {/* Editor Footer - Language & Stats */}
+                  <div className="h-8 bg-[#1a1a1a] border-t border-white/10 flex items-center justify-between px-4 text-xs text-white/50">
+                    <div className="flex items-center gap-4">
+                      <span>HTML/CSS/JS</span>
+                      <span>{editorCode.split('\n').length} lines</span>
+                      <span>{editorCode.length} characters</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Code className="w-3 h-3" />
+                      <span>UTF-8</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 

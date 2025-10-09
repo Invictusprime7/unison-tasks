@@ -3,10 +3,12 @@ import grapesjs, { Editor } from "grapesjs";
 import "grapesjs/dist/css/grapes.min.css";
 import gjsPresetWebpage from "grapesjs-preset-webpage";
 import { Button } from "@/components/ui/button";
-import { Code, Eye } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Code, Eye, Sparkles, Send, Loader2 } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
 import { toast } from "sonner";
 import { WebComponentsPanel } from "./design-studio/WebComponentsPanel";
+import { supabase } from "@/integrations/supabase/client";
 
 interface GrapeJSEditorProps {
   initialHtml?: string;
@@ -21,6 +23,9 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
   const [htmlCode, setHtmlCode] = useState(initialHtml || "");
   const [cssCode, setCssCode] = useState(initialCss || "");
   const [activeTab, setActiveTab] = useState<"html" | "css">("html");
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isAiProcessing, setIsAiProcessing] = useState(false);
+  const [showAiAssistant, setShowAiAssistant] = useState(false);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -189,11 +194,73 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
     toast(`${component.name} added to canvas`);
   };
 
+  const handleAiAssist = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!editor || !aiPrompt.trim()) {
+      toast.error("Please enter a design instruction");
+      return;
+    }
+
+    setIsAiProcessing(true);
+    console.log("Processing AI design request:", aiPrompt);
+
+    try {
+      const currentHtml = editor.getHtml();
+      const currentCss = editor.getCss();
+
+      const { data, error } = await supabase.functions.invoke('ai-design-assistant', {
+        body: {
+          prompt: aiPrompt,
+          currentHtml,
+          currentCss
+        }
+      });
+
+      if (error) {
+        console.error("AI assistant error:", error);
+        throw error;
+      }
+
+      if (data?.html !== undefined && data?.css !== undefined) {
+        // Apply the AI-generated changes
+        editor.setComponents(data.html);
+        editor.setStyle(data.css);
+        
+        toast.success(data.explanation || "Design updated by AI");
+        setAiPrompt("");
+      } else {
+        throw new Error("Invalid response from AI assistant");
+      }
+    } catch (error: any) {
+      console.error("Error in AI assistant:", error);
+      
+      if (error.message?.includes("Rate limit")) {
+        toast.error("Rate limit exceeded. Please try again later.");
+      } else if (error.message?.includes("Payment required")) {
+        toast.error("AI credits exhausted. Please add credits to continue.");
+      } else {
+        toast.error("Failed to process AI request. Please try again.");
+      }
+    } finally {
+      setIsAiProcessing(false);
+    }
+  };
+
   return (
     <div className="h-full w-full flex flex-col bg-background overflow-hidden">
       <div className="h-9 sm:h-10 border-b bg-card flex items-center justify-between px-2 sm:px-4 flex-shrink-0 min-w-0">
         <div className="panel__devices flex gap-1 min-w-0"></div>
         <div className="flex gap-1 sm:gap-2 flex-shrink-0">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowAiAssistant(!showAiAssistant)}
+            className="h-7 sm:h-8 px-2"
+          >
+            <Sparkles className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+            <span className="hidden sm:inline">AI Assistant</span>
+          </Button>
           <Button
             variant="outline"
             size="sm"
@@ -208,6 +275,43 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           </Button>
         </div>
       </div>
+
+      {/* AI Assistant Panel */}
+      {showAiAssistant && (
+        <div className="border-b bg-card p-3 flex-shrink-0">
+          <form onSubmit={handleAiAssist} className="flex gap-2">
+            <Input
+              type="text"
+              placeholder="Describe your design changes (e.g., 'make the header blue', 'add a contact form')"
+              value={aiPrompt}
+              onChange={(e) => setAiPrompt(e.target.value)}
+              disabled={isAiProcessing}
+              className="flex-1"
+            />
+            <Button 
+              type="submit" 
+              size="sm" 
+              disabled={isAiProcessing || !aiPrompt.trim()}
+              className="flex gap-2"
+            >
+              {isAiProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  <span className="hidden sm:inline">Processing...</span>
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4" />
+                  <span className="hidden sm:inline">Apply</span>
+                </>
+              )}
+            </Button>
+          </form>
+          <p className="text-xs text-muted-foreground mt-2">
+            💡 Try: "Add a hero section with a gradient background" or "Change all buttons to rounded corners"
+          </p>
+        </div>
+      )}
 
       {showCode ? (
         <div className="flex-1 flex flex-col overflow-hidden min-h-0">

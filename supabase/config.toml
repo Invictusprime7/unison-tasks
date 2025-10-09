@@ -2,3 +2,6 @@ project_id = "rwmbfwjsdwchqiqnqcjo"
 
 [functions.generate-image]
 verify_jwt = false
+
+[functions.ai-design-assistant]
+verify_jwt = false

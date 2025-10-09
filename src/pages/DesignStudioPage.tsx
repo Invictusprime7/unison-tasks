@@ -4,22 +4,13 @@ import { ArrowLeft, FolderOpen } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { DesignStudio } from "@/components/creatives/DesignStudio";
 import { FileBrowser } from "@/components/creatives/design-studio/FileBrowser";
-import { GrapeJSEditor } from "@/components/creatives/GrapeJSEditor";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { VisualEditor } from "@/components/creatives/VisualEditor";
 
 const DesignStudioPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [fileBrowserOpen, setFileBrowserOpen] = useState(false);
   const designStudioRef = useRef<any>(null);
-  const [templateHtml, setTemplateHtml] = useState("");
-  const [templateCss, setTemplateCss] = useState("");
-  const [activeEditor, setActiveEditor] = useState<"fabric" | "grapejs">("fabric");
-
-  const handleTemplateSave = (html: string, css: string) => {
-    setTemplateHtml(html);
-    setTemplateCss(css);
-  };
 
   return (
     <div className="h-screen w-full flex flex-col bg-gray-50 overflow-hidden">
@@ -47,24 +38,9 @@ const DesignStudioPage = () => {
         </Button>
       </header>
 
-      <Tabs value={activeEditor} onValueChange={(v) => setActiveEditor(v as "fabric" | "grapejs")} className="flex-1 flex flex-col min-h-0 overflow-hidden">
-        <TabsList className="mx-2 sm:mx-4 mt-1 sm:mt-2 w-fit h-8 flex-shrink-0">
-          <TabsTrigger value="fabric" className="text-xs sm:text-sm h-7 px-2 sm:px-3">Canvas</TabsTrigger>
-          <TabsTrigger value="grapejs" className="text-xs sm:text-sm h-7 px-2 sm:px-3">Web</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="fabric" className="flex-1 mt-0 overflow-hidden">
-          <DesignStudio ref={designStudioRef} />
-        </TabsContent>
-        
-        <TabsContent value="grapejs" className="flex-1 mt-0 overflow-hidden">
-          <GrapeJSEditor 
-            initialHtml={templateHtml}
-            initialCss={templateCss}
-            onSave={handleTemplateSave}
-          />
-        </TabsContent>
-      </Tabs>
+      <div className="flex-1 overflow-hidden">
+        <DesignStudio ref={designStudioRef} />
+      </div>
 
       <FileBrowser 
         open={fileBrowserOpen} 

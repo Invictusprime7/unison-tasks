@@ -148,6 +148,292 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
           },
         ],
       },
+      blockManager: {
+        blocks: [
+          // Hero Section
+          {
+            id: 'hero-section',
+            label: 'Hero Section',
+            category: 'Sections',
+            content: `
+              <section style="padding: 80px 20px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div style="max-width: 1200px; margin: 0 auto;">
+                  <h1 style="font-size: 48px; font-weight: bold; color: white; margin-bottom: 20px;">Welcome to Our Platform</h1>
+                  <p style="font-size: 20px; color: rgba(255,255,255,0.9); margin-bottom: 30px; max-width: 600px; margin-left: auto; margin-right: auto;">Build amazing experiences with our industry-leading tools and components</p>
+                  <button style="background: white; color: #667eea; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; border: none; cursor: pointer;">Get Started</button>
+                </div>
+              </section>
+            `,
+          },
+          // Feature Grid
+          {
+            id: 'feature-grid',
+            label: 'Feature Grid',
+            category: 'Sections',
+            content: `
+              <section style="padding: 60px 20px; background: #f9fafb;">
+                <div style="max-width: 1200px; margin: 0 auto;">
+                  <h2 style="font-size: 36px; font-weight: bold; text-align: center; margin-bottom: 50px;">Our Features</h2>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                    <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                      <div style="width: 48px; height: 48px; background: #667eea; border-radius: 8px; margin-bottom: 20px;"></div>
+                      <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 12px;">Fast Performance</h3>
+                      <p style="color: #6b7280; line-height: 1.6;">Lightning-fast load times and optimal performance for the best user experience.</p>
+                    </div>
+                    <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                      <div style="width: 48px; height: 48px; background: #764ba2; border-radius: 8px; margin-bottom: 20px;"></div>
+                      <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 12px;">Easy to Use</h3>
+                      <p style="color: #6b7280; line-height: 1.6;">Intuitive interface designed for both beginners and professionals.</p>
+                    </div>
+                    <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                      <div style="width: 48px; height: 48px; background: #f093fb; border-radius: 8px; margin-bottom: 20px;"></div>
+                      <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 12px;">Secure</h3>
+                      <p style="color: #6b7280; line-height: 1.6;">Enterprise-grade security to keep your data safe and protected.</p>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            `,
+          },
+          // Testimonial Section
+          {
+            id: 'testimonial',
+            label: 'Testimonials',
+            category: 'Sections',
+            content: `
+              <section style="padding: 60px 20px; background: white;">
+                <div style="max-width: 1200px; margin: 0 auto;">
+                  <h2 style="font-size: 36px; font-weight: bold; text-align: center; margin-bottom: 50px;">What Our Customers Say</h2>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 30px;">
+                    <div style="background: #f9fafb; padding: 30px; border-radius: 12px; border-left: 4px solid #667eea;">
+                      <p style="font-size: 16px; line-height: 1.8; color: #374151; margin-bottom: 20px;">"This platform has transformed how we work. The tools are powerful yet easy to use."</p>
+                      <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 48px; height: 48px; background: #667eea; border-radius: 50%;"></div>
+                        <div>
+                          <div style="font-weight: 600; color: #111827;">Sarah Johnson</div>
+                          <div style="font-size: 14px; color: #6b7280;">CEO, TechCorp</div>
+                        </div>
+                      </div>
+                    </div>
+                    <div style="background: #f9fafb; padding: 30px; border-radius: 12px; border-left: 4px solid #764ba2;">
+                      <p style="font-size: 16px; line-height: 1.8; color: #374151; margin-bottom: 20px;">"Outstanding experience! The best solution we've found for our needs."</p>
+                      <div style="display: flex; align-items: center; gap: 12px;">
+                        <div style="width: 48px; height: 48px; background: #764ba2; border-radius: 50%;"></div>
+                        <div>
+                          <div style="font-weight: 600; color: #111827;">Michael Chen</div>
+                          <div style="font-size: 14px; color: #6b7280;">Designer, CreativeStudio</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            `,
+          },
+          // CTA Section
+          {
+            id: 'cta-section',
+            label: 'Call to Action',
+            category: 'Sections',
+            content: `
+              <section style="padding: 80px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); text-align: center;">
+                <div style="max-width: 800px; margin: 0 auto;">
+                  <h2 style="font-size: 40px; font-weight: bold; color: white; margin-bottom: 20px;">Ready to Get Started?</h2>
+                  <p style="font-size: 18px; color: rgba(255,255,255,0.9); margin-bottom: 30px;">Join thousands of users who are already using our platform</p>
+                  <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+                    <button style="background: white; color: #667eea; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; border: none; cursor: pointer;">Start Free Trial</button>
+                    <button style="background: transparent; color: white; padding: 14px 32px; border-radius: 8px; font-weight: 600; font-size: 16px; border: 2px solid white; cursor: pointer;">Learn More</button>
+                  </div>
+                </div>
+              </section>
+            `,
+          },
+          // Contact Form
+          {
+            id: 'contact-form',
+            label: 'Contact Form',
+            category: 'Forms',
+            content: `
+              <section style="padding: 60px 20px; background: #f9fafb;">
+                <div style="max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 15px rgba(0,0,0,0.1);">
+                  <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 24px; text-align: center;">Contact Us</h2>
+                  <form>
+                    <div style="margin-bottom: 20px;">
+                      <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Name</label>
+                      <input type="text" placeholder="Your name" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                      <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Email</label>
+                      <input type="email" placeholder="your@email.com" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px;">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                      <label style="display: block; font-weight: 600; margin-bottom: 8px; color: #374151;">Message</label>
+                      <textarea placeholder="Your message" rows="4" style="width: 100%; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 16px; resize: vertical;"></textarea>
+                    </div>
+                    <button type="submit" style="width: 100%; background: #667eea; color: white; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 16px; border: none; cursor: pointer;">Send Message</button>
+                  </form>
+                </div>
+              </section>
+            `,
+          },
+          // Stats Section
+          {
+            id: 'stats-section',
+            label: 'Stats Section',
+            category: 'Sections',
+            content: `
+              <section style="padding: 60px 20px; background: white;">
+                <div style="max-width: 1200px; margin: 0 auto;">
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; text-align: center;">
+                    <div>
+                      <div style="font-size: 48px; font-weight: bold; color: #667eea; margin-bottom: 8px;">10K+</div>
+                      <div style="font-size: 18px; color: #6b7280;">Active Users</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 48px; font-weight: bold; color: #764ba2; margin-bottom: 8px;">50K+</div>
+                      <div style="font-size: 18px; color: #6b7280;">Projects Created</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 48px; font-weight: bold; color: #f093fb; margin-bottom: 8px;">99.9%</div>
+                      <div style="font-size: 18px; color: #6b7280;">Uptime</div>
+                    </div>
+                    <div>
+                      <div style="font-size: 48px; font-weight: bold; color: #667eea; margin-bottom: 8px;">24/7</div>
+                      <div style="font-size: 18px; color: #6b7280;">Support</div>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            `,
+          },
+          // Pricing Table
+          {
+            id: 'pricing-table',
+            label: 'Pricing Table',
+            category: 'Sections',
+            content: `
+              <section style="padding: 60px 20px; background: #f9fafb;">
+                <div style="max-width: 1200px; margin: 0 auto;">
+                  <h2 style="font-size: 36px; font-weight: bold; text-align: center; margin-bottom: 50px;">Choose Your Plan</h2>
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px;">
+                    <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                      <div style="font-size: 14px; font-weight: 600; color: #667eea; margin-bottom: 8px;">STARTER</div>
+                      <div style="font-size: 40px; font-weight: bold; margin-bottom: 20px;">$19<span style="font-size: 16px; color: #6b7280;">/mo</span></div>
+                      <ul style="list-style: none; padding: 0; margin-bottom: 30px;">
+                        <li style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">✓ 5 Projects</li>
+                        <li style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">✓ Basic Support</li>
+                        <li style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">✓ 10GB Storage</li>
+                      </ul>
+                      <button style="width: 100%; background: #667eea; color: white; padding: 14px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer;">Choose Plan</button>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px; border-radius: 12px; box-shadow: 0 10px 20px rgba(102,126,234,0.3); transform: scale(1.05);">
+                      <div style="font-size: 14px; font-weight: 600; color: white; margin-bottom: 8px;">PRO</div>
+                      <div style="font-size: 40px; font-weight: bold; color: white; margin-bottom: 20px;">$49<span style="font-size: 16px; color: rgba(255,255,255,0.8);">/mo</span></div>
+                      <ul style="list-style: none; padding: 0; margin-bottom: 30px; color: white;">
+                        <li style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">✓ Unlimited Projects</li>
+                        <li style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">✓ Priority Support</li>
+                        <li style="padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.2);">✓ 100GB Storage</li>
+                      </ul>
+                      <button style="width: 100%; background: white; color: #667eea; padding: 14px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer;">Choose Plan</button>
+                    </div>
+                    <div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                      <div style="font-size: 14px; font-weight: 600; color: #667eea; margin-bottom: 8px;">ENTERPRISE</div>
+                      <div style="font-size: 40px; font-weight: bold; margin-bottom: 20px;">$99<span style="font-size: 16px; color: #6b7280;">/mo</span></div>
+                      <ul style="list-style: none; padding: 0; margin-bottom: 30px;">
+                        <li style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">✓ Unlimited Everything</li>
+                        <li style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">✓ 24/7 Support</li>
+                        <li style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">✓ Unlimited Storage</li>
+                      </ul>
+                      <button style="width: 100%; background: #667eea; color: white; padding: 14px; border-radius: 8px; font-weight: 600; border: none; cursor: pointer;">Choose Plan</button>
+                    </div>
+                  </div>
+                </div>
+              </section>
+            `,
+          },
+          // Footer
+          {
+            id: 'footer',
+            label: 'Footer',
+            category: 'Sections',
+            content: `
+              <footer style="background: #1f2937; color: white; padding: 60px 20px 30px;">
+                <div style="max-width: 1200px; margin: 0 auto;">
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px; margin-bottom: 40px;">
+                    <div>
+                      <div style="font-size: 24px; font-weight: bold; margin-bottom: 16px;">Company</div>
+                      <p style="color: #9ca3af; line-height: 1.6;">Building the future of web design, one component at a time.</p>
+                    </div>
+                    <div>
+                      <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Product</div>
+                      <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 12px;"><a href="#" style="color: #9ca3af; text-decoration: none;">Features</a></li>
+                        <li style="margin-bottom: 12px;"><a href="#" style="color: #9ca3af; text-decoration: none;">Pricing</a></li>
+                        <li style="margin-bottom: 12px;"><a href="#" style="color: #9ca3af; text-decoration: none;">Security</a></li>
+                      </ul>
+                    </div>
+                    <div>
+                      <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Company</div>
+                      <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 12px;"><a href="#" style="color: #9ca3af; text-decoration: none;">About</a></li>
+                        <li style="margin-bottom: 12px;"><a href="#" style="color: #9ca3af; text-decoration: none;">Blog</a></li>
+                        <li style="margin-bottom: 12px;"><a href="#" style="color: #9ca3af; text-decoration: none;">Careers</a></li>
+                      </ul>
+                    </div>
+                    <div>
+                      <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Legal</div>
+                      <ul style="list-style: none; padding: 0; margin: 0;">
+                        <li style="margin-bottom: 12px;"><a href="#" style="color: #9ca3af; text-decoration: none;">Privacy</a></li>
+                        <li style="margin-bottom: 12px;"><a href="#" style="color: #9ca3af; text-decoration: none;">Terms</a></li>
+                        <li style="margin-bottom: 12px;"><a href="#" style="color: #9ca3af; text-decoration: none;">License</a></li>
+                      </ul>
+                    </div>
+                  </div>
+                  <div style="border-top: 1px solid #374151; padding-top: 30px; text-align: center; color: #9ca3af;">
+                    © 2025 Your Company. All rights reserved.
+                  </div>
+                </div>
+              </footer>
+            `,
+          },
+          // Card Component
+          {
+            id: 'card',
+            label: 'Card',
+            category: 'Components',
+            content: `
+              <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 350px;">
+                <div style="width: 100%; height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                <div style="padding: 24px;">
+                  <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 12px;">Card Title</h3>
+                  <p style="color: #6b7280; line-height: 1.6; margin-bottom: 20px;">This is a beautiful card component with an image and text content.</p>
+                  <button style="background: #667eea; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer;">Learn More</button>
+                </div>
+              </div>
+            `,
+          },
+          // Navigation Bar
+          {
+            id: 'navbar',
+            label: 'Navigation',
+            category: 'Components',
+            content: `
+              <nav style="background: white; border-bottom: 1px solid #e5e7eb; padding: 16px 20px;">
+                <div style="max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;">
+                  <div style="font-size: 24px; font-weight: bold; color: #667eea;">Logo</div>
+                  <div style="display: flex; gap: 32px; align-items: center;">
+                    <a href="#" style="color: #374151; text-decoration: none; font-weight: 500;">Home</a>
+                    <a href="#" style="color: #374151; text-decoration: none; font-weight: 500;">Features</a>
+                    <a href="#" style="color: #374151; text-decoration: none; font-weight: 500;">Pricing</a>
+                    <a href="#" style="color: #374151; text-decoration: none; font-weight: 500;">About</a>
+                    <button style="background: #667eea; color: white; padding: 10px 20px; border-radius: 6px; font-weight: 600; border: none; cursor: pointer;">Sign In</button>
+                  </div>
+                </div>
+              </nav>
+            `,
+          },
+        ],
+      },
     });
 
     // Load initial content

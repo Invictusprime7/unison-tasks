@@ -22,12 +22,25 @@ export const useTemplateState = (fabricCanvas: FabricCanvas | null) => {
    * Update template state and trigger dual rendering
    */
   const updateTemplate = useCallback(async (newTemplate: AIGeneratedTemplate) => {
-    if (!fabricCanvas) return;
+    console.log('[TemplateState] updateTemplate called with:', newTemplate);
+    
+    if (!fabricCanvas) {
+      console.error('[TemplateState] Fabric canvas not initialized');
+      throw new Error('Canvas not ready. Please wait for the canvas to initialize.');
+    }
 
     setIsRendering(true);
     setTemplate(newTemplate);
 
     try {
+      // Validate template structure
+      if (!newTemplate.sections || !Array.isArray(newTemplate.sections)) {
+        throw new Error('Invalid template: missing sections array');
+      }
+      if (!newTemplate.variants || !Array.isArray(newTemplate.variants) || newTemplate.variants.length === 0) {
+        throw new Error('Invalid template: missing variants');
+      }
+
       // Phase 4: Preload assets before rendering
       const assets = assetPreloader.extractAssetUrls(newTemplate);
       console.log('[TemplateState] Preloading assets:', assets);
@@ -37,10 +50,12 @@ export const useTemplateState = (fabricCanvas: FabricCanvas | null) => {
         console.log(`[TemplateState] Preloading images: ${loaded}/${total}`);
       });
 
+      console.log('[TemplateState] Assets preloaded, starting canvas render');
+
       // Render to Fabric Canvas (editing mode)
       const renderer = new TemplateRenderer(fabricCanvas);
       await renderer.renderTemplate(newTemplate);
-      console.log('[TemplateState] Template rendered to Fabric Canvas');
+      console.log('[TemplateState] ✅ Template rendered to Fabric Canvas');
 
       // Export to HTML (preview mode)
       const exporter = new TemplateToHTMLExporter();
@@ -56,11 +71,12 @@ export const useTemplateState = (fabricCanvas: FabricCanvas | null) => {
 
       setHtml(sanitizedHtml);
       setCss(sanitizedCss);
-      console.log('[TemplateState] HTML/CSS exported and sanitized');
+      console.log('[TemplateState] ✅ HTML/CSS exported and sanitized');
 
     } catch (error) {
-      console.error('[TemplateState] Error rendering template:', error);
-      throw error;
+      console.error('[TemplateState] ❌ Error rendering template:', error);
+      const errorMsg = error instanceof Error ? error.message : 'Unknown rendering error';
+      throw new Error(`Failed to render template: ${errorMsg}`);
     } finally {
       setIsRendering(false);
     }

@@ -194,19 +194,46 @@ Make templates production-ready with real content, proper spacing, and visual hi
     const messageContent = data.choices[0]?.message?.content;
     
     if (!messageContent) {
+      console.error("No message content from AI");
       throw new Error("No template generated");
     }
 
-    const templateStructure = JSON.parse(messageContent);
+    console.log("AI Response:", messageContent.substring(0, 200) + "...");
+
+    let templateStructure;
+    try {
+      templateStructure = JSON.parse(messageContent);
+    } catch (parseError) {
+      console.error("Failed to parse AI response:", parseError);
+      throw new Error("Invalid JSON response from AI");
+    }
+
+    // Validate required fields
+    if (!templateStructure.sections || !Array.isArray(templateStructure.sections)) {
+      console.error("Invalid template structure: missing sections");
+      throw new Error("Invalid template structure: missing sections");
+    }
+
+    if (!templateStructure.variants || !Array.isArray(templateStructure.variants)) {
+      console.error("Invalid template structure: missing variants");
+      throw new Error("Invalid template structure: missing variants");
+    }
+
+    const completeTemplate = {
+      ...templateStructure,
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+
+    console.log("✅ Template generated successfully with", 
+      completeTemplate.sections.length, "sections");
 
     return new Response(
       JSON.stringify({ 
-        template: {
-          ...templateStructure,
-          id: crypto.randomUUID(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
+        template: completeTemplate,
+        explanation: "AI template generated successfully with " + 
+          completeTemplate.sections.length + " sections"
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

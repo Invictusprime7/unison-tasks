@@ -797,10 +797,27 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         onClose={() => setAiPanelOpen(false)}
         fabricCanvas={fabricCanvas}
         onTemplateGenerated={async (template) => {
-          // Template state handles both canvas and HTML rendering
-          await templateState.updateTemplate(template);
-          toast.success('Template rendered to canvas!');
-          setShowPreview(true);
+          try {
+            console.log('[WebBuilder] Template received from AI:', template);
+            
+            // Ensure canvas is ready
+            if (!fabricCanvas) {
+              toast.error('Canvas not ready. Please wait a moment and try again.');
+              return;
+            }
+
+            // Template state handles both canvas and HTML rendering
+            await templateState.updateTemplate(template);
+            
+            console.log('[WebBuilder] ✅ Template successfully rendered');
+            toast.success('✨ AI template rendered successfully!');
+            
+            // Show preview after successful render
+            setShowPreview(true);
+          } catch (error) {
+            console.error('[WebBuilder] ❌ Failed to render template:', error);
+            toast.error(error instanceof Error ? error.message : 'Failed to render template');
+          }
         }}
       />
 

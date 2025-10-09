@@ -11,6 +11,8 @@ import { NavigationPanel } from "./web-builder/NavigationPanel";
 import { WebPropertiesPanel } from "./web-builder/WebPropertiesPanel";
 import { AIAssistantPanel } from "./web-builder/AIAssistantPanel";
 import { CodePreviewDialog } from "./web-builder/CodePreviewDialog";
+import { IntegrationsPanel } from "./design-studio/IntegrationsPanel";
+import { ExportDialog } from "./design-studio/ExportDialog";
 import { webBlocks } from "./web-builder/webBlocks";
 import { useKeyboardShortcuts, defaultWebBuilderShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useCanvasHistory } from "@/hooks/useCanvasHistory";
@@ -37,6 +39,10 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [codePreviewOpen, setCodePreviewOpen] = useState(false);
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
+  const [integrationsPanelOpen, setIntegrationsPanelOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportHtml, setExportHtml] = useState("");
+  const [exportCss, setExportCss] = useState("");
 
   // History management
   const history = useCanvasHistory(fabricCanvas);
@@ -214,6 +220,83 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     }
   };
 
+  const handleExport = (format: string) => {
+    if (!fabricCanvas) return;
+    
+    const objects = fabricCanvas.getObjects();
+    let html = '<div class="web-page">\n';
+    let css = '.web-page {\n  min-height: 100vh;\n  position: relative;\n  background: white;\n}\n\n';
+    
+    objects.forEach((obj: any, index: number) => {
+      const className = `element-${index}`;
+      
+      // Generate HTML
+      if (obj.type === 'text' || obj.type === 'textbox') {
+        html += `  <div class="${className}">${obj.text}</div>\n`;
+      } else if (obj.type === 'rect') {
+        html += `  <div class="${className}"></div>\n`;
+      } else if (obj.type === 'image') {
+        html += `  <img class="${className}" src="${obj.getSrc()}" alt="" />\n`;
+      }
+      
+      // Generate CSS
+      css += `.${className} {\n`;
+      css += `  position: absolute;\n`;
+      css += `  left: ${obj.left}px;\n`;
+      css += `  top: ${obj.top}px;\n`;
+      css += `  width: ${obj.width * (obj.scaleX || 1)}px;\n`;
+      css += `  height: ${obj.height * (obj.scaleY || 1)}px;\n`;
+      
+      if (obj.fill) {
+        css += `  background-color: ${obj.fill};\n`;
+      }
+      if (obj.fontSize) {
+        css += `  font-size: ${obj.fontSize}px;\n`;
+      }
+      if (obj.fontFamily) {
+        css += `  font-family: ${obj.fontFamily};\n`;
+      }
+      if (obj.textAlign) {
+        css += `  text-align: ${obj.textAlign};\n`;
+      }
+      css += `}\n\n`;
+    });
+    
+    html += '</div>';
+    
+    setExportHtml(html);
+    setExportCss(css);
+    
+    if (format === 'html') {
+      setExportDialogOpen(true);
+    } else if (format === 'react') {
+      // Convert to React component
+      const reactCode = `import React from 'react';\n\nconst GeneratedComponent = () => {\n  return (\n${html.split('\n').map(l => '    ' + l).join('\n')}\n  );\n};\n\nexport default GeneratedComponent;`;
+      const blob = new Blob([reactCode], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'GeneratedComponent.jsx';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success('React component exported');
+    } else if (format === 'json') {
+      const json = JSON.stringify(fabricCanvas.toJSON(), null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'design.json';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success('JSON exported');
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-[#0a0a0a]">
       {/* Top Toolbar */}
@@ -262,6 +345,15 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIntegrationsPanelOpen(true)}
+            className="text-white/70 hover:text-white"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            Export & Integrations
+          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -423,6 +515,37 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         onClose={() => setCodePreviewOpen(false)}
         fabricCanvas={fabricCanvas}
       />
+
+      {/* Export Dialog */}
+      <ExportDialog
+        open={exportDialogOpen}
+        onOpenChange={setExportDialogOpen}
+        html={exportHtml}
+        css={exportCss}
+      />
+
+      {/* Integrations Panel as Sidebar */}
+      {integrationsPanelOpen && (
+        <div className="fixed right-0 top-0 bottom-0 w-80 bg-white shadow-2xl z-50 overflow-auto">
+          <div className="p-4 border-b flex items-center justify-between">
+            <h2 className="font-semibold">Export & Integrations</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIntegrationsPanelOpen(false)}
+            >
+              ✕
+            </Button>
+          </div>
+          <IntegrationsPanel 
+            onExport={handleExport}
+            onIntegrationConnect={(integration, config) => {
+              console.log('Integration connected:', integration, config);
+              toast.success(`${integration} connected successfully!`);
+            }}
+          />
+        </div>
+      )}
 
       {/* Keyboard Shortcuts Dialog */}
       <Dialog open={shortcutsDialogOpen} onOpenChange={setShortcutsDialogOpen}>

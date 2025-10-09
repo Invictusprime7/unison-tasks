@@ -8,7 +8,6 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { NavigationPanel } from "./web-builder/NavigationPanel";
-import { ComponentsLibrary } from "./web-builder/ComponentsLibrary";
 import { WebPropertiesPanel } from "./web-builder/WebPropertiesPanel";
 import { AIAssistantPanel } from "./web-builder/AIAssistantPanel";
 import { CodePreviewDialog } from "./web-builder/CodePreviewDialog";
@@ -328,9 +327,6 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
       <div className="flex-1 flex overflow-hidden">
         {/* Left Navigation Panel */}
         <NavigationPanel />
-
-        {/* Middle Components Library */}
-        <ComponentsLibrary onAddBlock={addBlock} />
 
         {/* Center Canvas Area */}
         <div className="flex-1 flex flex-col bg-[#0a0a0a]">

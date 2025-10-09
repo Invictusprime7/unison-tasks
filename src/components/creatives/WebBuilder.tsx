@@ -9,7 +9,8 @@ import {
   ChevronsDown, ChevronsUp, ArrowDown, ArrowUp, FileCode, Copy, Maximize2
 } from "lucide-react";
 import { toast } from "sonner";
-import Editor from '@monaco-editor/react';
+import Editor, { Monaco } from '@monaco-editor/react';
+import * as monaco from 'monaco-editor';
 import { LiveHTMLPreview } from './LiveHTMLPreview';
 import { NavigationPanel } from "./web-builder/NavigationPanel";
 import { WebPropertiesPanel } from "./web-builder/WebPropertiesPanel";
@@ -69,6 +70,144 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [editorCode, setEditorCode] = useState('<!-- AI-generated code will appear here -->\n<div style="padding: 40px; text-align: center;">\n  <h1>Welcome to AI Web Builder</h1>\n  <p>Use the AI Code Assistant to generate components</p>\n</div>');
   const [previewCode, setPreviewCode] = useState('<!-- AI-generated code will appear here -->\n<div style="padding: 40px; text-align: center;">\n  <h1>Welcome to AI Web Builder</h1>\n  <p>Use the AI Code Assistant to generate components</p>\n</div>');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const monacoRef = useRef<Monaco | null>(null);
+
+  // Configure Monaco for full React/JSX/TypeScript support
+  const handleEditorWillMount = (monaco: Monaco) => {
+    monacoRef.current = monaco;
+
+    // Add React type definitions
+    const reactTypes = `
+declare module 'react' {
+  export interface FC<P = {}> {
+    (props: P): JSX.Element | null;
+  }
+  export function useState<T>(initialState: T | (() => T)): [T, (value: T) => void];
+  export function useEffect(effect: () => void | (() => void), deps?: any[]): void;
+  export function useCallback<T extends (...args: any[]) => any>(callback: T, deps: any[]): T;
+  export function useMemo<T>(factory: () => T, deps: any[]): T;
+  export function useRef<T>(initialValue: T): { current: T };
+  export function useContext<T>(context: React.Context<T>): T;
+  export function useReducer<R extends React.Reducer<any, any>>(
+    reducer: R,
+    initialState: React.ReducerState<R>
+  ): [React.ReducerState<R>, React.Dispatch<React.ReducerAction<R>>];
+  export const Children: {
+    map<T, C>(children: C | C[], fn: (child: C, index: number) => T): T[];
+    forEach<C>(children: C | C[], fn: (child: C, index: number) => void): void;
+    count(children: any): number;
+    only<C>(children: C): C extends any[] ? never : C;
+    toArray(children: any): any[];
+  };
+  export interface ReactNode {}
+  export interface ReactElement<P = any> {
+    type: any;
+    props: P;
+    key: string | null;
+  }
+  export interface CSSProperties {
+    [key: string]: string | number;
+  }
+}
+
+declare global {
+  namespace JSX {
+    interface Element extends React.ReactElement<any, any> {}
+    interface IntrinsicElements {
+      div: React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
+      span: React.DetailedHTMLProps<React.HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>;
+      p: React.DetailedHTMLProps<React.HTMLAttributes<HTMLParagraphElement>, HTMLParagraphElement>;
+      h1: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+      h2: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+      h3: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+      h4: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+      h5: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+      h6: React.DetailedHTMLProps<React.HTMLAttributes<HTMLHeadingElement>, HTMLHeadingElement>;
+      button: React.DetailedHTMLProps<React.ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>;
+      input: React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
+      img: React.DetailedHTMLProps<React.ImgHTMLAttributes<HTMLImageElement>, HTMLImageElement>;
+      a: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>;
+      ul: React.DetailedHTMLProps<React.HTMLAttributes<HTMLUListElement>, HTMLUListElement>;
+      ol: React.DetailedHTMLProps<React.OlHTMLAttributes<HTMLOListElement>, HTMLOListElement>;
+      li: React.DetailedHTMLProps<React.LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>;
+      form: React.DetailedHTMLProps<React.FormHTMLAttributes<HTMLFormElement>, HTMLFormElement>;
+      label: React.DetailedHTMLProps<React.LabelHTMLAttributes<HTMLLabelElement>, HTMLLabelElement>;
+      select: React.DetailedHTMLProps<React.SelectHTMLAttributes<HTMLSelectElement>, HTMLSelectElement>;
+      option: React.DetailedHTMLProps<React.OptionHTMLAttributes<HTMLOptionElement>, HTMLOptionElement>;
+      textarea: React.DetailedHTMLProps<React.TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>;
+      nav: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      header: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      footer: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      section: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      article: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      aside: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      main: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
+      svg: React.SVGProps<SVGSVGElement>;
+      path: React.SVGProps<SVGPathElement>;
+      [elemName: string]: any;
+    }
+  }
+}
+`;
+
+    // Configure TypeScript/JSX compiler options
+    monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ESNext,
+      allowNonTsExtensions: true,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      module: monaco.languages.typescript.ModuleKind.ESNext,
+      noEmit: true,
+      jsx: monaco.languages.typescript.JsxEmit.React,
+      jsxFactory: 'React.createElement',
+      reactNamespace: 'React',
+      allowJs: true,
+      typeRoots: ['node_modules/@types'],
+      esModuleInterop: true,
+      allowSyntheticDefaultImports: true,
+    });
+
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      target: monaco.languages.typescript.ScriptTarget.ESNext,
+      allowNonTsExtensions: true,
+      moduleResolution: monaco.languages.typescript.ModuleResolutionKind.NodeJs,
+      module: monaco.languages.typescript.ModuleKind.ESNext,
+      noEmit: true,
+      jsx: monaco.languages.typescript.JsxEmit.React,
+      jsxFactory: 'React.createElement',
+      reactNamespace: 'React',
+      allowJs: true,
+      esModuleInterop: true,
+      allowSyntheticDefaultImports: true,
+    });
+
+    // Add React type definitions to the editor
+    monaco.languages.typescript.typescriptDefaults.addExtraLib(
+      reactTypes,
+      'file:///node_modules/@types/react/index.d.ts'
+    );
+
+    monaco.languages.typescript.javascriptDefaults.addExtraLib(
+      reactTypes,
+      'file:///node_modules/@types/react/index.d.ts'
+    );
+
+    // Enable advanced diagnostics
+    monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: false,
+      noSyntaxValidation: false,
+      noSuggestionDiagnostics: false,
+    });
+
+    monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+      noSemanticValidation: false,
+      noSyntaxValidation: false,
+      noSuggestionDiagnostics: false,
+    });
+
+    // Configure editor features
+    monaco.languages.typescript.typescriptDefaults.setEagerModelSync(true);
+    monaco.languages.typescript.javascriptDefaults.setEagerModelSync(true);
+  };
 
   // Load template from navigation state (from Web Design Kit)
   useEffect(() => {
@@ -940,13 +1079,14 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
               <div className="w-full h-full bg-[#1e1e1e]">
                 <Editor
                   height="100%"
-                  defaultLanguage="html"
-                  language="html"
+                  defaultLanguage="typescript"
+                  language="typescript"
                   value={editorCode}
                   onChange={(value) => {
                     setEditorCode(value || '');
                     setPreviewCode(value || '');
                   }}
+                  beforeMount={handleEditorWillMount}
                   theme="vs-dark"
                   options={{
                     minimap: { enabled: true },
@@ -967,10 +1107,14 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                       strings: true,
                     },
                     parameterHints: { enabled: true },
+                    acceptSuggestionOnCommitCharacter: true,
+                    acceptSuggestionOnEnter: 'on',
                     autoClosingBrackets: 'always',
                     autoClosingQuotes: 'always',
                     autoIndent: 'full',
                     bracketPairColorization: { enabled: true },
+                    colorDecorators: true,
+                    contextmenu: true,
                     cursorBlinking: 'smooth',
                     cursorSmoothCaretAnimation: 'on',
                     smoothScrolling: true,
@@ -978,6 +1122,28 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                     folding: true,
                     foldingHighlight: true,
                     showFoldingControls: 'always',
+                    suggest: {
+                      showWords: true,
+                      showMethods: true,
+                      showFunctions: true,
+                      showConstructors: true,
+                      showFields: true,
+                      showVariables: true,
+                      showClasses: true,
+                      showStructs: true,
+                      showInterfaces: true,
+                      showModules: true,
+                      showProperties: true,
+                      showEvents: true,
+                      showOperators: true,
+                      showUnits: true,
+                      showValues: true,
+                      showConstants: true,
+                      showEnums: true,
+                      showEnumMembers: true,
+                      showKeywords: true,
+                      showSnippets: true,
+                    },
                   }}
                 />
               </div>
@@ -1021,13 +1187,14 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                     </div>
                     <Editor
                       height="calc(100% - 40px)"
-                      defaultLanguage="html"
-                      language="html"
+                      defaultLanguage="typescript"
+                      language="typescript"
                       value={editorCode}
                       onChange={(value) => {
                         setEditorCode(value || '');
                         setPreviewCode(value || '');
                       }}
+                      beforeMount={handleEditorWillMount}
                       theme="vs-dark"
                       options={{
                         minimap: { enabled: true },
@@ -1038,11 +1205,27 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                         tabSize: 2,
                         wordWrap: 'on',
                         suggestOnTriggerCharacters: true,
-                        quickSuggestions: true,
+                        quickSuggestions: {
+                          other: true,
+                          comments: true,
+                          strings: true,
+                        },
+                        parameterHints: { enabled: true },
+                        acceptSuggestionOnCommitCharacter: true,
+                        acceptSuggestionOnEnter: 'on',
                         autoClosingBrackets: 'always',
                         autoClosingQuotes: 'always',
                         formatOnPaste: true,
                         formatOnType: true,
+                        suggest: {
+                          showWords: true,
+                          showMethods: true,
+                          showFunctions: true,
+                          showConstructors: true,
+                          showVariables: true,
+                          showProperties: true,
+                          showSnippets: true,
+                        },
                       }}
                     />
                   </div>

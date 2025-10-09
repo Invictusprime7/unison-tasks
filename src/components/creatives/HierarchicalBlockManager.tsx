@@ -172,7 +172,7 @@ export const HierarchicalBlockManager = ({ editor }: HierarchicalBlockManagerPro
               <AccordionItem key={categoryKey} value={categoryKey} className="border-b border-border/50">
                 <AccordionTrigger className="px-3 py-2.5 hover:bg-muted/50 text-sm font-medium">
                   <div className="flex items-center gap-2">
-                    {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+                    {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" style={{ opacity: 1, strokeWidth: 2 }} />}
                     <span>{category.label}</span>
                   </div>
                 </AccordionTrigger>
@@ -185,7 +185,7 @@ export const HierarchicalBlockManager = ({ editor }: HierarchicalBlockManagerPro
                         <AccordionItem key={subKey} value={subKey} className="border-none">
                           <AccordionTrigger className="px-6 py-2 hover:bg-muted/30 text-sm">
                             <div className="flex items-center gap-2">
-                              {SubIcon && <SubIcon className="h-3.5 w-3.5 text-muted-foreground" />}
+                              {SubIcon && <SubIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" style={{ opacity: 1, strokeWidth: 2 }} />}
                               <span className="text-muted-foreground">{subcategory.label}</span>
                             </div>
                           </AccordionTrigger>

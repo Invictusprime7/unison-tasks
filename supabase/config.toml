@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.generate-page]
 verify_jwt = false
+
+[functions.web-builder-ai]
+verify_jwt = false

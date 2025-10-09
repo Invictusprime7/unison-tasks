@@ -392,6 +392,15 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => setAiPanelOpen(true)}
+            className="text-white/70 hover:text-white"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Assistant
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setIntegrationsPanelOpen(true)}
             className="text-white/70 hover:text-white"
           >
@@ -584,7 +593,11 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
       </div>
 
       {/* AI Assistant Panel */}
-      <AIAssistantPanel isOpen={aiPanelOpen} onClose={() => setAiPanelOpen(false)} />
+      <AIAssistantPanel 
+        isOpen={aiPanelOpen} 
+        onClose={() => setAiPanelOpen(false)}
+        fabricCanvas={fabricCanvas}
+      />
 
       {/* Code Preview Dialog */}
       <CodePreviewDialog

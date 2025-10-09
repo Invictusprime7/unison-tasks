@@ -5,12 +5,14 @@ import { Input } from "@/components/ui/input";
 import { 
   Plus, Layout, Type, Square, Settings2, Eye, Play,
   Monitor, Tablet, Smartphone, ZoomIn, ZoomOut, Hand,
-  MousePointer2, Search
+  MousePointer2, Search, Sparkles, Code
 } from "lucide-react";
 import { toast } from "sonner";
 import { NavigationPanel } from "./web-builder/NavigationPanel";
 import { ComponentsLibrary } from "./web-builder/ComponentsLibrary";
 import { PropertiesPanel } from "./web-builder/PropertiesPanel";
+import { AIAssistantPanel } from "./web-builder/AIAssistantPanel";
+import { CodePreviewDialog } from "./web-builder/CodePreviewDialog";
 import { webBlocks } from "./web-builder/webBlocks";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -27,6 +29,8 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [activeMode, setActiveMode] = useState<"insert" | "layout" | "text" | "vector">("insert");
   const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [zoom, setZoom] = useState(0.5);
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
+  const [codePreviewOpen, setCodePreviewOpen] = useState(false);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -155,6 +159,24 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setCodePreviewOpen(true)}
+            className="text-white/70 hover:text-white"
+          >
+            <Code className="h-4 w-4 mr-2" />
+            Code
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setAiPanelOpen(true)}
+            className="text-white/70 hover:text-white"
+          >
+            <Sparkles className="h-4 w-4 mr-2" />
+            AI Assistant
+          </Button>
           <Button variant="ghost" size="sm" className="text-white/70 hover:text-white">
             <Eye className="h-4 w-4 mr-2" />
             Preview
@@ -271,6 +293,16 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           selectedObject={selectedObject}
         />
       </div>
+
+      {/* AI Assistant Panel */}
+      <AIAssistantPanel isOpen={aiPanelOpen} onClose={() => setAiPanelOpen(false)} />
+
+      {/* Code Preview Dialog */}
+      <CodePreviewDialog
+        isOpen={codePreviewOpen}
+        onClose={() => setCodePreviewOpen(false)}
+        fabricCanvas={fabricCanvas}
+      />
     </div>
   );
 };

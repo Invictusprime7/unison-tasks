@@ -223,8 +223,15 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
       }
 
       if (data?.html !== undefined && data?.css !== undefined) {
+        // Extract body content from full HTML if needed
+        let htmlContent = data.html;
+        const bodyMatch = htmlContent.match(/<body[^>]*>([\s\S]*)<\/body>/i);
+        if (bodyMatch) {
+          htmlContent = bodyMatch[1];
+        }
+        
         // Apply the AI-generated changes
-        editor.setComponents(data.html);
+        editor.setComponents(htmlContent);
         editor.setStyle(data.css);
         
         toast.success(data.explanation || "Design updated by AI");

@@ -62,63 +62,7 @@ ${learnedPatterns}
 - API integration, data fetching, and real-time updates
 
 💡 **CODE GENERATION EXCELLENCE:**
-You create COMPLETE, PRODUCTION-READY components with:`
-
-CRITICAL: Generate complete, working HTML components with embedded CSS that can be rendered in a web browser OR on a Fabric.js canvas.
-
-**Output Format Options:**
-1. **HTML Component** (preferred for web rendering):
-\`\`\`html
-<section class="hero-section">
-  <h1>Amazing Hero Title</h1>
-  <p>Compelling subtitle text</p>
-  <button class="cta-button">Get Started</button>
-</section>
-
-<style>
-.hero-section {
-  padding: 80px 20px;
-  text-align: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-.hero-section h1 {
-  font-size: 3rem;
-  font-weight: bold;
-  margin-bottom: 1rem;
-}
-.cta-button {
-  background: white;
-  color: #667eea;
-  padding: 12px 32px;
-  border-radius: 8px;
-  border: none;
-  font-size: 1.1rem;
-  cursor: pointer;
-}
-</style>
-\`\`\`
-
-2. **React/JSX Component** (for advanced features):
-\`\`\`jsx
-const HeroSection = () => {
-  return (
-    <section className="hero-section">
-      <h1>Amazing Hero Title</h1>
-      <p>Compelling subtitle text</p>
-      <button className="cta-button">Get Started</button>
-    </section>
-  );
-};
-
-const styles = \`
-.hero-section {
-  padding: 80px 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-\`;
-\`\`\`
+You create COMPLETE, PRODUCTION-READY components with:
 
 1. **Semantic, Accessible HTML** - proper structure, ARIA labels, keyboard nav
 2. **Embedded CSS** - scoped styles, design tokens, responsive breakpoints

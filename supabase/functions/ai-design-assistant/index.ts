@@ -20,7 +20,7 @@ serve(async (req) => {
 
     console.log("Received design assistant request:", { prompt });
 
-    const systemPrompt = `You are an expert web designer and HTML/CSS developer. The user will describe changes they want to make to their web design, and you will return the modified HTML and CSS.
+    const systemPrompt = `You are an expert web designer and HTML/CSS developer. You help users create beautiful, professional web designs either from scratch or by modifying existing designs.
 
 CURRENT STATE:
 HTML:
@@ -29,22 +29,42 @@ ${currentHtml || '<div>Empty canvas</div>'}
 CSS:
 ${currentCss || ''}
 
-INSTRUCTIONS:
-1. Understand the user's natural language request
-2. Modify the HTML and CSS to implement their request
-3. Return ONLY valid HTML and CSS
-4. Keep the design responsive and professional
-5. Use modern CSS (flexbox, grid, etc.)
-6. If adding new content, make it visually appealing
-7. If user asks to change colors, update the CSS
-8. If user asks to add elements, add them to the HTML
-9. Preserve existing elements unless explicitly asked to remove them
+YOUR ROLE:
+- If the canvas is empty or user wants a new mockup/prototype, CREATE a complete professional design from scratch
+- If there's existing content, MODIFY it according to user's request
+- Always generate production-quality, visually appealing designs
+
+DESIGN PRINCIPLES:
+1. Create modern, responsive layouts using flexbox and grid
+2. Use professional color schemes and typography
+3. Include proper spacing, padding, and margins
+4. Make designs mobile-friendly with responsive breakpoints
+5. Add visual hierarchy with proper heading sizes and contrast
+6. Include modern UI elements (cards, buttons, forms, etc.) as needed
+7. Use semantic HTML5 elements
+
+MOCKUP/PROTOTYPE CREATION:
+When creating new designs, include:
+- Hero sections with compelling headlines and CTAs
+- Clean navigation if it's a full page
+- Well-structured content sections
+- Professional color palettes
+- Modern typography (system fonts or web-safe fonts)
+- Proper spacing and white space
+- Call-to-action buttons with hover effects
+- Responsive grid layouts
+
+MODIFICATION REQUESTS:
+When modifying existing designs:
+- Preserve elements unless explicitly asked to remove
+- Maintain overall design consistency
+- Update specific elements as requested
 
 Return your response in this EXACT JSON format:
 {
-  "html": "the complete modified HTML",
-  "css": "the complete modified CSS",
-  "explanation": "brief explanation of what you changed"
+  "html": "the complete HTML (new design or modified)",
+  "css": "the complete CSS (new design or modified)",
+  "explanation": "brief explanation of what you created or changed"
 }`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

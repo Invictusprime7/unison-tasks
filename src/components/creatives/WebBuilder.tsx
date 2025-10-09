@@ -866,7 +866,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             
             {/* Canvas Mode - AI Live Preview Only */}
             {viewMode === 'canvas' && (
-              <div className="w-full h-full flex flex-col bg-white rounded-lg overflow-hidden border border-white/10 shadow-2xl relative">
+              <div className="w-full h-full flex flex-col bg-white rounded-lg overflow-hidden border border-white/10 shadow-2xl">
                 <div className="h-12 bg-muted border-b flex items-center justify-between px-4">
                   <div className="flex items-center gap-2">
                     <Eye className="w-4 h-4 text-muted-foreground" />
@@ -914,64 +914,6 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                     autoRefresh={true}
                     className="w-full h-full"
                   />
-                </div>
-                
-                {/* Scroll Control Buttons */}
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col gap-2 z-50">
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      if (scrollContainerRef.current) {
-                        scrollContainerRef.current.scrollTo({ top: 0, behavior: 'auto' });
-                      }
-                    }}
-                    className="h-10 w-10 rounded-full bg-primary/90 hover:bg-primary shadow-lg"
-                    title="Scroll to top (immediate)"
-                  >
-                    <ChevronsUp className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      if (scrollContainerRef.current) {
-                        scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-                      }
-                    }}
-                    className="h-10 w-10 rounded-full bg-primary/90 hover:bg-primary shadow-lg"
-                    title="Scroll to top (smooth)"
-                  >
-                    <ArrowUp className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      if (scrollContainerRef.current) {
-                        scrollContainerRef.current.scrollTo({ 
-                          top: scrollContainerRef.current.scrollHeight, 
-                          behavior: 'smooth' 
-                        });
-                      }
-                    }}
-                    className="h-10 w-10 rounded-full bg-primary/90 hover:bg-primary shadow-lg"
-                    title="Scroll to bottom (smooth)"
-                  >
-                    <ArrowDown className="h-5 w-5" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    onClick={() => {
-                      if (scrollContainerRef.current) {
-                        scrollContainerRef.current.scrollTo({ 
-                          top: scrollContainerRef.current.scrollHeight, 
-                          behavior: 'auto' 
-                        });
-                      }
-                    }}
-                    className="h-10 w-10 rounded-full bg-primary/90 hover:bg-primary shadow-lg"
-                    title="Scroll to bottom (immediate)"
-                  >
-                    <ChevronsDown className="h-5 w-5" />
-                  </Button>
                 </div>
               </div>
             )}

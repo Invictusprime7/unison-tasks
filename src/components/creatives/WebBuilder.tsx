@@ -995,11 +995,11 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                       </div>
                       <Button
                         size="sm"
-                        onClick={handleRenderToCanvas}
+                        onClick={() => setViewMode('canvas')}
                         className="h-7 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                       >
-                        <Play className="w-3 h-3 mr-1" />
-                        Render to Fabric Canvas
+                        <Eye className="w-3 h-3 mr-1" />
+                        View in Canvas
                       </Button>
                     </div>
                     <Editor

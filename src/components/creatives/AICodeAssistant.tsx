@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Canvas as FabricCanvas, Rect, Textbox } from 'fabric';
+import { supabase } from "@/integrations/supabase/client";
 import Editor from '@monaco-editor/react';
 import { executeCanvasCode, getCanvasCodeExample } from '@/utils/canvasCodeRunner';
 import { parseComponentCode, renderComponentToCanvas, generateHTMLFile, generateReactComponent } from '@/utils/componentRenderer';
@@ -54,6 +55,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
   const [isLoading, setIsLoading] = useState(false);
   const [mode, setMode] = useState<'code' | 'design' | 'review'>('code');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [learningEnabled, setLearningEnabled] = useState(true);
   const [codeViewerOpen, setCodeViewerOpen] = useState(false);
   const [currentCode, setCurrentCode] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -180,6 +182,15 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
         title: 'Component rendered!',
         description: description || 'Component added to canvas successfully.',
       });
+
+      // Save successful pattern to learning database
+      if (learningEnabled) {
+        saveCodePattern(
+          JSON.stringify(componentData),
+          'component',
+          'Successfully rendered component from AI generation'
+        );
+      }
     } catch (error) {
       console.error('[AICodeAssistant] Render error:', error);
       toast({
@@ -187,6 +198,23 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
         description: 'Could not render component to canvas.',
         variant: 'destructive',
       });
+    }
+  };
+
+  const saveCodePattern = async (code: string, patternType: string, description: string) => {
+    try {
+      const codeSnippet = code.substring(0, 5000); // Limit size
+      await supabase.from('ai_code_patterns').insert({
+        pattern_type: patternType,
+        code_snippet: codeSnippet,
+        description,
+        tags: [mode, patternType],
+        success_rate: 100,
+        usage_count: 1
+      });
+      console.log('✅ Code pattern saved to learning database');
+    } catch (error) {
+      console.error('Failed to save pattern:', error);
     }
   };
 
@@ -388,14 +416,30 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
               ({messages.length} messages)
             </span>
           )}
+          {learningEnabled && (
+            <span className="text-xs bg-white/10 text-white px-2 py-1 rounded-full flex items-center gap-1">
+              🧠 Learning
+            </span>
+          )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-white hover:bg-white/20"
-        >
-          {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setLearningEnabled(!learningEnabled)}
+            title={learningEnabled ? "Disable learning" : "Enable learning"}
+            className="text-white hover:bg-white/20"
+          >
+            {learningEnabled ? "🧠" : "💤"}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-white hover:bg-white/20"
+          >
+            {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+          </Button>
+        </div>
       </div>
 
       {/* Main Content */}

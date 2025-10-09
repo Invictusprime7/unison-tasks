@@ -14,6 +14,78 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_code_patterns: {
+        Row: {
+          code_snippet: string
+          created_at: string | null
+          description: string | null
+          id: string
+          pattern_type: string
+          success_rate: number | null
+          tags: string[] | null
+          updated_at: string | null
+          usage_count: number | null
+        }
+        Insert: {
+          code_snippet: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          pattern_type: string
+          success_rate?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Update: {
+          code_snippet?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          pattern_type?: string
+          success_rate?: number | null
+          tags?: string[] | null
+          updated_at?: string | null
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
+      ai_learning_sessions: {
+        Row: {
+          ai_response: string
+          code_generated: string | null
+          created_at: string | null
+          feedback_score: number | null
+          id: string
+          session_type: string
+          technologies_used: string[] | null
+          user_prompt: string
+          was_successful: boolean | null
+        }
+        Insert: {
+          ai_response: string
+          code_generated?: string | null
+          created_at?: string | null
+          feedback_score?: number | null
+          id?: string
+          session_type: string
+          technologies_used?: string[] | null
+          user_prompt: string
+          was_successful?: boolean | null
+        }
+        Update: {
+          ai_response?: string
+          code_generated?: string | null
+          created_at?: string | null
+          feedback_score?: number | null
+          id?: string
+          session_type?: string
+          technologies_used?: string[] | null
+          user_prompt?: string
+          was_successful?: boolean | null
+        }
+        Relationships: []
+      }
       brand_kits: {
         Row: {
           colors: Json | null
@@ -865,6 +937,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      increment_pattern_usage: {
+        Args: { pattern_id: string }
+        Returns: undefined
+      }
       validate_file_share_token: {
         Args: { _file_id: string; _token: string }
         Returns: boolean

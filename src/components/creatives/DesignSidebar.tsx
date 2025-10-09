@@ -1,6 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ElementsPanel } from './design-studio/ElementsPanel';
-import { WebComponentsPanel } from './design-studio/WebComponentsPanel';
 import { IntegrationsPanel } from './design-studio/IntegrationsPanel';
 import { Button } from '@/components/ui/button';
 import type { DesignElement } from './design-studio/ElementsPanel';
@@ -59,7 +58,9 @@ export const DesignSidebar = ({
       </TabsContent>
 
       <TabsContent value="web" className="flex-1 m-0 overflow-hidden">
-        <WebComponentsPanel onComponentSelect={(comp) => console.log('Web component:', comp)} />
+        <div className="p-4 text-sm text-muted-foreground">
+          Web components are available in the Web Builder. Switch to the Web tab in the main toolbar to access GrapeJS editor with web components.
+        </div>
       </TabsContent>
 
       <TabsContent value="export" className="flex-1 m-0 overflow-hidden">

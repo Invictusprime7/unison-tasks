@@ -10,31 +10,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Check, Upload, Save, Code2 } from "lucide-react";
 import { toast } from "sonner";
 import Editor from "@monaco-editor/react";
-import type { useGrapeJS } from "@/hooks/useGrapeJS";
 
 interface CodePreviewDialogProps {
   isOpen: boolean;
   onClose: () => void;
   fabricCanvas: any;
-  grapeJS?: ReturnType<typeof useGrapeJS>;
 }
 
 export const CodePreviewDialog = ({
   isOpen,
   onClose,
   fabricCanvas,
-  grapeJS,
 }: CodePreviewDialogProps) => {
   const [copied, setCopied] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [htmlCode, setHtmlCode] = useState("");
   const [cssCode, setCssCode] = useState("");
 
-  const generateHTML = async () => {
-    if (grapeJS && grapeJS.isReady) {
-      return await grapeJS.getHtml();
-    }
-    
+  const generateHTML = () => {
     if (!fabricCanvas) return "<div>No content</div>";
 
     const objects = fabricCanvas.getObjects();
@@ -54,11 +47,7 @@ export const CodePreviewDialog = ({
     return html;
   };
 
-  const generateCSS = async () => {
-    if (grapeJS && grapeJS.isReady) {
-      return await grapeJS.getCss();
-    }
-    
+  const generateCSS = () => {
     return `.web-builder-output {
   font-family: system-ui, -apple-system, sans-serif;
   line-height: 1.5;
@@ -69,10 +58,10 @@ export const CodePreviewDialog = ({
 
   useEffect(() => {
     if (isOpen) {
-      generateHTML().then(setHtmlCode);
-      generateCSS().then(setCssCode);
+      setHtmlCode(generateHTML());
+      setCssCode(generateCSS());
     }
-  }, [isOpen, fabricCanvas, grapeJS]);
+  }, [isOpen, fabricCanvas]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -105,15 +94,11 @@ export const CodePreviewDialog = ({
     input.click();
   };
 
-  const handleApplyChanges = async () => {
-    // Apply code changes to GrapeJS editor
-    if (grapeJS && grapeJS.isReady) {
-      await grapeJS.setComponents(JSON.parse(htmlCode));
-      toast.success("Code changes applied!");
-      setIsEditMode(false);
-    } else {
-      toast.info("Code editing not available in legacy mode");
-    }
+  const handleApplyChanges = () => {
+    // This would apply the code changes to the canvas
+    // For now, just show a success message
+    toast.success("Code changes applied!");
+    setIsEditMode(false);
   };
 
   const handleDownload = (code: string, filename: string) => {

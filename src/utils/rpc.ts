@@ -4,10 +4,7 @@
 
 type RPCMethod = 'fs.writeFile' | 'fs.readFile' | 'fs.deleteFile' | 
                  'runtime.reload' | 'runtime.applyCSS' | 'runtime.evalModule' |
-                 'events.subscribe' | 'editorReady' | 'editorChanged' | 'console' |
-                 'getHtml' | 'getCss' | 'getJs' | 'setComponents' | 'getComponents' |
-                 'addComponents' | 'setStyle' | 'getStyle' | 'clear' | 'undo' | 'redo' |
-                 'setDevice' | 'getDevice';
+                 'events.subscribe';
 
 interface RPCRequest {
   id: string;
@@ -29,8 +26,8 @@ export class RPCHost {
   private targetWindow: Window | null = null;
   private targetOrigin = '*';
 
-  constructor(private sourceWindow: Window = window) {
-    sourceWindow.addEventListener('message', this.handleMessage.bind(this));
+  constructor() {
+    window.addEventListener('message', this.handleMessage.bind(this));
   }
 
   setTarget(window: Window, origin = '*') {
@@ -96,7 +93,7 @@ export class RPCHost {
   }
 
   destroy() {
-    this.sourceWindow.removeEventListener('message', this.handleMessage.bind(this));
+    window.removeEventListener('message', this.handleMessage.bind(this));
     this.pendingRequests.clear();
     this.handlers.clear();
   }

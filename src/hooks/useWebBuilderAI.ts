@@ -87,17 +87,26 @@ export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
   const addObjectsToCanvas = async (objects: AICanvasObject[]) => {
     if (!fabricCanvas) return;
 
+    const canvasWidth = fabricCanvas.width || 1920;
+    const canvasHeight = fabricCanvas.height || 1440;
+
+    const constrainPosition = (value: number, max: number, size: number = 0) => {
+      return Math.max(0, Math.min(value, max - size));
+    };
+
     for (const obj of objects) {
       try {
         let fabricObj;
 
         switch (obj.type) {
           case 'rect':
+            const rectWidth = obj.width || 200;
+            const rectHeight = obj.height || 100;
             fabricObj = new Rect({
-              left: obj.left,
-              top: obj.top,
-              width: obj.width || 200,
-              height: obj.height || 100,
+              left: constrainPosition(obj.left, canvasWidth, rectWidth),
+              top: constrainPosition(obj.top, canvasHeight, rectHeight),
+              width: rectWidth,
+              height: rectHeight,
               fill: obj.fill || '#3b82f6',
               stroke: obj.stroke,
               strokeWidth: obj.strokeWidth || 0,
@@ -108,10 +117,11 @@ export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
             break;
 
           case 'circle':
+            const radius = obj.radius || 50;
             fabricObj = new Circle({
-              left: obj.left,
-              top: obj.top,
-              radius: obj.radius || 50,
+              left: constrainPosition(obj.left, canvasWidth, radius * 2),
+              top: constrainPosition(obj.top, canvasHeight, radius * 2),
+              radius: radius,
               fill: obj.fill || '#3b82f6',
               stroke: obj.stroke,
               strokeWidth: obj.strokeWidth || 0,
@@ -120,8 +130,8 @@ export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
 
           case 'text':
             fabricObj = new IText(obj.text || 'Text', {
-              left: obj.left,
-              top: obj.top,
+              left: constrainPosition(obj.left, canvasWidth),
+              top: constrainPosition(obj.top, canvasHeight),
               fill: obj.fill || '#000000',
               fontSize: obj.fontSize || 24,
               fontFamily: obj.fontFamily || 'Arial',
@@ -129,10 +139,11 @@ export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
             break;
 
           case 'textbox':
+            const textboxWidth = obj.width || 200;
             fabricObj = new Textbox(obj.text || 'Text', {
-              left: obj.left,
-              top: obj.top,
-              width: obj.width || 200,
+              left: constrainPosition(obj.left, canvasWidth, textboxWidth),
+              top: constrainPosition(obj.top, canvasHeight),
+              width: textboxWidth,
               fill: obj.fill || '#000000',
               fontSize: obj.fontSize || 16,
               fontFamily: obj.fontFamily || 'Arial',
@@ -145,9 +156,11 @@ export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
                 fabricObj = await FabricImage.fromURL(obj.src, {
                   crossOrigin: 'anonymous'
                 });
+                const imgWidth = obj.width || fabricObj.width || 100;
+                const imgHeight = obj.height || fabricObj.height || 100;
                 fabricObj.set({
-                  left: obj.left,
-                  top: obj.top,
+                  left: constrainPosition(obj.left, canvasWidth, imgWidth),
+                  top: constrainPosition(obj.top, canvasHeight, imgHeight),
                   scaleX: obj.width ? obj.width / (fabricObj.width || 1) : 1,
                   scaleY: obj.height ? obj.height / (fabricObj.height || 1) : 1,
                 });

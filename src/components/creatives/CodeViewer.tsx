@@ -190,8 +190,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
 
         <TabsContent value="component" className="flex-1 m-0 p-0 data-[state=active]:flex">
           <LiveHTMLPreview 
-            html={componentData.html}
-            css={componentData.css}
+            code={code}
             autoRefresh={true}
             className="w-full h-full"
           />
@@ -199,8 +198,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
 
         <TabsContent value="live" className="flex-1 m-0 p-0 data-[state=active]:flex">
           <LiveHTMLPreview 
-            html={componentData.html}
-            css={componentData.css}
+            code={code}
             autoRefresh={true}
             className="w-full h-full"
           />

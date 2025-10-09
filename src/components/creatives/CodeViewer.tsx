@@ -23,6 +23,12 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
   const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
   const { toast } = useToast();
 
+  // Update code when initialCode changes
+  React.useEffect(() => {
+    setCode(initialCode);
+    console.log('[CodeViewer] Code updated:', initialCode.substring(0, 100));
+  }, [initialCode]);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(code);
     toast({
@@ -111,15 +117,16 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="code" className="flex-1 m-0 p-0">
+        <TabsContent value="code" className="flex-1 m-0 p-0 data-[state=active]:flex">
           <Editor
             height="100%"
+            defaultLanguage={language}
             language={language}
             value={code}
             onChange={(value) => setCode(value || '')}
             theme="vs-dark"
             options={{
-              minimap: { enabled: false },
+              minimap: { enabled: true },
               fontSize: 14,
               lineNumbers: 'on',
               roundedSelection: true,
@@ -129,7 +136,16 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
               wordWrap: 'on',
               formatOnPaste: true,
               formatOnType: true,
+              padding: { top: 16, bottom: 16 },
             }}
+            loading={
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-sm text-muted-foreground">Loading editor...</p>
+                </div>
+              </div>
+            }
           />
         </TabsContent>
 

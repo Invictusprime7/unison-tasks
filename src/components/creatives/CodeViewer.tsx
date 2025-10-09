@@ -54,11 +54,19 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
   };
 
   const handleRender = () => {
+    console.log('[CodeViewer] Rendering code to canvas:', code.substring(0, 100));
     if (onRender) {
       onRender(code);
       toast({
         title: 'Rendering...',
         description: 'Converting code to canvas elements',
+      });
+    } else {
+      console.warn('[CodeViewer] No onRender callback provided');
+      toast({
+        title: 'Cannot render',
+        description: 'Canvas connection not available',
+        variant: 'destructive',
       });
     }
   };

@@ -531,10 +531,12 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
+                  // Only prevent default for Enter without Shift
                   if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault();
                     handleSend();
                   }
+                  // Allow all other keys including Backspace, Delete, etc.
                 }}
                 placeholder={
                   mode === 'code' 
@@ -545,6 +547,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                 }
                 disabled={isLoading}
                 className="min-h-[60px] max-h-[120px] resize-none"
+                autoFocus={false}
               />
               <Button
                 onClick={handleSend}

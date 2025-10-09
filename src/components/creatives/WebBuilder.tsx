@@ -57,7 +57,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     
     const canvas = new FabricCanvas(canvasElement, {
       width: 1920,
-      height: 1080,
+      height: 1440,
       backgroundColor: "#1a1a1a",
     });
 
@@ -227,7 +227,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     switch (device) {
       case "tablet": return 1024;
       case "mobile": return 667;
-      default: return 1080;
+      default: return 1440;
     }
   };
 

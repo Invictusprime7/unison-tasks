@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Code, Eye } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
 import { toast } from "sonner";
+import { WebComponentsPanel } from "./design-studio/WebComponentsPanel";
 
 interface GrapeJSEditorProps {
   initialHtml?: string;
@@ -171,6 +172,23 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
     toast("Template saved successfully");
   };
 
+  const handleComponentSelect = (component: any) => {
+    if (!editor) return;
+
+    const { config } = component;
+    
+    // Add component to the canvas
+    editor.addComponents(config.html || '');
+    
+    // Add CSS if provided
+    if (config.css) {
+      const currentCss = editor.getCss();
+      editor.setStyle(currentCss + '\n' + config.css);
+    }
+    
+    toast(`${component.name} added to canvas`);
+  };
+
   return (
     <div className="h-full w-full flex flex-col bg-background overflow-hidden">
       <div className="h-9 sm:h-10 border-b bg-card flex items-center justify-between px-2 sm:px-4 flex-shrink-0 min-w-0">
@@ -255,10 +273,18 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
         </div>
       ) : (
         <div className="flex-1 flex flex-col sm:flex-row overflow-hidden min-h-0">
+          {/* Left Sidebar - Web Components */}
+          <div className="w-full sm:w-64 border-b sm:border-r sm:border-b-0 bg-card max-h-[40vh] sm:max-h-none flex-shrink-0 overflow-hidden">
+            <WebComponentsPanel onComponentSelect={handleComponentSelect} />
+          </div>
+
+          {/* Center - Canvas */}
           <div className="flex-1 relative min-h-[300px] overflow-hidden">
             <div ref={editorRef} className="h-full w-full" />
           </div>
-          <div className="w-full sm:w-64 md:w-80 border-t sm:border-l sm:border-t-0 bg-card max-h-[40vh] sm:max-h-none flex-shrink-0 overflow-hidden">
+
+          {/* Right Sidebar - Properties */}
+          <div className="w-full sm:w-64 md:w-72 border-t sm:border-l sm:border-t-0 bg-card max-h-[40vh] sm:max-h-none flex-shrink-0 overflow-hidden">
             <div className="panel__switcher border-b text-xs overflow-x-auto"></div>
             <div className="panel__right h-full overflow-auto text-xs"></div>
           </div>

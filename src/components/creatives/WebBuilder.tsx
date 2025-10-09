@@ -67,7 +67,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     const canvas = new FabricCanvas(canvasElement, {
       width: 1280,
       height: canvasHeight,
-      backgroundColor: "#1a1a1a",
+      backgroundColor: "#ffffff", // Keep canvas background white to avoid black flashes on zoom
     });
 
     setFabricCanvas(canvas);

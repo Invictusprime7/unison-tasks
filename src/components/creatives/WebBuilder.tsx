@@ -25,6 +25,7 @@ import { webBlocks } from "./web-builder/webBlocks";
 import { useKeyboardShortcuts, defaultWebBuilderShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useCanvasHistory } from "@/hooks/useCanvasHistory";
 import { ChevronLeft, ChevronRight, PanelLeftClose, PanelRightClose } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -39,6 +40,7 @@ interface WebBuilderProps {
 }
 
 export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps) => {
+  const location = useLocation();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
   const [selectedObject, setSelectedObject] = useState<any>(null);
@@ -67,6 +69,21 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [editorCode, setEditorCode] = useState('<!-- AI-generated code will appear here -->\n<div style="padding: 40px; text-align: center;">\n  <h1>Welcome to AI Web Builder</h1>\n  <p>Use the AI Code Assistant to generate components</p>\n</div>');
   const [previewCode, setPreviewCode] = useState('<!-- AI-generated code will appear here -->\n<div style="padding: 40px; text-align: center;">\n  <h1>Welcome to AI Web Builder</h1>\n  <p>Use the AI Code Assistant to generate components</p>\n</div>');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Load template from navigation state (from Web Design Kit)
+  useEffect(() => {
+    if (location.state?.generatedCode) {
+      const { generatedCode, templateName, aesthetic } = location.state;
+      setEditorCode(generatedCode);
+      setPreviewCode(generatedCode);
+      setViewMode('canvas'); // Start in canvas view for live preview
+      toast(`${templateName} loaded!`, {
+        description: `${aesthetic} - Edit in Monaco or view in Canvas`,
+      });
+      // Clear the state to prevent re-loading on subsequent renders
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Handle AI code generation
   const handleAICodeGenerated = (code: string) => {

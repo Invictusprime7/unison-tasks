@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Palette, FileText, Video, Sparkles } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { WebDesignKit } from "./WebDesignKit";
 
 interface CreativeTaskSelectorProps {
@@ -11,7 +12,21 @@ interface CreativeTaskSelectorProps {
 }
 
 export const CreativeTaskSelector = ({ open, onOpenChange }: CreativeTaskSelectorProps) => {
+  const navigate = useNavigate();
   const [selectedTask, setSelectedTask] = useState<string | null>(null);
+
+  const handleTemplateGenerated = (code: string, name: string, aesthetic: string) => {
+    // Navigate to web builder with the generated template
+    navigate("/web-builder", {
+      state: {
+        generatedCode: code,
+        templateName: name,
+        aesthetic: aesthetic,
+      },
+    });
+    setSelectedTask(null);
+    onOpenChange(false);
+  };
 
   const creativeOptions = [
     {
@@ -50,6 +65,7 @@ export const CreativeTaskSelector = ({ open, onOpenChange }: CreativeTaskSelecto
         open={open}
         onOpenChange={onOpenChange}
         onBack={() => setSelectedTask(null)}
+        onTemplateGenerated={handleTemplateGenerated}
       />
     );
   }

@@ -13,9 +13,10 @@ interface WebDesignKitProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onBack: () => void;
+  onTemplateGenerated?: (code: string, name: string, aesthetic: string) => void;
 }
 
-export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) => {
+export const WebDesignKit = ({ open, onOpenChange, onBack, onTemplateGenerated }: WebDesignKitProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [generating, setGenerating] = useState(false);
   const [editorOpen, setEditorOpen] = useState(false);
@@ -70,13 +71,20 @@ export const WebDesignKit = ({ open, onOpenChange, onBack }: WebDesignKitProps) 
         return;
       }
 
-      setCurrentTemplate({
-        name: templateName,
-        aesthetic: aesthetic,
-        code: data.code,
-      });
-      setEditorOpen(true);
-      toast.success("Template generated successfully!");
+      // Pass the generated template to WebBuilder
+      if (onTemplateGenerated) {
+        onTemplateGenerated(data.code, templateName, aesthetic);
+        onOpenChange(false);
+        toast.success("Template loaded in Web Builder!");
+      } else {
+        setCurrentTemplate({
+          name: templateName,
+          aesthetic: aesthetic,
+          code: data.code,
+        });
+        setEditorOpen(true);
+        toast.success("Template generated successfully!");
+      }
     } catch (error) {
       console.error("Error generating template:", error);
       toast.error("Failed to generate template. Please try again.");

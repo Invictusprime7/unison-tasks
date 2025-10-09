@@ -6,6 +6,8 @@ import { Slider } from "@/components/ui/slider";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState, useEffect } from "react";
+import { CopyRewritePanel } from "./CopyRewritePanel";
+import { ImageOperationsPanel } from "./ImageOperationsPanel";
 
 interface WebPropertiesPanelProps {
   fabricCanvas: FabricCanvas | null;
@@ -71,10 +73,12 @@ export const WebPropertiesPanel = ({ fabricCanvas, selectedObject, onUpdate }: W
       {/* Properties */}
       <ScrollArea className="flex-1">
         <Tabs defaultValue="layout" className="w-full">
-          <TabsList className="w-full grid grid-cols-3 h-9">
+          <TabsList className="w-full grid grid-cols-5 h-9">
             <TabsTrigger value="layout" className="text-xs">Layout</TabsTrigger>
             <TabsTrigger value="style" className="text-xs">Style</TabsTrigger>
             <TabsTrigger value="effects" className="text-xs">Effects</TabsTrigger>
+            <TabsTrigger value="copy" className="text-xs">Copy</TabsTrigger>
+            <TabsTrigger value="image" className="text-xs">Image</TabsTrigger>
           </TabsList>
 
           <TabsContent value="layout" className="p-4 space-y-4">
@@ -249,6 +253,27 @@ export const WebPropertiesPanel = ({ fabricCanvas, selectedObject, onUpdate }: W
                 </SelectContent>
               </Select>
             </div>
+          </TabsContent>
+
+          <TabsContent value="copy" className="p-0">
+            <CopyRewritePanel
+              selectedObject={selectedObject}
+              onUpdate={(newText) => {
+                if (selectedObject) {
+                  selectedObject.set({ text: newText });
+                  fabricCanvas?.renderAll();
+                  onUpdate();
+                }
+              }}
+            />
+          </TabsContent>
+
+          <TabsContent value="image" className="p-0">
+            <ImageOperationsPanel
+              selectedObject={selectedObject}
+              fabricCanvas={fabricCanvas}
+              onUpdate={onUpdate}
+            />
           </TabsContent>
         </Tabs>
       </ScrollArea>

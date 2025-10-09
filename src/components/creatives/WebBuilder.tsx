@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { 
   Plus, Layout, Type, Square, Eye, Play,
   Monitor, Tablet, Smartphone, ZoomIn, ZoomOut,
-  Sparkles, Code, Undo2, Redo2, Save, Keyboard
+  Sparkles, Code, Undo2, Redo2, Save, Keyboard, Zap
 } from "lucide-react";
 import { toast } from "sonner";
 import { NavigationPanel } from "./web-builder/NavigationPanel";
@@ -13,6 +13,7 @@ import { AIAssistantPanel } from "./web-builder/AIAssistantPanel";
 import { CodePreviewDialog } from "./web-builder/CodePreviewDialog";
 import { IntegrationsPanel } from "./design-studio/IntegrationsPanel";
 import { ExportDialog } from "./design-studio/ExportDialog";
+import { PerformancePanel } from "./web-builder/PerformancePanel";
 import { webBlocks } from "./web-builder/webBlocks";
 import { useKeyboardShortcuts, defaultWebBuilderShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useCanvasHistory } from "@/hooks/useCanvasHistory";
@@ -48,6 +49,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [leftPanelCollapsed, setLeftPanelCollapsed] = useState(false);
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [performancePanelOpen, setPerformancePanelOpen] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
   const canvasContainerRef = useRef<HTMLDivElement>(null);
   const [isPanning, setIsPanning] = useState(false);
@@ -546,6 +548,15 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => setPerformancePanelOpen(true)}
+            className="text-white/70 hover:text-white"
+          >
+            <Zap className="h-4 w-4 mr-2" />
+            Performance
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setIntegrationsPanelOpen(true)}
             className="text-white/70 hover:text-white"
           >
@@ -790,6 +801,29 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         html={exportHtml}
         css={exportCss}
       />
+
+      {/* Performance Panel as Sidebar */}
+      {performancePanelOpen && (
+        <div className="fixed right-0 top-0 bottom-0 w-80 bg-[#1a1a1a] border-l border-white/10 shadow-2xl z-50 flex flex-col">
+          <div className="p-4 border-b border-white/10 flex items-center justify-between">
+            <h2 className="font-semibold text-white">Performance</h2>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setPerformancePanelOpen(false)}
+              className="text-white/70 hover:text-white"
+            >
+              ✕
+            </Button>
+          </div>
+          <PerformancePanel 
+            fabricCanvas={fabricCanvas}
+            onAutoFix={() => {
+              toast.success("Auto-fix applied! Optimizations complete.");
+            }}
+          />
+        </div>
+      )}
 
       {/* Integrations Panel as Sidebar */}
       {integrationsPanelOpen && (

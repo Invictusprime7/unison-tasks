@@ -1000,69 +1000,51 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
               </div>
             )}
 
-            {/* Code Mode - Monaco Editor + Live Preview */}
+            {/* Code Mode - Full Monaco Editor Only */}
             {viewMode === 'code' && (
-              <div className="w-full h-full flex gap-4">
-                {/* Monaco Editor */}
-                <div className="flex-1 bg-[#1e1e1e] rounded-lg overflow-hidden border border-white/10">
-                  <div className="h-10 bg-[#2d2d2d] border-b border-white/10 flex items-center justify-between px-4">
-                    <div className="flex items-center">
-                      <FileCode className="w-4 h-4 text-white/70 mr-2" />
-                      <span className="text-sm text-white/70">Monaco Code Editor</span>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={handleRenderToCanvas}
-                      className="h-7 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                    >
-                      <Play className="w-3 h-3 mr-1" />
-                      Render to Canvas
-                    </Button>
-                  </div>
-                  <Editor
-                    height="calc(100% - 40px)"
-                    defaultLanguage="html"
-                    language="html"
-                    value={editorCode}
-                    onChange={(value) => {
-                      setEditorCode(value || '');
-                      setPreviewCode(value || '');
-                    }}
-                    theme="vs-dark"
-                    options={{
-                      minimap: { enabled: true },
-                      fontSize: 14,
-                      lineNumbers: 'on',
-                      roundedSelection: true,
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                      tabSize: 2,
-                      wordWrap: 'on',
-                      formatOnPaste: true,
-                      formatOnType: true,
-                      padding: { top: 16, bottom: 16 },
-                      suggestOnTriggerCharacters: true,
-                      quickSuggestions: true,
-                      autoClosingBrackets: 'always',
-                      autoClosingQuotes: 'always',
-                    }}
-                  />
-                </div>
-
-                {/* Live Preview */}
-                <div className="flex-1 bg-white rounded-lg overflow-hidden border border-white/10">
-                  <div className="h-10 bg-muted border-b flex items-center px-4">
-                    <Eye className="w-4 h-4 text-muted-foreground mr-2" />
-                    <span className="text-sm text-muted-foreground">Live HTML Preview</span>
-                  </div>
-                  <div className="h-[calc(100%-40px)]">
-                    <LiveHTMLPreview 
-                      code={previewCode}
-                      autoRefresh={true}
-                      className="w-full h-full"
-                    />
-                  </div>
-                </div>
+              <div className="w-full h-full bg-[#1e1e1e]">
+                <Editor
+                  height="100%"
+                  defaultLanguage="html"
+                  language="html"
+                  value={editorCode}
+                  onChange={(value) => {
+                    setEditorCode(value || '');
+                    setPreviewCode(value || '');
+                  }}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: true },
+                    fontSize: 14,
+                    lineNumbers: 'on',
+                    roundedSelection: true,
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                    tabSize: 2,
+                    wordWrap: 'on',
+                    formatOnPaste: true,
+                    formatOnType: true,
+                    padding: { top: 16, bottom: 16 },
+                    suggestOnTriggerCharacters: true,
+                    quickSuggestions: {
+                      other: true,
+                      comments: true,
+                      strings: true,
+                    },
+                    parameterHints: { enabled: true },
+                    autoClosingBrackets: 'always',
+                    autoClosingQuotes: 'always',
+                    autoIndent: 'full',
+                    bracketPairColorization: { enabled: true },
+                    cursorBlinking: 'smooth',
+                    cursorSmoothCaretAnimation: 'on',
+                    smoothScrolling: true,
+                    snippetSuggestions: 'inline',
+                    folding: true,
+                    foldingHighlight: true,
+                    showFoldingControls: 'always',
+                  }}
+                />
               </div>
             )}
 

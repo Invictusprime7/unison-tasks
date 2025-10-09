@@ -49,6 +49,10 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
 
   // History management
   const history = useCanvasHistory(fabricCanvas);
@@ -368,6 +372,120 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     };
   }, []);
 
+  // Handle mouse wheel zoom
+  useEffect(() => {
+    const container = canvasContainerRef.current;
+    if (!container) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 0.9 : 1.1;
+      const newZoom = Math.max(0.1, Math.min(2, zoom * delta));
+      setZoom(newZoom);
+      if (fabricCanvas) {
+        fabricCanvas.setZoom(newZoom);
+        fabricCanvas.renderAll();
+      }
+    };
+
+    container.addEventListener('wheel', handleWheel, { passive: false });
+    return () => container.removeEventListener('wheel', handleWheel);
+  }, [zoom, fabricCanvas]);
+
+  // Handle panning with mouse drag
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button === 1 || (e.button === 0 && e.altKey)) { // Middle mouse or Alt+Left
+      setIsPanning(true);
+      setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+      e.preventDefault();
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isPanning) return;
+    setPanOffset({
+      x: e.clientX - panStart.x,
+      y: e.clientY - panStart.y,
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsPanning(false);
+  };
+
+  // Handle touch gestures for mobile
+  useEffect(() => {
+    const container = canvasContainerRef.current;
+    if (!container) return;
+
+    let initialDistance = 0;
+    let initialZoom = zoom;
+    let lastTouchCenter = { x: 0, y: 0 };
+    let touchPanOffset = { x: 0, y: 0 };
+
+    const getTouchDistance = (touches: TouchList) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    const getTouchCenter = (touches: TouchList) => {
+      return {
+        x: (touches[0].clientX + touches[1].clientX) / 2,
+        y: (touches[0].clientY + touches[1].clientY) / 2,
+      };
+    };
+
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        initialDistance = getTouchDistance(e.touches);
+        initialZoom = zoom;
+        lastTouchCenter = getTouchCenter(e.touches);
+        touchPanOffset = { ...panOffset };
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        
+        // Pinch zoom
+        const currentDistance = getTouchDistance(e.touches);
+        const scale = currentDistance / initialDistance;
+        const newZoom = Math.max(0.1, Math.min(2, initialZoom * scale));
+        setZoom(newZoom);
+        if (fabricCanvas) {
+          fabricCanvas.setZoom(newZoom);
+          fabricCanvas.renderAll();
+        }
+
+        // Pan
+        const currentCenter = getTouchCenter(e.touches);
+        const dx = currentCenter.x - lastTouchCenter.x;
+        const dy = currentCenter.y - lastTouchCenter.y;
+        setPanOffset({
+          x: touchPanOffset.x + dx,
+          y: touchPanOffset.y + dy,
+        });
+      }
+    };
+
+    const handleTouchEnd = () => {
+      initialDistance = 0;
+    };
+
+    container.addEventListener('touchstart', handleTouchStart, { passive: false });
+    container.addEventListener('touchmove', handleTouchMove, { passive: false });
+    container.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      container.removeEventListener('touchstart', handleTouchStart);
+      container.removeEventListener('touchmove', handleTouchMove);
+      container.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [zoom, fabricCanvas, panOffset]);
+
   return (
     <div ref={mainContainerRef} className="flex flex-col h-screen bg-[#0a0a0a]">
       {/* Top Toolbar */}
@@ -559,21 +677,31 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           </div>
 
           {/* Canvas - Scrollable like a real website */}
-          <div className="flex-1 overflow-auto p-4 flex items-start justify-center bg-[#0a0a0a]">
+          <div 
+            ref={canvasContainerRef}
+            className="flex-1 overflow-hidden p-4 flex items-start justify-center bg-[#0a0a0a] relative"
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            style={{ cursor: isPanning ? 'grabbing' : 'default' }}
+          >
             <div 
               className="bg-white shadow-2xl overflow-y-auto overflow-x-hidden"
               style={{ 
                 width: getCanvasWidth() * zoom,
                 minHeight: getCanvasHeight() * zoom,
                 maxHeight: "none",
-                boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)"
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)",
+                transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+                transition: isPanning ? 'none' : 'transform 0.1s ease-out',
               }}
             >
               <canvas ref={canvasRef} />
             </div>
           </div>
 
-          {/* Bottom Controls - Zoom only */}
+          {/* Bottom Controls - Zoom and Pan Reset */}
           <div className="h-12 border-t border-white/10 flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
               <Button
@@ -581,7 +709,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                 size="sm"
                 onClick={handleZoomOut}
                 className="text-white/70 hover:text-white h-8 w-8 p-0"
-                title="Zoom out"
+                title="Zoom out (or use scroll wheel)"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
@@ -593,9 +721,26 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                 size="sm"
                 onClick={handleZoomIn}
                 className="text-white/70 hover:text-white h-8 w-8 p-0"
-                title="Zoom in"
+                title="Zoom in (or use scroll wheel)"
               >
                 <ZoomIn className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setZoom(0.5);
+                  setPanOffset({ x: 0, y: 0 });
+                  if (fabricCanvas) {
+                    fabricCanvas.setZoom(0.5);
+                    fabricCanvas.renderAll();
+                  }
+                  toast.success("Reset view");
+                }}
+                className="text-white/70 hover:text-white text-xs"
+                title="Reset zoom and pan"
+              >
+                Reset View
               </Button>
             </div>
           </div>

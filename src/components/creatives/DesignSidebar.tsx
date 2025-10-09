@@ -1,5 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ElementsPanel } from './design-studio/ElementsPanel';
+import { WebComponentsPanel } from './design-studio/WebComponentsPanel';
+import { IntegrationsPanel } from './design-studio/IntegrationsPanel';
 import { Button } from '@/components/ui/button';
 import type { DesignElement } from './design-studio/ElementsPanel';
 
@@ -42,9 +44,11 @@ export const DesignSidebar = ({
 }: DesignSidebarProps) => {
   return (
     <Tabs defaultValue="elements" className="w-full h-full flex flex-col">
-      <TabsList className="w-full grid grid-cols-2 bg-white border-b-2 border-primary h-8" style={{ boxShadow: 'var(--shadow-neon-blue)' }}>
-        <TabsTrigger value="elements" className="text-[10px] sm:text-xs py-1 text-gray-700 data-[state=active]:shadow-blue-500/40">Elements</TabsTrigger>
-        <TabsTrigger value="layers" className="text-[10px] sm:text-xs py-1 text-gray-700 data-[state=active]:shadow-blue-500/40">Layers</TabsTrigger>
+      <TabsList className="w-full grid grid-cols-4 bg-white border-b-2 border-primary h-8 text-[10px]" style={{ boxShadow: 'var(--shadow-neon-blue)' }}>
+        <TabsTrigger value="elements" className="text-[10px] py-1 text-gray-700">Design</TabsTrigger>
+        <TabsTrigger value="web" className="text-[10px] py-1 text-gray-700">Web</TabsTrigger>
+        <TabsTrigger value="layers" className="text-[10px] py-1 text-gray-700">Layers</TabsTrigger>
+        <TabsTrigger value="export" className="text-[10px] py-1 text-gray-700">Export</TabsTrigger>
       </TabsList>
 
       <TabsContent value="elements" className="flex-1 m-0 overflow-hidden">
@@ -52,6 +56,14 @@ export const DesignSidebar = ({
           onElementSelect={onElementSelect}
           onElementDragStart={onElementDragStart}
         />
+      </TabsContent>
+
+      <TabsContent value="web" className="flex-1 m-0 overflow-hidden">
+        <WebComponentsPanel onComponentSelect={(comp) => console.log('Web component:', comp)} />
+      </TabsContent>
+
+      <TabsContent value="export" className="flex-1 m-0 overflow-hidden">
+        <IntegrationsPanel />
       </TabsContent>
 
       <TabsContent value="layers" className="flex-1 m-0 p-2 overflow-y-auto space-y-2">

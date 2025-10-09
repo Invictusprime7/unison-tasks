@@ -129,72 +129,72 @@ export const PropertiesPanel = ({
   }
 
   return (
-    <Card className="h-full overflow-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-sm">
-          <Settings className="h-4 w-4" />
+    <Card className="h-full overflow-auto border-0 rounded-none shadow-none">
+      <CardHeader className="p-3 pb-2">
+        <CardTitle className="flex items-center gap-2 text-xs font-medium">
+          <Settings className="h-3 w-3" />
           Properties
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-3 p-3 pt-0">
         <Tabs defaultValue="position" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="position">Position</TabsTrigger>
-            <TabsTrigger value="style">Style</TabsTrigger>
-            <TabsTrigger value="text">Text</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 h-7">
+            <TabsTrigger value="position" className="text-[10px]">Position</TabsTrigger>
+            <TabsTrigger value="style" className="text-[10px]">Style</TabsTrigger>
+            <TabsTrigger value="text" className="text-[10px]">Text</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="position" className="space-y-4 mt-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="x-pos">X Position</Label>
+          <TabsContent value="position" className="space-y-2 mt-2">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="x-pos" className="text-[10px]">X</Label>
                 <Input
                   id="x-pos"
                   type="number"
                   value={localValues.left}
                   onChange={(e) => handleInputChange("left", parseInt(e.target.value) || 0)}
-                  className="h-9"
+                  className="h-7 text-xs"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="y-pos">Y Position</Label>
+              <div className="space-y-1">
+                <Label htmlFor="y-pos" className="text-[10px]">Y</Label>
                 <Input
                   id="y-pos"
                   type="number"
                   value={localValues.top}
                   onChange={(e) => handleInputChange("top", parseInt(e.target.value) || 0)}
-                  className="h-9"
+                  className="h-7 text-xs"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="width">Width</Label>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-1">
+                <Label htmlFor="width" className="text-[10px]">W</Label>
                 <Input
                   id="width"
                   type="number"
                   value={localValues.width}
                   onChange={(e) => handleInputChange("width", parseInt(e.target.value) || 0)}
-                  className="h-9"
+                  className="h-7 text-xs"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="height">Height</Label>
+              <div className="space-y-1">
+                <Label htmlFor="height" className="text-[10px]">H</Label>
                 <Input
                   id="height"
                   type="number"
                   value={localValues.height}
                   onChange={(e) => handleInputChange("height", parseInt(e.target.value) || 0)}
-                  className="h-9"
+                  className="h-7 text-xs"
                 />
               </div>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <Label htmlFor="rotation">Rotation</Label>
-                <span className="text-sm text-muted-foreground">{rotation}°</span>
+                <Label htmlFor="rotation" className="text-[10px]">Rotation</Label>
+                <span className="text-[10px] text-muted-foreground">{rotation}°</span>
               </div>
               <Slider
                 id="rotation"
@@ -211,10 +211,10 @@ export const PropertiesPanel = ({
               />
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-1">
               <div className="flex items-center justify-between">
-                <Label htmlFor="opacity">Opacity</Label>
-                <span className="text-sm text-muted-foreground">{opacityVal}%</span>
+                <Label htmlFor="opacity" className="text-[10px]">Opacity</Label>
+                <span className="text-[10px] text-muted-foreground">{opacityVal}%</span>
               </div>
               <Slider
                 id="opacity"

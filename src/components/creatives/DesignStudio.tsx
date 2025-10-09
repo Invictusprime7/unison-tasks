@@ -1342,14 +1342,14 @@ export const DesignStudio = forwardRef((props, ref) => {
           </div>
         </main>
 
-        {/* Right Sidebar - Properties & Filters (Hidden on smaller screens) */}
-        <aside className="hidden xl:flex border-l-2 border-blue-400 shadow-lg shadow-blue-400/20 bg-white overflow-hidden flex-col flex-shrink-0">
+        {/* Right Sidebar - Properties & Filters (Compact, collapsible) */}
+        <aside className="hidden lg:flex border-l-2 border-blue-400 shadow-lg shadow-blue-400/20 bg-white overflow-hidden flex-col w-64 xl:w-72 flex-shrink-0">
           <Tabs defaultValue="properties" className="flex flex-col h-full">
-            <TabsList className="grid w-full grid-cols-2 bg-white border-b-2 border-blue-400 shadow-sm shadow-blue-400/30">
-              <TabsTrigger value="properties" className="text-xs text-gray-700 data-[state=active]:shadow-blue-500/40">Properties</TabsTrigger>
-              <TabsTrigger value="filters" className="text-xs text-gray-700 data-[state=active]:shadow-blue-500/40">Filters</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-white border-b-2 border-blue-400 shadow-sm shadow-blue-400/30 h-9">
+              <TabsTrigger value="properties" className="text-[10px] text-gray-700 data-[state=active]:shadow-blue-500/40">Properties</TabsTrigger>
+              <TabsTrigger value="filters" className="text-[10px] text-gray-700 data-[state=active]:shadow-blue-500/40">Filters</TabsTrigger>
             </TabsList>
-            <TabsContent value="properties" className="flex-1 overflow-y-auto m-0">
+            <TabsContent value="properties" className="flex-1 overflow-y-auto m-0 p-0">
               <PropertiesPanel
                 selectedObject={selectedObject}
                 onPropertyChange={handlePropertyChange}
@@ -1358,7 +1358,7 @@ export const DesignStudio = forwardRef((props, ref) => {
                 onAlign={alignObjects}
               />
             </TabsContent>
-            <TabsContent value="filters" className="flex-1 overflow-y-auto m-0">
+            <TabsContent value="filters" className="flex-1 overflow-y-auto m-0 p-0">
               <FiltersPanel
                 selectedObject={selectedObject}
                 onApplyFilter={applyFilter}

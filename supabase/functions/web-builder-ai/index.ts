@@ -51,9 +51,9 @@ CRITICAL RULES:
    - Center important elements
    - Use proper spacing and alignment
    - Follow design best practices
-   - Canvas is 1920x1440px
-   - CRITICAL: All objects MUST fit within canvas bounds (0-1920 width, 0-1440 height)
-   - Consider object dimensions when positioning (left + width <= 1920, top + height <= 1440)
+   - Canvas is 1280x800px (desktop), expandable vertically
+   - CRITICAL: All objects MUST fit within canvas bounds (0-1280 width, 0-800+ height)
+   - Consider object dimensions when positioning (left + width <= 1280, top + height within canvas)
 
 3. Use modern, beautiful colors:
    - Professional color schemes

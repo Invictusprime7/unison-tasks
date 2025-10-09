@@ -37,7 +37,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [activeMode, setActiveMode] = useState<"insert" | "layout" | "text" | "vector">("insert");
   const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
   const [zoom, setZoom] = useState(0.5);
-  const [canvasHeight, setCanvasHeight] = useState(1440);
+  const [canvasHeight, setCanvasHeight] = useState(800);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [codePreviewOpen, setCodePreviewOpen] = useState(false);
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
@@ -59,7 +59,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     const canvasElement = canvasRef.current;
     
     const canvas = new FabricCanvas(canvasElement, {
-      width: 1920,
+      width: 1280,
       height: canvasHeight,
       backgroundColor: "#1a1a1a",
     });
@@ -153,11 +153,11 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     
     const objects = fabricCanvas.getObjects();
     if (objects.length === 0) {
-      setCanvasHeight(1440);
+      setCanvasHeight(800);
       return;
     }
     
-    let maxBottom = 1440; // Minimum height
+    let maxBottom = 800; // Minimum height
     objects.forEach((obj: any) => {
       const objBottom = (obj.top || 0) + (obj.height || 0) * (obj.scaleY || 1);
       if (objBottom > maxBottom) {
@@ -166,7 +166,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     });
     
     // Add padding at the bottom
-    const newHeight = Math.max(1440, Math.ceil(maxBottom + 200));
+    const newHeight = Math.max(800, Math.ceil(maxBottom + 200));
     if (newHeight !== canvasHeight) {
       setCanvasHeight(newHeight);
     }
@@ -248,7 +248,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     switch (device) {
       case "tablet": return 768;
       case "mobile": return 375;
-      default: return 1920;
+      default: return 1280;
     }
   };
 

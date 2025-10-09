@@ -87,8 +87,8 @@ export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
   const addObjectsToCanvas = async (objects: AICanvasObject[]) => {
     if (!fabricCanvas) return;
 
-    const canvasWidth = fabricCanvas.width || 1920;
-    const canvasHeight = fabricCanvas.height || 1440;
+    const canvasWidth = fabricCanvas.width || 1280;
+    const canvasHeight = fabricCanvas.height || 800;
 
     const constrainPosition = (value: number, max: number, size: number = 0) => {
       return Math.max(0, Math.min(value, max - size));

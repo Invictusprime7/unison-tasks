@@ -894,15 +894,6 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={handleRenderToCanvas}
-                      className="h-8"
-                    >
-                      <Play className="w-3 h-3 mr-1" />
-                      Render to Fabric.js
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
                       onClick={() => {
                         navigator.clipboard.writeText(editorCode);
                         toast('Code copied to clipboard!');

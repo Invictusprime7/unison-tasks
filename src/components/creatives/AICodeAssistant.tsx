@@ -5,6 +5,7 @@ import { executeCanvasCode, getCanvasCodeExample } from '@/utils/canvasCodeRunne
 import { Button } from '@/components/ui/button';
 import { CodeViewer } from './CodeViewer';
 import { LiveCodePreview } from './LiveCodePreview';
+import { CanvasQuickStart } from './CanvasQuickStart';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -384,7 +385,21 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
 
       {/* Main Content */}
       {isExpanded && (
-        <div className="h-[calc(100%-56px)] bg-background border-t flex flex-col">
+        <div className="h-[calc(100%-56px)] bg-background border-t flex">
+          {/* Quick Start Sidebar (only in code mode) */}
+          {mode === 'code' && messages.length === 0 && (
+            <div className="w-80 border-r flex-shrink-0">
+              <CanvasQuickStart 
+                onCodeSelect={(code) => {
+                  setCurrentCode(code);
+                  setCodeViewerOpen(true);
+                }}
+              />
+            </div>
+          )}
+          
+          {/* Main chat area */}
+          <div className="flex-1 flex flex-col min-w-0">
           {/* Mode Selector */}
           <Tabs value={mode} onValueChange={(v) => setMode(v as typeof mode)} className="border-b">
             <TabsList className="w-full grid grid-cols-3 rounded-none h-12">
@@ -585,6 +600,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
             <p className="text-xs text-muted-foreground mt-2">
               Powered by Lovable AI • Press Enter to send, Shift+Enter for new line
             </p>
+          </div>
           </div>
         </div>
       )}

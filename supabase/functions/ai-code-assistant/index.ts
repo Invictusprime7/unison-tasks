@@ -20,20 +20,50 @@ serve(async (req) => {
     }
 
     const systemPrompts = {
-      code: `You are an expert web component designer for a visual canvas builder. When users ask you to create components, you should provide both a description AND structured data for rendering.
+      code: `You are an expert Canvas Code Generator that creates executable code for a Fabric.js canvas using a simple API.
 
-IMPORTANT: Always call the render_component tool to specify exactly how the component should be rendered on the canvas.
+CRITICAL: When users ask you to create visual components, generate executable JavaScript code using these canvas functions:
 
-Provide clear descriptions and specifications for:
-- Hero sections: Large background, heading, subtitle, CTA buttons
-- Cards: Container boxes with titles, content, buttons
-- Buttons: Interactive elements with text
-- Navigation: Header bars with links and logos
-- Pricing cards: Special cards with price, features, CTA
-- Forms: Input fields and submit buttons
-- Content sections: Text blocks with images
+**Available Canvas Functions:**
+- addRect({ x, y, width, height, fill, cornerRadius, borderColor, borderWidth, opacity, rotation, ... })
+- addCircle({ x, y, radius, fill, borderColor, borderWidth, opacity, ... })
+- addText({ text, x, y, fontSize, color, fontFamily, fontWeight, fontStyle, align, ... })
+- addPolygon(points[], { x, y, fill, borderColor, borderWidth, ... })
+- addImage(url, { x, y, width, height, scale, rotation, opacity, ... })
+- clearCanvas()
+- setBackground(color)
 
-Be specific about colors (hex codes), sizes (pixels), positions, and styling.`,
+**Code Generation Rules:**
+1. Generate EXECUTABLE JavaScript code, not pseudocode
+2. Use ONLY the functions listed above
+3. Include comments to explain what you're creating
+4. Start with setBackground() to set the canvas background
+5. Use appropriate colors (hex codes like '#3b82f6')
+6. Position elements with x, y coordinates
+7. Make designs visually appealing with proper spacing
+
+**Examples:**
+\`\`\`javascript
+// Modern hero section
+setBackground('#f0f9ff');
+
+addRect({
+  x: 50, y: 100,
+  width: 700, height: 300,
+  fill: '#3b82f6',
+  cornerRadius: 16
+});
+
+addText({
+  text: 'Welcome to Canvas',
+  x: 100, y: 180,
+  fontSize: 48,
+  color: '#ffffff',
+  fontWeight: 'bold'
+});
+\`\`\`
+
+ALWAYS provide working code that can be directly executed on the canvas!`,
 
       design: `You are a creative design consultant specializing in modern web design. You help users improve their designs with actionable recommendations.
 
@@ -71,58 +101,6 @@ Provide constructive feedback with specific improvements.`
       ],
       stream: true,
     };
-
-    // Add tool calling for code mode to get structured component data
-    if (mode === 'code') {
-      body.tools = [
-        {
-          type: 'function',
-          function: {
-            name: 'render_component',
-            description: 'Render a visual component on the Fabric.js canvas with specified elements and styling',
-            parameters: {
-              type: 'object',
-              properties: {
-                componentType: {
-                  type: 'string',
-                  enum: ['hero', 'card', 'button', 'navigation', 'pricing', 'form', 'section', 'custom'],
-                  description: 'The type of component to render'
-                },
-                elements: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      type: { type: 'string', enum: ['rectangle', 'text', 'circle', 'image'] },
-                      x: { type: 'number', description: 'X position in pixels' },
-                      y: { type: 'number', description: 'Y position in pixels' },
-                      width: { type: 'number', description: 'Width in pixels' },
-                      height: { type: 'number', description: 'Height in pixels' },
-                      fill: { type: 'string', description: 'Fill color (hex or gradient)' },
-                      text: { type: 'string', description: 'Text content (for text elements)' },
-                      fontSize: { type: 'number', description: 'Font size in pixels' },
-                      fontWeight: { type: 'string', description: 'Font weight (normal, bold, 600, etc.)' },
-                      textAlign: { type: 'string', enum: ['left', 'center', 'right'] },
-                      rx: { type: 'number', description: 'Border radius X' },
-                      ry: { type: 'number', description: 'Border radius Y' },
-                      stroke: { type: 'string', description: 'Stroke color' },
-                      strokeWidth: { type: 'number', description: 'Stroke width' }
-                    },
-                    required: ['type', 'x', 'y']
-                  }
-                },
-                description: {
-                  type: 'string',
-                  description: 'Human-readable description of what was created'
-                }
-              },
-              required: ['componentType', 'elements', 'description']
-            }
-          }
-        }
-      ];
-      body.tool_choice = 'auto'; // Let the model decide when to use tools
-    }
 
     const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',

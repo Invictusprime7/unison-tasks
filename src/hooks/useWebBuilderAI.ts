@@ -37,7 +37,10 @@ export interface AITemplateResponse {
   css?: string;
 }
 
-export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
+export const useWebBuilderAI = (
+  fabricCanvas: FabricCanvas | null,
+  onTemplateGenerated?: (template: AIGeneratedTemplate, html: string, css: string) => void
+) => {
   const [loading, setLoading] = useState(false);
   const [lastResponse, setLastResponse] = useState<AIResponse | null>(null);
 
@@ -240,6 +243,11 @@ export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
       // Add HTML/CSS to response
       aiTemplateResponse.html = html;
       aiTemplateResponse.css = css;
+
+      // Notify parent component with template and HTML/CSS
+      if (onTemplateGenerated) {
+        onTemplateGenerated(aiTemplateResponse.template, html, css);
+      }
 
       toast.success(aiTemplateResponse.explanation || 'Template generated successfully!');
       return aiTemplateResponse;

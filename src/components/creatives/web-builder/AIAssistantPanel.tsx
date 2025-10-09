@@ -15,7 +15,7 @@ interface AIAssistantPanelProps {
   isOpen: boolean;
   onClose: () => void;
   fabricCanvas: FabricCanvas | null;
-  onTemplateGenerated?: (html: string, css: string) => void;
+  onTemplateGenerated?: (template: any, html: string, css: string) => void;
 }
 
 export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onClose, fabricCanvas, onTemplateGenerated }) => {
@@ -27,7 +27,10 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
   ]);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { loading, generateDesign, generateTemplate } = useWebBuilderAI(fabricCanvas);
+  const { loading, generateDesign, generateTemplate } = useWebBuilderAI(
+    fabricCanvas,
+    onTemplateGenerated
+  );
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -49,11 +52,6 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
     let response;
     if (isTemplateRequest) {
       response = await generateTemplate(userInput);
-      
-      // Trigger HTML preview for full templates
-      if (response && 'html' in response && 'css' in response && onTemplateGenerated) {
-        onTemplateGenerated(response.html || '', response.css || '');
-      }
     } else {
       response = await generateDesign(userInput);
     }

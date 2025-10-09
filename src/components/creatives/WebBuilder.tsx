@@ -15,6 +15,8 @@ import { IntegrationsPanel } from "./design-studio/IntegrationsPanel";
 import { ExportDialog } from "./design-studio/ExportDialog";
 import { PerformancePanel } from "./web-builder/PerformancePanel";
 import { SecureIframePreview } from "@/components/SecureIframePreview";
+import { useTemplateState } from "@/hooks/useTemplateState";
+import { sanitizeHTML } from "@/utils/htmlSanitizer";
 import { webBlocks } from "./web-builder/webBlocks";
 import { useKeyboardShortcuts, defaultWebBuilderShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useCanvasHistory } from "@/hooks/useCanvasHistory";
@@ -56,9 +58,10 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const [previewHtml, setPreviewHtml] = useState("");
-  const [previewCss, setPreviewCss] = useState("");
   const [showPreview, setShowPreview] = useState(false);
+
+  // State management - template schema as source of truth
+  const templateState = useTemplateState(fabricCanvas);
 
   // History management
   const history = useCanvasHistory(fabricCanvas);
@@ -793,10 +796,11 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         isOpen={aiPanelOpen} 
         onClose={() => setAiPanelOpen(false)}
         fabricCanvas={fabricCanvas}
-        onTemplateGenerated={(html, css) => {
-          setPreviewHtml(html);
-          setPreviewCss(css);
+        onTemplateGenerated={async (template, html, css) => {
+          // Update template state (single source of truth)
+          await templateState.updateTemplate(template);
           setShowPreview(true);
+          toast.success('Template rendered to canvas and preview!');
         }}
       />
 
@@ -865,21 +869,27 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
       <Dialog open={showPreview} onOpenChange={setShowPreview}>
         <DialogContent className="max-w-6xl h-[90vh] bg-[#1a1a1a] border-white/10">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
-              <Eye className="h-5 w-5" />
-              Live HTML Preview
+            <DialogTitle className="text-white flex items-center justify-between gap-2">
+              <span className="flex items-center gap-2">
+                <Eye className="h-5 w-5" />
+                Live HTML Preview
+              </span>
+              {templateState.isRendering && (
+                <span className="text-xs text-white/50">Rendering...</span>
+              )}
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 overflow-hidden">
             <SecureIframePreview
-              html={previewHtml}
-              css={previewCss}
-              className="w-full h-full border border-white/10 rounded"
+              html={sanitizeHTML(templateState.html)}
+              css={templateState.css}
+              className="w-full h-full border border-white/10 rounded bg-white"
               onConsole={(type, args) => {
                 console.log(`[Preview ${type}]:`, ...args);
               }}
               onError={(error) => {
                 console.error('[Preview Error]:', error);
+                toast.error('Preview error: ' + error.message);
               }}
             />
           </div>

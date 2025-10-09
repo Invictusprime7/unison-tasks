@@ -62,7 +62,8 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
         styles: [],
         scripts: [],
       },
-      // Clean panel configuration
+      // Clean panel configuration - sections menu disabled
+      showOffsets: false,
       panels: {
         defaults: [
           {

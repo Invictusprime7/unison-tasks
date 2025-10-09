@@ -34,7 +34,10 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   useEffect(() => {
     if (!canvasRef.current) return;
 
-    const canvas = new FabricCanvas(canvasRef.current, {
+    // Create a wrapper div for better DOM control
+    const canvasElement = canvasRef.current;
+    
+    const canvas = new FabricCanvas(canvasElement, {
       width: 1200,
       height: 800,
       backgroundColor: "#ffffff",
@@ -43,20 +46,37 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     setFabricCanvas(canvas);
 
     // Selection events
-    canvas.on("selection:created", (e) => {
+    const handleSelectionCreated = (e: any) => {
       setSelectedObject(e.selected?.[0]);
-    });
+    };
 
-    canvas.on("selection:updated", (e) => {
+    const handleSelectionUpdated = (e: any) => {
       setSelectedObject(e.selected?.[0]);
-    });
+    };
 
-    canvas.on("selection:cleared", () => {
+    const handleSelectionCleared = () => {
       setSelectedObject(null);
-    });
+    };
+
+    canvas.on("selection:created", handleSelectionCreated);
+    canvas.on("selection:updated", handleSelectionUpdated);
+    canvas.on("selection:cleared", handleSelectionCleared);
 
     return () => {
+      // Properly cleanup Fabric.js before React unmounts
+      canvas.off("selection:created", handleSelectionCreated);
+      canvas.off("selection:updated", handleSelectionUpdated);
+      canvas.off("selection:cleared", handleSelectionCleared);
+      
+      // Clear all objects first
+      canvas.clear();
+      
+      // Dispose of the canvas
       canvas.dispose();
+      
+      // Reset state
+      setFabricCanvas(null);
+      setSelectedObject(null);
     };
   }, []);
 

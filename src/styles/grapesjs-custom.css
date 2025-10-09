@@ -5,15 +5,36 @@
   display: none;
 }
 
-/* Main Canvas Styling */
+/* Main Canvas Styling - Fixed spacing and borders */
 .gjs-cv-canvas {
   background: hsl(var(--muted) / 0.3) !important;
   top: 0 !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+  overflow: auto !important;
+}
+
+.gjs-cv-canvas__frames {
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.gjs-frame-wrapper {
+  margin: 0 auto !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  border: 1px solid hsl(var(--border)) !important;
+  background: #fff !important;
 }
 
 .gjs-frame {
   border: none !important;
   box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  display: block !important;
 }
 
 /* Panels - Modern Look */
@@ -67,10 +88,11 @@
   border: 1px solid hsl(var(--border)) !important;
   border-radius: 8px !important;
   padding: 12px !important;
-  margin: 8px 0 !important;
+  margin: 8px 4px !important;
   transition: all 0.2s !important;
   width: calc(50% - 8px) !important;
   min-height: 80px !important;
+  box-sizing: border-box !important;
 }
 
 .gjs-block:hover {
@@ -342,13 +364,51 @@
   display: none !important;
 }
 
-/* Component outline when selected */
+/* Component outline when selected - Fixed overlaps */
 .gjs-selected {
   outline: 2px solid hsl(var(--primary)) !important;
   outline-offset: 2px !important;
+  box-sizing: border-box !important;
 }
 
 .gjs-hovered {
   outline: 1px dashed hsl(var(--primary)) !important;
-  outline-offset: 2px !important;
+  outline-offset: 1px !important;
+  box-sizing: border-box !important;
+}
+
+/* Global box-sizing fix for all GrapeJS elements */
+.gjs-cv-canvas *,
+.gjs-frame *,
+.gjs-pn-panel *,
+.gjs-blocks-c *,
+.gjs-layers *,
+.gjs-sm-sectors *,
+.gjs-toolbar * {
+  box-sizing: border-box !important;
+}
+
+/* Fix component borders to prevent overlap */
+[data-gjs-type] {
+  box-sizing: border-box !important;
+}
+
+/* Ensure proper spacing in panels */
+.gjs-pn-panel {
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Fix toolbar spacing */
+.gjs-toolbar {
+  margin: 0 !important;
+  padding: 4px !important;
+  box-sizing: border-box !important;
+  gap: 2px !important;
+}
+
+.gjs-toolbar-item {
+  margin: 0 !important;
+  box-sizing: border-box !important;
 }

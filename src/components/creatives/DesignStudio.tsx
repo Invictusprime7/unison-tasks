@@ -85,6 +85,10 @@ export const DesignStudio = forwardRef((props, ref) => {
       width: maxWidth,
       height: maxHeight,
       backgroundColor: "#ffffff",
+      selection: true,
+      preserveObjectStacking: true,
+      renderOnAddRemove: true,
+      enableRetinaScaling: true,
     });
 
     // Enable zoom with mouse wheel
@@ -1328,17 +1332,31 @@ export const DesignStudio = forwardRef((props, ref) => {
         </aside>
 
 
-        {/* Canvas Center - Responsive */}
+        {/* Canvas Center - Responsive with Fixed Borders */}
         <main className="relative bg-gray-100 flex items-center justify-center overflow-auto p-2 md:p-4 min-w-0">
           <div
             ref={containerRef}
-            className="bg-white rounded-lg shadow-lg relative mx-auto max-w-full"
+            className="bg-white rounded-lg shadow-lg relative mx-auto"
             style={{ 
-              width: 'min(960px, 100%)',
+              width: 'min(960px, calc(100% - 16px))',
               height: 'min(540px, calc(100vh - 200px))',
+              padding: 0,
+              margin: '8px auto',
+              boxSizing: 'border-box',
             }}
           >
-            <canvas ref={canvasRef} className="w-full h-full border-2 border-blue-400 shadow-lg shadow-blue-500/30" />
+            <canvas 
+              ref={canvasRef} 
+              className="w-full h-full rounded-lg"
+              style={{
+                border: '2px solid hsl(var(--primary))',
+                boxShadow: '0 10px 15px -3px hsl(var(--primary) / 0.2)',
+                boxSizing: 'border-box',
+                display: 'block',
+                margin: 0,
+                padding: 0,
+              }}
+            />
           </div>
         </main>
 

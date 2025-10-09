@@ -12,6 +12,7 @@ import Creatives from "./pages/Creatives";
 import TaskPlanning from "./pages/TaskPlanning";
 import DesignStudioPage from "./pages/DesignStudioPage";
 import NotFound from "./pages/NotFound";
+import { AIPageGenerator } from "./components/creatives/AIPageGenerator";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/creatives" element={<Creatives />} />
             <Route path="/planning" element={<TaskPlanning />} />
             <Route path="/design-studio" element={<DesignStudioPage />} />
+            <Route path="/ai-generator" element={<AIPageGenerator />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

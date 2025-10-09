@@ -390,6 +390,42 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_pages: {
+        Row: {
+          created_at: string | null
+          html_content: string | null
+          id: string
+          prompt: string
+          schema: Json
+          theme_tokens: Json | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          html_content?: string | null
+          id?: string
+          prompt: string
+          schema: Json
+          theme_tokens?: Json | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          html_content?: string | null
+          id?: string
+          prompt?: string
+          schema?: Json
+          theme_tokens?: Json | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       layers: {
         Row: {
           adjustments: Json | null
@@ -442,6 +478,41 @@ export type Database = {
             columns: ["page_id"]
             isOneToOne: false
             referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      page_sections: {
+        Row: {
+          created_at: string | null
+          id: string
+          page_id: string | null
+          schema: Json
+          section_type: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          page_id?: string | null
+          schema: Json
+          section_type: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          page_id?: string | null
+          schema?: Json
+          section_type?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_sections_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "generated_pages"
             referencedColumns: ["id"]
           },
         ]

@@ -12,7 +12,7 @@ import { ImageEditor } from "@/components/creatives/ImageEditor";
 import { VideoEditor } from "@/components/creatives/VideoEditor";
 import { CreativeTaskSelector } from "@/components/creatives/CreativeTaskSelector";
 import { VisualEditor } from "@/components/creatives/VisualEditor";
-import { AICodeAssistant } from "@/components/creatives/AICodeAssistant";
+
 const Creatives = () => {
   const navigate = useNavigate();
   const {
@@ -238,7 +238,6 @@ const Creatives = () => {
       </div>
 
       <CreativeTaskSelector open={selectorOpen} onOpenChange={setSelectorOpen} />
-      <AICodeAssistant />
     </div>;
 };
 export default Creatives;

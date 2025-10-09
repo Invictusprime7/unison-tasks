@@ -4,7 +4,7 @@ import { ArrowLeft, FolderOpen } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { DesignStudio } from "@/components/creatives/DesignStudio";
 import { FileBrowser } from "@/components/creatives/design-studio/FileBrowser";
-import { GrapeJSEditor } from "@/components/creatives/GrapeJSEditor";
+import { CraftJSEditor } from "@/components/creatives/CraftJSEditor";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DesignStudioPage = () => {
@@ -12,22 +12,11 @@ const DesignStudioPage = () => {
   const location = useLocation();
   const [fileBrowserOpen, setFileBrowserOpen] = useState(false);
   const designStudioRef = useRef<any>(null);
-  const [templateHtml, setTemplateHtml] = useState("");
-  const [templateCss, setTemplateCss] = useState("");
-  const [activeEditor, setActiveEditor] = useState<"fabric" | "grapejs">("fabric");
+  const [templateData, setTemplateData] = useState("");
+  const [activeEditor, setActiveEditor] = useState<"fabric" | "craftjs">("fabric");
 
-  // Load template from navigation state if available
-  useEffect(() => {
-    const state = location.state as { templateCode?: string; templateName?: string; aesthetic?: string };
-    if (state?.templateCode) {
-      setTemplateHtml(state.templateCode);
-      setActiveEditor("grapejs");
-    }
-  }, [location.state]);
-
-  const handleTemplateSave = (html: string, css: string) => {
-    setTemplateHtml(html);
-    setTemplateCss(css);
+  const handleTemplateSave = (data: string) => {
+    setTemplateData(data);
   };
 
   return (
@@ -56,20 +45,19 @@ const DesignStudioPage = () => {
         </Button>
       </header>
 
-      <Tabs value={activeEditor} onValueChange={(v) => setActiveEditor(v as "fabric" | "grapejs")} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <Tabs value={activeEditor} onValueChange={(v) => setActiveEditor(v as "fabric" | "craftjs")} className="flex-1 flex flex-col min-h-0 overflow-hidden">
         <TabsList className="mx-2 sm:mx-4 mt-1 sm:mt-2 w-fit h-8 flex-shrink-0">
           <TabsTrigger value="fabric" className="text-xs sm:text-sm h-7 px-2 sm:px-3">Canvas</TabsTrigger>
-          <TabsTrigger value="grapejs" className="text-xs sm:text-sm h-7 px-2 sm:px-3">Web</TabsTrigger>
+          <TabsTrigger value="craftjs" className="text-xs sm:text-sm h-7 px-2 sm:px-3">Web Builder</TabsTrigger>
         </TabsList>
         
         <TabsContent value="fabric" className="flex-1 mt-0 overflow-hidden">
           <DesignStudio ref={designStudioRef} />
         </TabsContent>
         
-        <TabsContent value="grapejs" className="flex-1 mt-0 overflow-hidden">
-          <GrapeJSEditor 
-            initialHtml={templateHtml}
-            initialCss={templateCss}
+        <TabsContent value="craftjs" className="flex-1 mt-0 overflow-hidden">
+          <CraftJSEditor 
+            initialData={templateData}
             onSave={handleTemplateSave}
           />
         </TabsContent>

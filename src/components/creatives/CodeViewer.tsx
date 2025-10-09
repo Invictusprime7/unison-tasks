@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Download, Play, Code2, Eye } from 'lucide-react';
+import { Copy, Download, Play, Code2, Eye, Monitor } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { LiveCodePreview } from './LiveCodePreview';
 
 interface CodeViewerProps {
   code: string;
@@ -20,7 +21,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
   className,
 }) => {
   const [code, setCode] = useState(initialCode);
-  const [activeTab, setActiveTab] = useState<'code' | 'preview'>('code');
+  const [activeTab, setActiveTab] = useState<'code' | 'preview' | 'live'>('code');
   const { toast } = useToast();
 
   // Update code when initialCode changes
@@ -114,14 +115,18 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
 
       {/* Editor with tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="flex-1 flex flex-col">
-        <TabsList className="w-full grid grid-cols-2 rounded-none h-10 border-b">
+        <TabsList className="w-full grid grid-cols-3 rounded-none h-10 border-b">
           <TabsTrigger value="code" className="gap-2">
             <Code2 className="w-4 h-4" />
             Code
           </TabsTrigger>
+          <TabsTrigger value="live" className="gap-2">
+            <Monitor className="w-4 h-4" />
+            Live Preview
+          </TabsTrigger>
           <TabsTrigger value="preview" className="gap-2">
             <Eye className="w-4 h-4" />
-            Live Preview
+            Canvas Preview
           </TabsTrigger>
         </TabsList>
 
@@ -157,6 +162,10 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
           />
         </TabsContent>
 
+        <TabsContent value="live" className="flex-1 m-0 p-0 data-[state=active]:flex">
+          <LiveCodePreview code={code} autoRefresh={true} />
+        </TabsContent>
+
         <TabsContent value="preview" className="flex-1 m-0 p-4 overflow-auto bg-muted/10">
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center space-y-4">
@@ -164,9 +173,9 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
                 <Eye className="w-8 h-8 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium mb-2">Live Preview</p>
+                <p className="text-sm font-medium mb-2">Canvas Preview</p>
                 <p className="text-xs text-muted-foreground mb-4">
-                  Click "Render to Canvas" to see your component on the canvas
+                  Click "Render to Canvas" to see your component on the Fabric.js canvas
                 </p>
                 {onRender && (
                   <Button

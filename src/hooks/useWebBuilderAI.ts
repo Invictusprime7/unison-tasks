@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Canvas as FabricCanvas, Rect, Circle, IText, Textbox, FabricImage } from 'fabric';
 import { toast } from 'sonner';
 import { TemplateRenderer } from '@/utils/templateRenderer';
+import { TemplateToHTMLExporter } from '@/utils/templateToHTMLExporter';
 import type { AIGeneratedTemplate } from '@/types/template';
 
 export interface AICanvasObject {
@@ -32,6 +33,8 @@ export interface AIResponse {
 export interface AITemplateResponse {
   template: AIGeneratedTemplate;
   explanation: string;
+  html?: string;
+  css?: string;
 }
 
 export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
@@ -221,9 +224,22 @@ export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
 
       const aiTemplateResponse = data as AITemplateResponse;
       
-      // Render the template on the canvas
+      // Dual Rendering Pipeline:
+      // 1. Render template to Fabric Canvas (for editing)
       const renderer = new TemplateRenderer(fabricCanvas);
       await renderer.renderTemplate(aiTemplateResponse.template);
+      
+      // 2. Export template to HTML/CSS (for live preview)
+      const htmlExporter = new TemplateToHTMLExporter();
+      const html = htmlExporter.exportToHTML(aiTemplateResponse.template);
+      
+      // Extract CSS from HTML
+      const cssMatch = html.match(/<style>([\s\S]*?)<\/style>/);
+      const css = cssMatch ? cssMatch[1] : '';
+      
+      // Add HTML/CSS to response
+      aiTemplateResponse.html = html;
+      aiTemplateResponse.css = css;
 
       toast.success(aiTemplateResponse.explanation || 'Template generated successfully!');
       return aiTemplateResponse;

@@ -15,9 +15,10 @@ interface AIAssistantPanelProps {
   isOpen: boolean;
   onClose: () => void;
   fabricCanvas: FabricCanvas | null;
+  onTemplateGenerated?: (html: string, css: string) => void;
 }
 
-export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onClose, fabricCanvas }) => {
+export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onClose, fabricCanvas, onTemplateGenerated }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -48,6 +49,11 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
     let response;
     if (isTemplateRequest) {
       response = await generateTemplate(userInput);
+      
+      // Trigger HTML preview for full templates
+      if (response && 'html' in response && 'css' in response && onTemplateGenerated) {
+        onTemplateGenerated(response.html || '', response.css || '');
+      }
     } else {
       response = await generateDesign(userInput);
     }

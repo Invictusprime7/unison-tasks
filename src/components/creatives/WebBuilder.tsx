@@ -14,6 +14,7 @@ import { CodePreviewDialog } from "./web-builder/CodePreviewDialog";
 import { IntegrationsPanel } from "./design-studio/IntegrationsPanel";
 import { ExportDialog } from "./design-studio/ExportDialog";
 import { PerformancePanel } from "./web-builder/PerformancePanel";
+import { SecureIframePreview } from "@/components/SecureIframePreview";
 import { webBlocks } from "./web-builder/webBlocks";
 import { useKeyboardShortcuts, defaultWebBuilderShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useCanvasHistory } from "@/hooks/useCanvasHistory";
@@ -55,6 +56,9 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [isPanning, setIsPanning] = useState(false);
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [previewHtml, setPreviewHtml] = useState("");
+  const [previewCss, setPreviewCss] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
 
   // History management
   const history = useCanvasHistory(fabricCanvas);
@@ -789,6 +793,11 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         isOpen={aiPanelOpen} 
         onClose={() => setAiPanelOpen(false)}
         fabricCanvas={fabricCanvas}
+        onTemplateGenerated={(html, css) => {
+          setPreviewHtml(html);
+          setPreviewCss(css);
+          setShowPreview(true);
+        }}
       />
 
       {/* Code Preview Dialog */}
@@ -851,6 +860,31 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           />
         </div>
       )}
+
+      {/* Secure HTML Preview Dialog */}
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-6xl h-[90vh] bg-[#1a1a1a] border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Eye className="h-5 w-5" />
+              Live HTML Preview
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 overflow-hidden">
+            <SecureIframePreview
+              html={previewHtml}
+              css={previewCss}
+              className="w-full h-full border border-white/10 rounded"
+              onConsole={(type, args) => {
+                console.log(`[Preview ${type}]:`, ...args);
+              }}
+              onError={(error) => {
+                console.error('[Preview Error]:', error);
+              }}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Keyboard Shortcuts Dialog */}
       <Dialog open={shortcutsDialogOpen} onOpenChange={setShortcutsDialogOpen}>

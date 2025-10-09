@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Canvas as FabricCanvas, Rect, Textbox } from 'fabric';
+import Editor from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { CodeViewer } from './CodeViewer';
 import { LiveCodePreview } from './LiveCodePreview';
@@ -424,60 +425,90 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                 >
                   <div
                     className={cn(
-                      "max-w-[80%] rounded-lg p-3",
+                      "max-w-[80%] rounded-lg",
                       message.role === 'user'
-                        ? 'bg-primary text-primary-foreground'
-                        : 'bg-muted'
+                        ? 'bg-primary text-primary-foreground p-3'
+                        : 'bg-muted overflow-hidden'
                     )}
                   >
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      {message.content.includes('```') ? (
-                        <div className="space-y-2">
-                          {message.content.split('```').map((part, i) => {
-                            if (i % 2 === 0) {
-                              return part ? <p key={i} className="whitespace-pre-wrap m-0">{part}</p> : null;
-                            }
-                            const lines = part.split('\n');
-                            const lang = lines[0].trim();
-                            const codeContent = lines.slice(1).join('\n').trim();
-                            
-                            return (
-                              <div key={i} className="relative group">
-                                <div className="flex items-center justify-between bg-muted-foreground/10 px-3 py-1 rounded-t">
-                                  <span className="text-xs font-mono">{lang || 'code'}</span>
-                                  <div className="flex gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => openCodeViewer(codeContent)}
-                                      className="h-6 px-2"
-                                      title="Open in full editor"
-                                    >
-                                      <Maximize2 className="w-3 h-3 mr-1" />
-                                      <span className="text-xs">Edit</span>
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => copyToClipboard(codeContent)}
-                                      className="h-6 px-2"
-                                      title="Copy code"
-                                    >
-                                      <Copy className="w-3 h-3" />
-                                    </Button>
-                                  </div>
-                                </div>
-                                <pre className="m-0 p-3 bg-muted-foreground/10 rounded-b overflow-x-auto">
-                                  <code className="text-xs">{codeContent}</code>
-                                </pre>
+                    {message.content.includes('```') ? (
+                      <div className="space-y-2">
+                        {message.content.split('```').map((part, i) => {
+                          if (i % 2 === 0) {
+                            return part ? (
+                              <div key={i} className="px-3 py-2">
+                                <p className="whitespace-pre-wrap m-0 text-sm">{part}</p>
                               </div>
-                            );
-                          })}
-                        </div>
-                      ) : (
-                        <p className="whitespace-pre-wrap m-0">{message.content}</p>
-                      )}
-                    </div>
+                            ) : null;
+                          }
+                          const lines = part.split('\n');
+                          const lang = lines[0].trim();
+                          const codeContent = lines.slice(1).join('\n').trim();
+                          
+                          return (
+                            <div key={i} className="relative group border border-border/50 rounded-lg overflow-hidden">
+                              <div className="flex items-center justify-between bg-muted/50 px-4 py-2 border-b border-border/50">
+                                <div className="flex items-center gap-2">
+                                  <Code className="w-3.5 h-3.5 text-muted-foreground" />
+                                  <span className="text-xs font-medium text-muted-foreground uppercase">{lang || 'code'}</span>
+                                </div>
+                                <div className="flex gap-1">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => openCodeViewer(codeContent)}
+                                    className="h-7 px-2 hover:bg-accent"
+                                    title="Open in full editor"
+                                  >
+                                    <Maximize2 className="w-3.5 h-3.5 mr-1" />
+                                    <span className="text-xs">Edit</span>
+                                  </Button>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => copyToClipboard(codeContent)}
+                                    className="h-7 px-2 hover:bg-accent"
+                                    title="Copy code"
+                                  >
+                                    <Copy className="w-3.5 h-3.5" />
+                                  </Button>
+                                </div>
+                              </div>
+                              <div className="max-h-[400px] overflow-auto">
+                                <Editor
+                                  height="auto"
+                                  defaultLanguage={lang || 'typescript'}
+                                  language={lang || 'typescript'}
+                                  value={codeContent}
+                                  theme="vs-dark"
+                                  options={{
+                                    readOnly: true,
+                                    minimap: { enabled: false },
+                                    fontSize: 13,
+                                    lineNumbers: 'on',
+                                    scrollBeyondLastLine: false,
+                                    automaticLayout: true,
+                                    wordWrap: 'on',
+                                    padding: { top: 12, bottom: 12 },
+                                    scrollbar: {
+                                      vertical: 'auto',
+                                      horizontal: 'auto',
+                                    },
+                                    renderLineHighlight: 'none',
+                                    contextmenu: false,
+                                  }}
+                                  loading={null}
+                                />
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ) : (
+                      <div className="px-3 py-2">
+                        <p className="whitespace-pre-wrap m-0 text-sm">{message.content}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

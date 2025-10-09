@@ -247,7 +247,7 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
         editor.setComponents(htmlContent);
         editor.setStyle(data.css);
         
-        toast.success(data.explanation || "Design updated by AI");
+        toast.success("Design updated by AI");
         setAiPrompt("");
       } else {
         throw new Error("Invalid response from AI assistant");

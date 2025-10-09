@@ -1027,7 +1027,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
       </Dialog>
 
       {/* AI Code Assistant - Bottom Panel */}
-      <AICodeAssistant />
+      <AICodeAssistant fabricCanvas={fabricCanvas} />
     </div>
   );
 };

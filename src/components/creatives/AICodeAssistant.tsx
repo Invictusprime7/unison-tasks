@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Canvas as FabricCanvas, Rect, Textbox } from 'fabric';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -13,7 +14,9 @@ import {
   Download,
   Loader2,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Eye,
+  Layout
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -22,13 +25,15 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  hasCode?: boolean;
 }
 
 interface AICodeAssistantProps {
   className?: string;
+  fabricCanvas?: FabricCanvas | null;
 }
 
-export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className }) => {
+export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fabricCanvas }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +54,196 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className }) =
       title: 'Copied to clipboard',
       description: 'Code copied successfully',
     });
+  };
+
+  const renderCodeToCanvas = (code: string) => {
+    if (!fabricCanvas) {
+      toast({
+        title: 'Canvas not available',
+        description: 'Please make sure the Web Builder canvas is ready.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Parse the code to extract component structure
+      // This is a simplified example - in production, you'd want more sophisticated parsing
+      
+      // Example: Create a hero section based on common patterns
+      if (code.toLowerCase().includes('hero')) {
+        const heroRect = new Rect({
+          left: 50,
+          top: 50,
+          width: 1180,
+          height: 500,
+          fill: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          selectable: true,
+          hasControls: true,
+        });
+
+        const titleText = new Textbox('Welcome to Our Platform', {
+          left: 100,
+          top: 150,
+          width: 1080,
+          fontSize: 56,
+          fill: '#ffffff',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          selectable: true,
+          editable: true,
+        });
+
+        const subtitleText = new Textbox('Build amazing things with our tools', {
+          left: 100,
+          top: 250,
+          width: 1080,
+          fontSize: 24,
+          fill: '#ffffff',
+          opacity: 0.9,
+          textAlign: 'center',
+          selectable: true,
+          editable: true,
+        });
+
+        fabricCanvas.add(heroRect, titleText, subtitleText);
+        fabricCanvas.renderAll();
+
+        toast({
+          title: 'Component rendered',
+          description: 'Hero section added to canvas. Customize it as needed!',
+        });
+      } else if (code.toLowerCase().includes('card') || code.toLowerCase().includes('pricing')) {
+        // Create a card/pricing component
+        const cardRect = new Rect({
+          left: 100,
+          top: 100,
+          width: 350,
+          height: 450,
+          fill: '#ffffff',
+          stroke: '#e2e8f0',
+          strokeWidth: 2,
+          rx: 12,
+          ry: 12,
+          selectable: true,
+          hasControls: true,
+        });
+
+        const cardTitle = new Textbox('Premium Plan', {
+          left: 130,
+          top: 140,
+          width: 290,
+          fontSize: 28,
+          fill: '#1a202c',
+          fontWeight: 'bold',
+          selectable: true,
+          editable: true,
+        });
+
+        const cardPrice = new Textbox('$29/mo', {
+          left: 130,
+          top: 200,
+          width: 290,
+          fontSize: 42,
+          fill: '#667eea',
+          fontWeight: 'bold',
+          selectable: true,
+          editable: true,
+        });
+
+        const cardDescription = new Textbox('Perfect for growing teams', {
+          left: 130,
+          top: 270,
+          width: 290,
+          fontSize: 16,
+          fill: '#718096',
+          selectable: true,
+          editable: true,
+        });
+
+        fabricCanvas.add(cardRect, cardTitle, cardPrice, cardDescription);
+        fabricCanvas.renderAll();
+
+        toast({
+          title: 'Component rendered',
+          description: 'Card component added to canvas!',
+        });
+      } else if (code.toLowerCase().includes('button')) {
+        // Create a button
+        const buttonRect = new Rect({
+          left: 150,
+          top: 150,
+          width: 200,
+          height: 56,
+          fill: '#667eea',
+          rx: 8,
+          ry: 8,
+          selectable: true,
+          hasControls: true,
+        });
+
+        const buttonText = new Textbox('Get Started', {
+          left: 185,
+          top: 165,
+          width: 130,
+          fontSize: 18,
+          fill: '#ffffff',
+          fontWeight: '600',
+          textAlign: 'center',
+          selectable: true,
+          editable: true,
+        });
+
+        fabricCanvas.add(buttonRect, buttonText);
+        fabricCanvas.renderAll();
+
+        toast({
+          title: 'Component rendered',
+          description: 'Button added to canvas!',
+        });
+      } else {
+        // Generic component - create a placeholder
+        const placeholderRect = new Rect({
+          left: 100,
+          top: 100,
+          width: 600,
+          height: 400,
+          fill: '#f7fafc',
+          stroke: '#cbd5e0',
+          strokeWidth: 2,
+          rx: 8,
+          ry: 8,
+          selectable: true,
+          hasControls: true,
+        });
+
+        const placeholderText = new Textbox('AI Generated Component\n\nCustomize this on the canvas!', {
+          left: 150,
+          top: 200,
+          width: 500,
+          fontSize: 20,
+          fill: '#2d3748',
+          textAlign: 'center',
+          selectable: true,
+          editable: true,
+        });
+
+        fabricCanvas.add(placeholderRect, placeholderText);
+        fabricCanvas.renderAll();
+
+        toast({
+          title: 'Component rendered',
+          description: 'Component structure added to canvas. Customize it!',
+        });
+      }
+    } catch (error) {
+      console.error('Error rendering to canvas:', error);
+      toast({
+        title: 'Render failed',
+        description: 'Could not render component to canvas.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const handleSend = async () => {
@@ -128,6 +323,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className }) =
                 const content = parsed.choices?.[0]?.delta?.content;
                 if (content) {
                   assistantContent += content;
+                  const hasCode = assistantContent.includes('```');
                   setMessages(prev => {
                     const newMessages = [...prev];
                     const lastMessage = newMessages[newMessages.length - 1];
@@ -136,12 +332,14 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className }) =
                       newMessages[newMessages.length - 1] = {
                         ...lastMessage,
                         content: assistantContent,
+                        hasCode,
                       };
                     } else {
                       newMessages.push({
                         role: 'assistant',
                         content: assistantContent,
                         timestamp: new Date(),
+                        hasCode,
                       });
                     }
                     return newMessages;
@@ -295,7 +493,16 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className }) =
                               <div key={i} className="relative group">
                                 <div className="flex items-center justify-between bg-muted-foreground/10 px-3 py-1 rounded-t">
                                   <span className="text-xs font-mono">{lang || 'code'}</span>
-                                  <div className="flex gap-1">
+                                   <div className="flex gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => renderCodeToCanvas(codeContent)}
+                                      className="h-6 px-2"
+                                      title="Render to canvas"
+                                    >
+                                      <Layout className="w-3 h-3" />
+                                    </Button>
                                     <Button
                                       variant="ghost"
                                       size="sm"

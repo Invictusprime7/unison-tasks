@@ -27,8 +27,9 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
   ]);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { loading, generateDesign, generateTemplate } = useWebBuilderAI(
-    fabricCanvas,
+  // Use null for fabricCanvas since we're using GrapeJS now
+  const { loading, generateTemplate } = useWebBuilderAI(
+    null,
     onTemplateGenerated
   );
 
@@ -46,15 +47,8 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
     const userInput = input;
     setInput('');
 
-    // Detect if user wants a full template or individual elements
-    const isTemplateRequest = /\b(template|page|website|landing page|full design|complete design|entire page)\b/i.test(userInput);
-
-    let response;
-    if (isTemplateRequest) {
-      response = await generateTemplate(userInput);
-    } else {
-      response = await generateDesign(userInput);
-    }
+    // Always generate full templates for GrapeJS
+    const response = await generateTemplate(userInput);
 
     if (response) {
       const assistantMessage: Message = {

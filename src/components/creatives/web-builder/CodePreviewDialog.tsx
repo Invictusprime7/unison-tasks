@@ -10,24 +10,31 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Check, Upload, Save, Code2 } from "lucide-react";
 import { toast } from "sonner";
 import Editor from "@monaco-editor/react";
+import type { useGrapeJS } from "@/hooks/useGrapeJS";
 
 interface CodePreviewDialogProps {
   isOpen: boolean;
   onClose: () => void;
   fabricCanvas: any;
+  grapeJS?: ReturnType<typeof useGrapeJS>;
 }
 
 export const CodePreviewDialog = ({
   isOpen,
   onClose,
   fabricCanvas,
+  grapeJS,
 }: CodePreviewDialogProps) => {
   const [copied, setCopied] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [htmlCode, setHtmlCode] = useState("");
   const [cssCode, setCssCode] = useState("");
 
-  const generateHTML = () => {
+  const generateHTML = async () => {
+    if (grapeJS && grapeJS.isReady) {
+      return await grapeJS.getHtml();
+    }
+    
     if (!fabricCanvas) return "<div>No content</div>";
 
     const objects = fabricCanvas.getObjects();
@@ -47,7 +54,11 @@ export const CodePreviewDialog = ({
     return html;
   };
 
-  const generateCSS = () => {
+  const generateCSS = async () => {
+    if (grapeJS && grapeJS.isReady) {
+      return await grapeJS.getCss();
+    }
+    
     return `.web-builder-output {
   font-family: system-ui, -apple-system, sans-serif;
   line-height: 1.5;
@@ -58,10 +69,10 @@ export const CodePreviewDialog = ({
 
   useEffect(() => {
     if (isOpen) {
-      setHtmlCode(generateHTML());
-      setCssCode(generateCSS());
+      generateHTML().then(setHtmlCode);
+      generateCSS().then(setCssCode);
     }
-  }, [isOpen, fabricCanvas]);
+  }, [isOpen, fabricCanvas, grapeJS]);
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -94,11 +105,15 @@ export const CodePreviewDialog = ({
     input.click();
   };
 
-  const handleApplyChanges = () => {
-    // This would apply the code changes to the canvas
-    // For now, just show a success message
-    toast.success("Code changes applied!");
-    setIsEditMode(false);
+  const handleApplyChanges = async () => {
+    // Apply code changes to GrapeJS editor
+    if (grapeJS && grapeJS.isReady) {
+      await grapeJS.setComponents(JSON.parse(htmlCode));
+      toast.success("Code changes applied!");
+      setIsEditMode(false);
+    } else {
+      toast.info("Code editing not available in legacy mode");
+    }
   };
 
   const handleDownload = (code: string, filename: string) => {

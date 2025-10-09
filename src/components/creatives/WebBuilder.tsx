@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas } from "fabric";
 import { Button } from "@/components/ui/button";
 import { 
   Plus, Layout, Type, Square, Eye, Play,
@@ -8,25 +7,23 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { NavigationPanel } from "./web-builder/NavigationPanel";
-import { WebPropertiesPanel } from "./web-builder/WebPropertiesPanel";
 import { AIAssistantPanel } from "./web-builder/AIAssistantPanel";
 import { CodePreviewDialog } from "./web-builder/CodePreviewDialog";
 import { IntegrationsPanel } from "./design-studio/IntegrationsPanel";
 import { ExportDialog } from "./design-studio/ExportDialog";
 import { PerformancePanel } from "./web-builder/PerformancePanel";
-import { SecureIframePreview } from "@/components/SecureIframePreview";
-import { useTemplateState } from "@/hooks/useTemplateState";
-import { sanitizeHTML } from "@/utils/htmlSanitizer";
-import { webBlocks } from "./web-builder/webBlocks";
+import { useGrapeJS } from "@/hooks/useGrapeJS";
+import { GrapeJSAdapter } from "@/utils/grapeJsAdapter";
+import grapeJsTemplate from "@/utils/grapeJsTemplate.html?raw";
 import { useKeyboardShortcuts, defaultWebBuilderShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { useCanvasHistory } from "@/hooks/useCanvasHistory";
-import { ChevronLeft, ChevronRight, PanelLeftClose, PanelRightClose } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import type { AIGeneratedTemplate } from "@/types/template";
 
 interface WebBuilderProps {
   initialHtml?: string;
@@ -35,13 +32,11 @@ interface WebBuilderProps {
 }
 
 export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
-  const [selectedObject, setSelectedObject] = useState<any>(null);
+  const grapeJS = useGrapeJS();
+  const [adapter] = useState(() => new GrapeJSAdapter());
   const [activeMode, setActiveMode] = useState<"insert" | "layout" | "text" | "vector">("insert");
   const [device, setDevice] = useState<"desktop" | "tablet" | "mobile">("desktop");
-  const [zoom, setZoom] = useState(0.5);
-  const [canvasHeight, setCanvasHeight] = useState(800);
+  const [zoom, setZoom] = useState(1);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [codePreviewOpen, setCodePreviewOpen] = useState(false);
   const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
@@ -54,103 +49,51 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [performancePanelOpen, setPerformancePanelOpen] = useState(false);
   const mainContainerRef = useRef<HTMLDivElement>(null);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
-  const [isPanning, setIsPanning] = useState(false);
-  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
-  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
-  const [showPreview, setShowPreview] = useState(false);
 
-  // State management - template schema as source of truth
-  const templateState = useTemplateState(fabricCanvas);
-
-  // History management
-  const history = useCanvasHistory(fabricCanvas);
-
+  // Sync device changes to GrapeJS
   useEffect(() => {
-    if (!canvasRef.current) return;
-
-    const canvasElement = canvasRef.current;
+    if (!grapeJS.isReady) return;
     
-    const canvas = new FabricCanvas(canvasElement, {
-      width: 1280,
-      height: canvasHeight,
-      backgroundColor: "#ffffff", // Keep canvas background white to avoid black flashes on zoom
-    });
-
-    setFabricCanvas(canvas);
-
-    const handleSelectionCreated = (e: any) => {
-      setSelectedObject(e.selected?.[0]);
+    const deviceMap: Record<string, string> = {
+      desktop: 'Desktop',
+      tablet: 'Tablet',
+      mobile: 'Mobile',
     };
-
-    const handleSelectionUpdated = (e: any) => {
-      setSelectedObject(e.selected?.[0]);
-    };
-
-    const handleSelectionCleared = () => {
-      setSelectedObject(null);
-    };
-
-    canvas.on("selection:created", handleSelectionCreated);
-    canvas.on("selection:updated", handleSelectionUpdated);
-    canvas.on("selection:cleared", handleSelectionCleared);
-
-    return () => {
-      canvas.off("selection:created", handleSelectionCreated);
-      canvas.off("selection:updated", handleSelectionUpdated);
-      canvas.off("selection:cleared", handleSelectionCleared);
-      canvas.clear();
-      canvas.dispose();
-      setFabricCanvas(null);
-      setSelectedObject(null);
-    };
-  }, [canvasHeight]);
+    
+    grapeJS.setDevice(deviceMap[device]);
+  }, [device, grapeJS.isReady, grapeJS.setDevice]);
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
     {
       ...defaultWebBuilderShortcuts.undo,
       action: () => {
-        if (history.canUndo) {
-          history.undo();
-          toast.success("Undone");
-        }
+        grapeJS.undo();
+        toast.success("Undone");
       },
     },
     {
       ...defaultWebBuilderShortcuts.redo,
       action: () => {
-        if (history.canRedo) {
-          history.redo();
-          toast.success("Redone");
-        }
+        grapeJS.redo();
+        toast.success("Redone");
       },
     },
     {
       ...defaultWebBuilderShortcuts.redoAlt,
       action: () => {
-        if (history.canRedo) {
-          history.redo();
-          toast.success("Redone");
-        }
+        grapeJS.redo();
+        toast.success("Redone");
       },
     },
     {
-      ...defaultWebBuilderShortcuts.delete,
-      action: () => selectedObject && handleDelete(),
-    },
-    {
-      ...defaultWebBuilderShortcuts.backspace,
-      action: () => selectedObject && handleDelete(),
-    },
-    {
-      ...defaultWebBuilderShortcuts.duplicate,
-      action: () => selectedObject && handleDuplicate(),
-    },
-    {
       ...defaultWebBuilderShortcuts.save,
-      action: () => {
-        history.save();
+      action: async () => {
+        const html = await grapeJS.getHtml();
+        const css = await grapeJS.getCss();
+        if (onSave) {
+          onSave(html, css);
+        }
         toast.success("Saved");
       },
     },
@@ -160,162 +103,9 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     },
   ]);
 
-  // Auto-adjust canvas height based on content
-  const updateCanvasHeight = () => {
-    if (!fabricCanvas) return;
-    
-    const objects = fabricCanvas.getObjects();
-    if (objects.length === 0) {
-      setCanvasHeight(800);
-      return;
-    }
-    
-    let maxBottom = 800; // Minimum height
-    objects.forEach((obj: any) => {
-      const objBottom = (obj.top || 0) + (obj.height || 0) * (obj.scaleY || 1);
-      if (objBottom > maxBottom) {
-        maxBottom = objBottom;
-      }
-    });
-    
-    // Add padding at the bottom
-    const newHeight = Math.max(800, Math.ceil(maxBottom + 200));
-    if (newHeight !== canvasHeight) {
-      setCanvasHeight(newHeight);
-    }
-  };
-
-  // Save to history when objects change
-  useEffect(() => {
-    if (!fabricCanvas) return;
-
-    const handleObjectModified = () => {
-      updateCanvasHeight();
-      setTimeout(() => history.save(), 100);
-    };
-
-    fabricCanvas.on("object:added", handleObjectModified);
-    fabricCanvas.on("object:removed", handleObjectModified);
-    fabricCanvas.on("object:modified", handleObjectModified);
-
-    return () => {
-      fabricCanvas.off("object:added", handleObjectModified);
-      fabricCanvas.off("object:removed", handleObjectModified);
-      fabricCanvas.off("object:modified", handleObjectModified);
-    };
-  }, [fabricCanvas, history, canvasHeight]);
-
-  const handleDelete = () => {
-    if (!fabricCanvas || !selectedObject) return;
-    fabricCanvas.remove(selectedObject);
-    fabricCanvas.renderAll();
-    toast.success("Deleted");
-  };
-
-  const handleDuplicate = () => {
-    if (!fabricCanvas || !selectedObject) return;
-    selectedObject.clone((cloned: any) => {
-      cloned.set({
-        left: cloned.left + 10,
-        top: cloned.top + 10,
-      });
-      fabricCanvas.add(cloned);
-      fabricCanvas.setActiveObject(cloned);
-      fabricCanvas.renderAll();
-      toast.success("Duplicated");
-    });
-  };
-
-  const addBlock = (blockId: string) => {
-    if (!fabricCanvas) return;
-    
-    const block = webBlocks.find(b => b.id === blockId);
-    if (!block) return;
-
-    const component = block.create(fabricCanvas);
-    if (component) {
-      fabricCanvas.add(component);
-      fabricCanvas.setActiveObject(component);
-      fabricCanvas.renderAll();
-      toast.success(`${block.label} added`);
-    }
-  };
-
-  const handleZoomIn = () => {
-    if (!fabricCanvas) return;
-    const newZoom = Math.min(zoom * 1.2, 2);
-    setZoom(newZoom);
-    fabricCanvas.setZoom(newZoom);
-    fabricCanvas.renderAll();
-  };
-
-  const handleZoomOut = () => {
-    if (!fabricCanvas) return;
-    const newZoom = Math.max(zoom / 1.2, 0.1);
-    setZoom(newZoom);
-    fabricCanvas.setZoom(newZoom);
-    fabricCanvas.renderAll();
-  };
-
-  const getCanvasWidth = () => {
-    switch (device) {
-      case "tablet": return 768;
-      case "mobile": return 375;
-      default: return 1280;
-    }
-  };
-
-  const getCanvasHeight = () => {
-    switch (device) {
-      case "tablet": return Math.max(1024, canvasHeight);
-      case "mobile": return Math.max(667, canvasHeight);
-      default: return canvasHeight;
-    }
-  };
-
-  const handleExport = (format: string) => {
-    if (!fabricCanvas) return;
-    
-    const objects = fabricCanvas.getObjects();
-    let html = '<div class="web-page">\n';
-    let css = '.web-page {\n  min-height: 100vh;\n  position: relative;\n  background: white;\n}\n\n';
-    
-    objects.forEach((obj: any, index: number) => {
-      const className = `element-${index}`;
-      
-      // Generate HTML
-      if (obj.type === 'text' || obj.type === 'textbox') {
-        html += `  <div class="${className}">${obj.text}</div>\n`;
-      } else if (obj.type === 'rect') {
-        html += `  <div class="${className}"></div>\n`;
-      } else if (obj.type === 'image') {
-        html += `  <img class="${className}" src="${obj.getSrc()}" alt="" />\n`;
-      }
-      
-      // Generate CSS
-      css += `.${className} {\n`;
-      css += `  position: absolute;\n`;
-      css += `  left: ${obj.left}px;\n`;
-      css += `  top: ${obj.top}px;\n`;
-      css += `  width: ${obj.width * (obj.scaleX || 1)}px;\n`;
-      css += `  height: ${obj.height * (obj.scaleY || 1)}px;\n`;
-      
-      if (obj.fill) {
-        css += `  background-color: ${obj.fill};\n`;
-      }
-      if (obj.fontSize) {
-        css += `  font-size: ${obj.fontSize}px;\n`;
-      }
-      if (obj.fontFamily) {
-        css += `  font-family: ${obj.fontFamily};\n`;
-      }
-      if (obj.textAlign) {
-        css += `  text-align: ${obj.textAlign};\n`;
-      }
-      css += `}\n\n`;
-    });
-    
-    html += '</div>';
+  const handleExport = async (format: string) => {
+    const html = await grapeJS.getHtml();
+    const css = await grapeJS.getCss();
     
     setExportHtml(html);
     setExportCss(css);
@@ -323,8 +113,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     if (format === 'html') {
       setExportDialogOpen(true);
     } else if (format === 'react') {
-      // Convert to React component
-      const reactCode = `import React from 'react';\n\nconst GeneratedComponent = () => {\n  return (\n${html.split('\n').map(l => '    ' + l).join('\n')}\n  );\n};\n\nexport default GeneratedComponent;`;
+      const reactCode = `import React from 'react';\n\nconst GeneratedComponent = () => {\n  return (\n    <div>\n${html.split('\n').map(l => '      ' + l).join('\n')}\n    </div>\n  );\n};\n\nexport default GeneratedComponent;`;
       const blob = new Blob([reactCode], { type: 'text/javascript' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -336,7 +125,8 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
       URL.revokeObjectURL(url);
       toast.success('React component exported');
     } else if (format === 'json') {
-      const json = JSON.stringify(fabricCanvas.toJSON(), null, 2);
+      const components = await grapeJS.getComponents();
+      const json = JSON.stringify(components, null, 2);
       const blob = new Blob([json], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
@@ -369,7 +159,6 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     }
   };
 
-  // Listen for fullscreen changes
   useEffect(() => {
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
@@ -381,123 +170,25 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     };
   }, []);
 
-  // Handle mouse wheel zoom (Ctrl+scroll)
-  useEffect(() => {
-    const container = canvasContainerRef.current;
-    if (!container) return;
+  const handleTemplateGenerated = async (template: AIGeneratedTemplate) => {
+    if (!grapeJS.isReady) {
+      toast.error('Editor not ready');
+      return;
+    }
 
-    const handleWheel = (e: WheelEvent) => {
-      // Only zoom if Ctrl key is pressed
-      if (e.ctrlKey) {
-        e.preventDefault();
-        const delta = e.deltaY > 0 ? 0.9 : 1.1;
-        const newZoom = Math.max(0.1, Math.min(2, zoom * delta));
-        setZoom(newZoom);
-        if (fabricCanvas) {
-          fabricCanvas.setZoom(newZoom);
-          fabricCanvas.renderAll();
-        }
-      }
-      // If Ctrl is not pressed, allow normal scrolling (do nothing)
-    };
-
-    container.addEventListener('wheel', handleWheel, { passive: false });
-    return () => container.removeEventListener('wheel', handleWheel);
-  }, [zoom, fabricCanvas]);
-
-  // Handle panning with mouse drag
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 1 || (e.button === 0 && e.altKey)) { // Middle mouse or Alt+Left
-      setIsPanning(true);
-      setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
-      e.preventDefault();
+    try {
+      // Convert template to GrapeJS components
+      const components = adapter.templateToGrapeJS(template);
+      
+      // Set components in GrapeJS
+      await grapeJS.setComponents(components);
+      
+      toast.success('Template rendered successfully!');
+    } catch (error) {
+      console.error('Error rendering template:', error);
+      toast.error('Failed to render template');
     }
   };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isPanning) return;
-    setPanOffset({
-      x: e.clientX - panStart.x,
-      y: e.clientY - panStart.y,
-    });
-  };
-
-  const handleMouseUp = () => {
-    setIsPanning(false);
-  };
-
-  // Handle touch gestures for mobile
-  useEffect(() => {
-    const container = canvasContainerRef.current;
-    if (!container) return;
-
-    let initialDistance = 0;
-    let initialZoom = zoom;
-    let lastTouchCenter = { x: 0, y: 0 };
-    let touchPanOffset = { x: 0, y: 0 };
-
-    const getTouchDistance = (touches: TouchList) => {
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    };
-
-    const getTouchCenter = (touches: TouchList) => {
-      return {
-        x: (touches[0].clientX + touches[1].clientX) / 2,
-        y: (touches[0].clientY + touches[1].clientY) / 2,
-      };
-    };
-
-    const handleTouchStart = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        e.preventDefault();
-        initialDistance = getTouchDistance(e.touches);
-        initialZoom = zoom;
-        lastTouchCenter = getTouchCenter(e.touches);
-        touchPanOffset = { ...panOffset };
-      }
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 2) {
-        e.preventDefault();
-        
-        // Pinch zoom
-        const currentDistance = getTouchDistance(e.touches);
-        const scale = currentDistance / initialDistance;
-        const newZoom = Math.max(0.1, Math.min(2, initialZoom * scale));
-        setZoom(newZoom);
-        if (fabricCanvas) {
-          fabricCanvas.setZoom(newZoom);
-          fabricCanvas.renderAll();
-        }
-
-        // Pan
-        const currentCenter = getTouchCenter(e.touches);
-        const dx = currentCenter.x - lastTouchCenter.x;
-        const dy = currentCenter.y - lastTouchCenter.y;
-        setPanOffset({
-          x: touchPanOffset.x + dx,
-          y: touchPanOffset.y + dy,
-        });
-      }
-    };
-
-    const handleTouchEnd = () => {
-      initialDistance = 0;
-    };
-
-    container.addEventListener('touchstart', handleTouchStart, { passive: false });
-    container.addEventListener('touchmove', handleTouchMove, { passive: false });
-    container.addEventListener('touchend', handleTouchEnd);
-
-    return () => {
-      container.removeEventListener('touchstart', handleTouchStart);
-      container.removeEventListener('touchmove', handleTouchMove);
-      container.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [zoom, fabricCanvas, panOffset]);
 
   return (
     <div ref={mainContainerRef} className="flex flex-col h-screen bg-[#0a0a0a]">
@@ -586,9 +277,8 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           <Button
             variant="ghost"
             size="sm"
-            onClick={history.undo}
-            disabled={!history.canUndo}
-            className="text-white/70 hover:text-white disabled:opacity-30"
+            onClick={() => grapeJS.undo()}
+            className="text-white/70 hover:text-white"
             title="Undo (Ctrl+Z)"
           >
             <Undo2 className="h-4 w-4" />
@@ -596,9 +286,8 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           <Button
             variant="ghost"
             size="sm"
-            onClick={history.redo}
-            disabled={!history.canRedo}
-            className="text-white/70 hover:text-white disabled:opacity-30"
+            onClick={() => grapeJS.redo()}
+            className="text-white/70 hover:text-white"
             title="Redo (Ctrl+Y)"
           >
             <Redo2 className="h-4 w-4" />
@@ -606,8 +295,12 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              history.save();
+            onClick={async () => {
+              const html = await grapeJS.getHtml();
+              const css = await grapeJS.getCss();
+              if (onSave) {
+                onSave(html, css);
+              }
               toast.success("Saved");
             }}
             className="text-white/70 hover:text-white"
@@ -695,43 +388,29 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                 Mobile
               </Button>
             </div>
-            <span className="text-sm text-white/50">{getCanvasWidth()}×{getCanvasHeight()}px (dynamic)</span>
+            <span className="text-sm text-white/50">Responsive Design</span>
           </div>
 
-          {/* Canvas - Scrollable like a real website */}
-          <div 
-            ref={canvasContainerRef}
-            className="flex-1 overflow-hidden p-4 flex items-start justify-center bg-[#0a0a0a] relative"
-            onMouseDown={handleMouseDown}
-            onMouseMove={handleMouseMove}
-            onMouseUp={handleMouseUp}
-            onMouseLeave={handleMouseUp}
-            style={{ cursor: isPanning ? 'grabbing' : 'default' }}
-          >
-            <div 
-              className="bg-white shadow-2xl overflow-y-auto overflow-x-hidden"
-              style={{ 
-                width: getCanvasWidth() * zoom,
-                minHeight: getCanvasHeight() * zoom,
-                maxHeight: "none",
-                boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)",
-                transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
-                transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-              }}
-            >
-              <canvas ref={canvasRef} />
-            </div>
+          {/* GrapeJS Editor Iframe */}
+          <div className="flex-1 overflow-hidden bg-[#0a0a0a]">
+            <iframe
+              ref={grapeJS.iframeRef}
+              srcDoc={grapeJsTemplate}
+              className="w-full h-full border-0"
+              title="GrapeJS Editor"
+              sandbox="allow-same-origin allow-scripts allow-forms"
+            />
           </div>
 
-          {/* Bottom Controls - Zoom and Pan Reset */}
+          {/* Bottom Controls - Zoom */}
           <div className="h-12 border-t border-white/10 flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleZoomOut}
+                onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
                 className="text-white/70 hover:text-white h-8 w-8 p-0"
-                title="Zoom out (or use scroll wheel)"
+                title="Zoom out"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
@@ -741,34 +420,28 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleZoomIn}
+                onClick={() => setZoom(Math.min(2, zoom + 0.1))}
                 className="text-white/70 hover:text-white h-8 w-8 p-0"
-                title="Zoom in (or use scroll wheel)"
+                title="Zoom in"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => {
-                  setZoom(0.5);
-                  setPanOffset({ x: 0, y: 0 });
-                  if (fabricCanvas) {
-                    fabricCanvas.setZoom(0.5);
-                    fabricCanvas.renderAll();
-                  }
-                  toast.success("Reset view");
-                }}
+                onClick={() => setZoom(1)}
                 className="text-white/70 hover:text-white text-xs"
-                title="Reset zoom and pan"
+                title="Reset zoom"
               >
                 Reset View
               </Button>
             </div>
+            {grapeJS.isReady && (
+              <span className="text-xs text-green-500">● Editor Ready</span>
+            )}
           </div>
         </div>
 
-        {/* Right Properties Panel - Collapsible */}
         {/* Right Panel Toggle */}
         <div className="relative">
           <Button
@@ -781,34 +454,22 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             {rightPanelCollapsed ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
         </div>
-        
-        {!rightPanelCollapsed && (
-          <WebPropertiesPanel 
-            fabricCanvas={fabricCanvas}
-            selectedObject={selectedObject}
-            onUpdate={() => fabricCanvas?.renderAll()}
-          />
-        )}
       </div>
 
       {/* AI Assistant Panel */}
       <AIAssistantPanel 
         isOpen={aiPanelOpen} 
         onClose={() => setAiPanelOpen(false)}
-        fabricCanvas={fabricCanvas}
-        onTemplateGenerated={async (template) => {
-          // Template state handles both canvas and HTML rendering
-          await templateState.updateTemplate(template);
-          toast.success('Template rendered to canvas!');
-          setShowPreview(true);
-        }}
+        fabricCanvas={null}
+        onTemplateGenerated={handleTemplateGenerated}
       />
 
       {/* Code Preview Dialog */}
       <CodePreviewDialog
         isOpen={codePreviewOpen}
         onClose={() => setCodePreviewOpen(false)}
-        fabricCanvas={fabricCanvas}
+        fabricCanvas={null}
+        grapeJS={grapeJS}
       />
 
       {/* Export Dialog */}
@@ -834,7 +495,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             </Button>
           </div>
           <PerformancePanel 
-            fabricCanvas={fabricCanvas}
+            fabricCanvas={null}
             onAutoFix={() => {
               toast.success("Auto-fix applied! Optimizations complete.");
             }}
@@ -864,37 +525,6 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           />
         </div>
       )}
-
-      {/* Secure HTML Preview Dialog */}
-      <Dialog open={showPreview} onOpenChange={setShowPreview}>
-        <DialogContent className="max-w-6xl h-[90vh] bg-[#1a1a1a] border-white/10">
-          <DialogHeader>
-            <DialogTitle className="text-white flex items-center justify-between gap-2">
-              <span className="flex items-center gap-2">
-                <Eye className="h-5 w-5" />
-                Live HTML Preview
-              </span>
-              {templateState.isRendering && (
-                <span className="text-xs text-white/50">Rendering...</span>
-              )}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-hidden">
-            <SecureIframePreview
-              html={sanitizeHTML(templateState.html)}
-              css={templateState.css}
-              className="w-full h-full border border-white/10 rounded bg-white"
-              onConsole={(type, args) => {
-                console.log(`[Preview ${type}]:`, ...args);
-              }}
-              onError={(error) => {
-                console.error('[Preview Error]:', error);
-                toast.error('Preview error: ' + error.message);
-              }}
-            />
-          </div>
-        </DialogContent>
-      </Dialog>
 
       {/* Keyboard Shortcuts Dialog */}
       <Dialog open={shortcutsDialogOpen} onOpenChange={setShortcutsDialogOpen}>

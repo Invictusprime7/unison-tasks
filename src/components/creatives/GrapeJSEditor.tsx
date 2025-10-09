@@ -4,13 +4,15 @@ import "grapesjs/dist/css/grapes.min.css";
 import gjsPresetWebpage from "grapesjs-preset-webpage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Code, Eye, Sparkles, Send, Loader2, Save, FolderOpen, Download } from "lucide-react";
+import { Code, Eye, Sparkles, Send, Loader2, Save, FolderOpen, Download, Palette, LayoutGrid } from "lucide-react";
 import MonacoEditor from "@monaco-editor/react";
 import { toast } from "sonner";
 import { WebComponentsPanel } from "./design-studio/WebComponentsPanel";
 import { SaveTemplateDialog } from "./design-studio/SaveTemplateDialog";
 import { TemplateGallery } from "./design-studio/TemplateGallery";
 import { ExportDialog } from "./design-studio/ExportDialog";
+import { DesignTokensPanel } from "./design-studio/DesignTokensPanel";
+import { LayoutControlsPanel } from "./design-studio/LayoutControlsPanel";
 import { supabase } from "@/integrations/supabase/client";
 
 interface GrapeJSEditorProps {
@@ -33,6 +35,8 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showTokensPanel, setShowTokensPanel] = useState(false);
+  const [showLayoutPanel, setShowLayoutPanel] = useState(false);
 
   useEffect(() => {
     if (!editorRef.current) return;
@@ -52,6 +56,11 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
         },
       },
       storageManager: false,
+      // Enable canvas features
+      canvas: {
+        styles: [],
+        scripts: [],
+      },
       panels: {
         defaults: [
           {
@@ -152,6 +161,25 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
     grapesEditor.on("update", () => {
       setHtmlCode(grapesEditor.getHtml());
       setCssCode(grapesEditor.getCss());
+    });
+
+    // Enable snap-to-grid and alignment guides
+    grapesEditor.on('component:drag:start', () => {
+      const canvas = grapesEditor.Canvas.getElement();
+      if (canvas) {
+        canvas.style.backgroundImage = `
+          repeating-linear-gradient(0deg, transparent, transparent 9px, rgba(0,0,0,0.05) 9px, rgba(0,0,0,0.05) 10px),
+          repeating-linear-gradient(90deg, transparent, transparent 9px, rgba(0,0,0,0.05) 9px, rgba(0,0,0,0.05) 10px)
+        `;
+        canvas.style.backgroundSize = '10px 10px';
+      }
+    });
+
+    grapesEditor.on('component:drag:end', () => {
+      const canvas = grapesEditor.Canvas.getElement();
+      if (canvas) {
+        canvas.style.backgroundImage = '';
+      }
     });
 
     setEditor(grapesEditor);
@@ -339,7 +367,25 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
       <div className="h-9 sm:h-10 border-b bg-card flex items-center justify-between px-2 sm:px-4 flex-shrink-0 min-w-0">
         <div className="panel__devices flex gap-1 min-w-0"></div>
         <div className="flex gap-1 sm:gap-2 flex-shrink-0">
-          <Button
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTokensPanel(!showTokensPanel)}
+              className="h-7 sm:h-8 px-2"
+            >
+              <Palette className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Tokens</span>
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowLayoutPanel(!showLayoutPanel)}
+              className="h-7 sm:h-8 px-2"
+            >
+              <LayoutGrid className="h-3 w-3 sm:h-4 sm:w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Layout</span>
+            </Button>
+            <Button
             variant="outline"
             size="sm"
             onClick={() => setGalleryOpen(true)}
@@ -451,6 +497,76 @@ export const GrapeJSEditor = ({ initialHtml, initialCss, onSave }: GrapeJSEditor
             <div className={`flex-1 relative min-h-[300px] overflow-hidden ${isFullscreen ? 'pb-24' : ''}`}>
               <div ref={editorRef} className="h-full w-full" />
             </div>
+
+            {/* Right Sidebar - Design Tokens */}
+            {showTokensPanel && (
+              <div className="w-full sm:w-72 border-t sm:border-l sm:border-t-0 max-h-[40vh] sm:max-h-none flex-shrink-0 overflow-hidden">
+                <DesignTokensPanel
+                  onTokensUpdate={(tokens) => {
+                    if (!editor) return;
+                    const css = `
+:root {
+  --color-primary: ${tokens.colors.primary};
+  --color-secondary: ${tokens.colors.secondary};
+  --color-accent: ${tokens.colors.accent};
+  --color-background: ${tokens.colors.background};
+  --color-text: ${tokens.colors.text};
+  --color-border: ${tokens.colors.border};
+  --font-heading: ${tokens.fonts.heading};
+  --font-body: ${tokens.fonts.body};
+  --spacing-md: ${tokens.spacing.md};
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: var(--font-body);
+}`;
+                    const currentCss = editor.getCss();
+                    editor.setStyle(css + '\n' + currentCss);
+                  }}
+                />
+              </div>
+            )}
+
+            {/* Right Sidebar - Layout Controls */}
+            {showLayoutPanel && !showTokensPanel && (
+              <div className="w-full sm:w-72 border-t sm:border-l sm:border-t-0 max-h-[40vh] sm:max-h-none flex-shrink-0 overflow-hidden">
+                <LayoutControlsPanel
+                  onLayoutUpdate={(layout) => {
+                    if (!editor) return;
+                    const selected = editor.getSelected();
+                    if (!selected) {
+                      toast.info("Select an element to apply layout");
+                      return;
+                    }
+                    
+                    const styles: Record<string, string> = {
+                      display: layout.display,
+                    };
+
+                    if (layout.display === 'flex') {
+                      if (layout.flexDirection) styles['flex-direction'] = layout.flexDirection;
+                      if (layout.justifyContent) styles['justify-content'] = layout.justifyContent;
+                      if (layout.alignItems) styles['align-items'] = layout.alignItems;
+                    }
+
+                    if (layout.display === 'grid') {
+                      if (layout.gridCols) styles['grid-template-columns'] = `repeat(${layout.gridCols}, 1fr)`;
+                      if (layout.gridRows) styles['grid-template-rows'] = `repeat(${layout.gridRows}, 1fr)`;
+                    }
+
+                    if (layout.gap) styles.gap = layout.gap;
+                    if (layout.padding) styles.padding = layout.padding;
+                    if (layout.position) styles.position = layout.position;
+                    if (layout.zIndex !== undefined) styles['z-index'] = String(layout.zIndex);
+
+                    selected.setStyle(styles);
+                    toast.success("Layout applied to selected element");
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           {/* AI Assistant - Always Visible at Bottom */}

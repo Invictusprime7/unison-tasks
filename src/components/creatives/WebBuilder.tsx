@@ -1,20 +1,27 @@
 import { useEffect, useRef, useState } from "react";
 import { Canvas as FabricCanvas } from "fabric";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { 
-  Plus, Layout, Type, Square, Settings2, Eye, Play,
-  Monitor, Tablet, Smartphone, ZoomIn, ZoomOut, Hand,
-  MousePointer2, Search, Sparkles, Code
+  Plus, Layout, Type, Square, Eye, Play,
+  Monitor, Tablet, Smartphone, ZoomIn, ZoomOut,
+  Sparkles, Code, Undo2, Redo2, Save, Keyboard
 } from "lucide-react";
 import { toast } from "sonner";
 import { NavigationPanel } from "./web-builder/NavigationPanel";
 import { ComponentsLibrary } from "./web-builder/ComponentsLibrary";
-import { PropertiesPanel } from "./web-builder/PropertiesPanel";
+import { WebPropertiesPanel } from "./web-builder/WebPropertiesPanel";
+import { WebLayersPanel } from "./web-builder/WebLayersPanel";
 import { AIAssistantPanel } from "./web-builder/AIAssistantPanel";
 import { CodePreviewDialog } from "./web-builder/CodePreviewDialog";
 import { webBlocks } from "./web-builder/webBlocks";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useKeyboardShortcuts, defaultWebBuilderShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useCanvasHistory } from "@/hooks/useCanvasHistory";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface WebBuilderProps {
   initialHtml?: string;
@@ -31,6 +38,10 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [zoom, setZoom] = useState(0.5);
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
   const [codePreviewOpen, setCodePreviewOpen] = useState(false);
+  const [shortcutsDialogOpen, setShortcutsDialogOpen] = useState(false);
+
+  // History management
+  const history = useCanvasHistory(fabricCanvas);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -71,6 +82,100 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
       setSelectedObject(null);
     };
   }, []);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      ...defaultWebBuilderShortcuts.undo,
+      action: () => {
+        if (history.canUndo) {
+          history.undo();
+          toast.success("Undone");
+        }
+      },
+    },
+    {
+      ...defaultWebBuilderShortcuts.redo,
+      action: () => {
+        if (history.canRedo) {
+          history.redo();
+          toast.success("Redone");
+        }
+      },
+    },
+    {
+      ...defaultWebBuilderShortcuts.redoAlt,
+      action: () => {
+        if (history.canRedo) {
+          history.redo();
+          toast.success("Redone");
+        }
+      },
+    },
+    {
+      ...defaultWebBuilderShortcuts.delete,
+      action: () => selectedObject && handleDelete(),
+    },
+    {
+      ...defaultWebBuilderShortcuts.backspace,
+      action: () => selectedObject && handleDelete(),
+    },
+    {
+      ...defaultWebBuilderShortcuts.duplicate,
+      action: () => selectedObject && handleDuplicate(),
+    },
+    {
+      ...defaultWebBuilderShortcuts.save,
+      action: () => {
+        history.save();
+        toast.success("Saved");
+      },
+    },
+    {
+      ...defaultWebBuilderShortcuts.toggleCode,
+      action: () => setCodePreviewOpen(true),
+    },
+  ]);
+
+  // Save to history when objects change
+  useEffect(() => {
+    if (!fabricCanvas) return;
+
+    const handleObjectModified = () => {
+      setTimeout(() => history.save(), 100);
+    };
+
+    fabricCanvas.on("object:added", handleObjectModified);
+    fabricCanvas.on("object:removed", handleObjectModified);
+    fabricCanvas.on("object:modified", handleObjectModified);
+
+    return () => {
+      fabricCanvas.off("object:added", handleObjectModified);
+      fabricCanvas.off("object:removed", handleObjectModified);
+      fabricCanvas.off("object:modified", handleObjectModified);
+    };
+  }, [fabricCanvas, history]);
+
+  const handleDelete = () => {
+    if (!fabricCanvas || !selectedObject) return;
+    fabricCanvas.remove(selectedObject);
+    fabricCanvas.renderAll();
+    toast.success("Deleted");
+  };
+
+  const handleDuplicate = () => {
+    if (!fabricCanvas || !selectedObject) return;
+    selectedObject.clone((cloned: any) => {
+      cloned.set({
+        left: cloned.left + 10,
+        top: cloned.top + 10,
+      });
+      fabricCanvas.add(cloned);
+      fabricCanvas.setActiveObject(cloned);
+      fabricCanvas.renderAll();
+      toast.success("Duplicated");
+    });
+  };
 
   const addBlock = (blockId: string) => {
     if (!fabricCanvas) return;
@@ -162,20 +267,52 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           <Button
             variant="ghost"
             size="sm"
+            onClick={() => setShortcutsDialogOpen(true)}
+            className="text-white/70 hover:text-white"
+            title="Keyboard shortcuts"
+          >
+            <Keyboard className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={history.undo}
+            disabled={!history.canUndo}
+            className="text-white/70 hover:text-white disabled:opacity-30"
+            title="Undo (Ctrl+Z)"
+          >
+            <Undo2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={history.redo}
+            disabled={!history.canRedo}
+            className="text-white/70 hover:text-white disabled:opacity-30"
+            title="Redo (Ctrl+Y)"
+          >
+            <Redo2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              history.save();
+              toast.success("Saved");
+            }}
+            className="text-white/70 hover:text-white"
+            title="Save (Ctrl+S)"
+          >
+            <Save className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setCodePreviewOpen(true)}
             className="text-white/70 hover:text-white"
           >
             <Code className="h-4 w-4 mr-2" />
             Code
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setAiPanelOpen(true)}
-            className="text-white/70 hover:text-white"
-          >
-            <Sparkles className="h-4 w-4 mr-2" />
-            AI Assistant
           </Button>
           <Button variant="ghost" size="sm" className="text-white/70 hover:text-white">
             <Eye className="h-4 w-4 mr-2" />
@@ -246,29 +383,15 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             </div>
           </div>
 
-          {/* Bottom Controls */}
+          {/* Bottom Controls - Zoom only */}
           <div className="h-12 border-t border-white/10 flex items-center justify-center gap-4">
             <div className="flex items-center gap-2">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-white/70 hover:text-white h-8 w-8 p-0"
-              >
-                <Hand className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-white/70 hover:text-white h-8 w-8 p-0"
-              >
-                <MousePointer2 className="h-4 w-4" />
-              </Button>
-              <div className="w-px h-6 bg-white/10 mx-2" />
-              <Button
-                variant="ghost"
-                size="sm"
                 onClick={handleZoomOut}
                 className="text-white/70 hover:text-white h-8 w-8 p-0"
+                title="Zoom out"
               >
                 <ZoomOut className="h-4 w-4" />
               </Button>
@@ -280,6 +403,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                 size="sm"
                 onClick={handleZoomIn}
                 className="text-white/70 hover:text-white h-8 w-8 p-0"
+                title="Zoom in"
               >
                 <ZoomIn className="h-4 w-4" />
               </Button>
@@ -287,11 +411,20 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
           </div>
         </div>
 
-        {/* Right Properties Panel */}
-        <PropertiesPanel 
-          fabricCanvas={fabricCanvas}
-          selectedObject={selectedObject}
-        />
+        {/* Right Side - Layers and Properties */}
+        <div className="flex">
+          <WebLayersPanel
+            fabricCanvas={fabricCanvas}
+            selectedObject={selectedObject}
+            onDelete={handleDelete}
+            onDuplicate={handleDuplicate}
+          />
+          <WebPropertiesPanel 
+            fabricCanvas={fabricCanvas}
+            selectedObject={selectedObject}
+            onUpdate={() => fabricCanvas?.renderAll()}
+          />
+        </div>
       </div>
 
       {/* AI Assistant Panel */}
@@ -303,6 +436,36 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         onClose={() => setCodePreviewOpen(false)}
         fabricCanvas={fabricCanvas}
       />
+
+      {/* Keyboard Shortcuts Dialog */}
+      <Dialog open={shortcutsDialogOpen} onOpenChange={setShortcutsDialogOpen}>
+        <DialogContent className="bg-[#1a1a1a] border-white/10">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Keyboard className="h-5 w-5" />
+              Keyboard Shortcuts
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2">
+            {Object.entries(defaultWebBuilderShortcuts).map(([key, shortcut]) => {
+              const parts = [];
+              if ('ctrl' in shortcut && shortcut.ctrl) parts.push("Ctrl");
+              if ('shift' in shortcut && shortcut.shift) parts.push("Shift");
+              if ('alt' in shortcut && shortcut.alt) parts.push("Alt");
+              parts.push(shortcut.key.toUpperCase());
+              
+              return (
+                <div key={key} className="flex justify-between items-center text-sm">
+                  <span className="text-white/70">{shortcut.description}</span>
+                  <kbd className="px-2 py-1 bg-white/10 rounded text-white/90 text-xs font-mono">
+                    {parts.join("+")}
+                  </kbd>
+                </div>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

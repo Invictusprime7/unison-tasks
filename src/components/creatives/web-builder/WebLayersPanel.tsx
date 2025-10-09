@@ -1,17 +1,22 @@
 import { Canvas as FabricCanvas } from "fabric";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Eye, EyeOff, Lock, Unlock, Trash2 } from "lucide-react";
+import { Eye, EyeOff, Lock, Unlock, Trash2, Copy, MoveUp, MoveDown, ChevronDown, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 interface WebLayersPanelProps {
   fabricCanvas: FabricCanvas | null;
   selectedObject: any;
   onDelete: () => void;
+  onDuplicate?: () => void;
 }
 
-export const WebLayersPanel = ({ fabricCanvas, selectedObject, onDelete }: WebLayersPanelProps) => {
+export const WebLayersPanel = ({ fabricCanvas, selectedObject, onDelete, onDuplicate }: WebLayersPanelProps) => {
   const [objects, setObjects] = useState<any[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedGroups, setExpandedGroups] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (!fabricCanvas) return;
@@ -64,6 +69,38 @@ export const WebLayersPanel = ({ fabricCanvas, selectedObject, onDelete }: WebLa
     return "Object";
   };
 
+  const moveLayer = (obj: any, direction: "up" | "down") => {
+    if (!fabricCanvas) return;
+    const index = objects.indexOf(obj);
+    if (direction === "up" && index < objects.length - 1) {
+      fabricCanvas.bringObjectForward(obj);
+      toast.success("Layer moved up");
+    } else if (direction === "down" && index > 0) {
+      fabricCanvas.sendObjectBackwards(obj);
+      toast.success("Layer moved down");
+    }
+    fabricCanvas.renderAll();
+    setObjects(fabricCanvas.getObjects());
+  };
+
+  const duplicateLayer = (obj: any) => {
+    if (!fabricCanvas) return;
+    obj.clone((cloned: any) => {
+      cloned.set({
+        left: cloned.left + 10,
+        top: cloned.top + 10,
+      });
+      fabricCanvas.add(cloned);
+      fabricCanvas.setActiveObject(cloned);
+      fabricCanvas.renderAll();
+      toast.success("Layer duplicated");
+    });
+  };
+
+  const filteredObjects = objects.filter(obj => 
+    getObjectName(obj).toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="w-64 border-l border-border bg-card flex flex-col">
       {/* Header */}
@@ -72,18 +109,25 @@ export const WebLayersPanel = ({ fabricCanvas, selectedObject, onDelete }: WebLa
         <p className="text-xs text-muted-foreground mt-1">
           {objects.length} {objects.length === 1 ? "component" : "components"}
         </p>
+        {/* Search */}
+        <Input
+          placeholder="Search layers..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="h-8 text-sm mt-2"
+        />
       </div>
 
       {/* Layers List */}
       <ScrollArea className="flex-1">
         <div className="p-2">
-          {objects.length === 0 ? (
+          {filteredObjects.length === 0 ? (
             <div className="p-8 text-center text-sm text-muted-foreground">
-              No components yet. Add some from the blocks panel.
+              {searchQuery ? "No layers match your search" : "No components yet. Add some from the blocks panel."}
             </div>
           ) : (
             <div className="space-y-1">
-              {objects.map((obj, index) => (
+              {filteredObjects.map((obj, index) => (
                 <div
                   key={index}
                   onClick={() => handleSelect(obj)}
@@ -104,8 +148,45 @@ export const WebLayersPanel = ({ fabricCanvas, selectedObject, onDelete }: WebLa
                         className="h-6 w-6 p-0"
                         onClick={(e) => {
                           e.stopPropagation();
+                          duplicateLayer(obj);
+                        }}
+                        title="Duplicate (Ctrl+D)"
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          moveLayer(obj, "up");
+                        }}
+                        title="Move up (Ctrl+])"
+                      >
+                        <MoveUp className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          moveLayer(obj, "down");
+                        }}
+                        title="Move down (Ctrl+[)"
+                      >
+                        <MoveDown className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
                           toggleVisibility(obj);
                         }}
+                        title="Toggle visibility"
                       >
                         {obj.visible !== false ? (
                           <Eye className="h-3 w-3" />
@@ -121,6 +202,7 @@ export const WebLayersPanel = ({ fabricCanvas, selectedObject, onDelete }: WebLa
                           e.stopPropagation();
                           toggleLock(obj);
                         }}
+                        title="Toggle lock"
                       >
                         {obj.selectable !== false ? (
                           <Unlock className="h-3 w-3" />
@@ -131,11 +213,12 @@ export const WebLayersPanel = ({ fabricCanvas, selectedObject, onDelete }: WebLa
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="h-6 w-6 p-0"
+                        className="h-6 w-6 p-0 hover:bg-destructive/10 hover:text-destructive"
                         onClick={(e) => {
                           e.stopPropagation();
                           onDelete();
                         }}
+                        title="Delete (Del)"
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>

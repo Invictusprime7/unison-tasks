@@ -374,12 +374,15 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
     };
   }, []);
 
-  // Handle mouse wheel zoom
+  // Handle mouse wheel zoom (Ctrl+scroll)
   useEffect(() => {
     const container = canvasContainerRef.current;
     if (!container) return;
 
     const handleWheel = (e: WheelEvent) => {
+      // Only zoom if Ctrl key is pressed
+      if (!e.ctrlKey) return;
+      
       e.preventDefault();
       const delta = e.deltaY > 0 ? 0.9 : 1.1;
       const newZoom = Math.max(0.1, Math.min(2, zoom * delta));

@@ -6,7 +6,7 @@ import {
   Plus, Layout, Type, Square, Eye, Play,
   Monitor, Tablet, Smartphone, ZoomIn, ZoomOut,
   Sparkles, Code, Undo2, Redo2, Save, Keyboard, Zap,
-  ChevronsDown, ChevronsUp, ArrowDown, ArrowUp, FileCode
+  ChevronsDown, ChevronsUp, ArrowDown, ArrowUp, FileCode, Copy, Maximize2
 } from "lucide-react";
 import { toast } from "sonner";
 import Editor from '@monaco-editor/react';
@@ -948,22 +948,25 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
               </div>
             )}
 
-            {/* Split Mode - Canvas + Code + Preview */}
+            {/* Split Mode - Live Preview + Code Editor */}
             {viewMode === 'split' && (
               <div className="w-full h-full flex gap-4">
-                {/* Canvas */}
-                <div 
-                  ref={scrollContainerRef}
-                  className="flex-1 bg-white shadow-2xl overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 rounded-lg"
-                  style={{ 
-                    maxHeight: "100%",
-                    boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)",
-                  }}
-                >
-                  <canvas ref={canvasRef} />
+                {/* Live Preview - Main viewing area */}
+                <div className="flex-1 bg-white rounded-lg overflow-hidden border border-white/10 shadow-2xl">
+                  <div className="h-10 bg-muted border-b flex items-center px-4">
+                    <Eye className="w-4 h-4 text-muted-foreground mr-2" />
+                    <span className="text-sm text-muted-foreground">Live Preview - AI Generated Template</span>
+                  </div>
+                  <div className="h-[calc(100%-40px)] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+                    <LiveHTMLPreview 
+                      code={previewCode}
+                      autoRefresh={true}
+                      className="w-full h-full"
+                    />
+                  </div>
                 </div>
 
-                {/* Code Editor + Live Preview */}
+                {/* Code Editor Panel */}
                 <div className="flex-1 flex flex-col gap-4">
                   {/* Monaco Editor */}
                   <div className="flex-1 bg-[#1e1e1e] rounded-lg overflow-hidden border border-white/10">
@@ -978,7 +981,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                         className="h-7 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                       >
                         <Play className="w-3 h-3 mr-1" />
-                        Update Canvas
+                        Render to Fabric Canvas
                       </Button>
                     </div>
                     <Editor
@@ -992,8 +995,8 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                       }}
                       theme="vs-dark"
                       options={{
-                        minimap: { enabled: false },
-                        fontSize: 12,
+                        minimap: { enabled: true },
+                        fontSize: 13,
                         lineNumbers: 'on',
                         scrollBeyondLastLine: false,
                         automaticLayout: true,
@@ -1003,22 +1006,42 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                         quickSuggestions: true,
                         autoClosingBrackets: 'always',
                         autoClosingQuotes: 'always',
+                        formatOnPaste: true,
+                        formatOnType: true,
                       }}
                     />
                   </div>
 
-                  {/* Live Preview */}
-                  <div className="flex-1 bg-white rounded-lg overflow-hidden border border-white/10">
-                    <div className="h-10 bg-muted border-b flex items-center px-4">
-                      <Eye className="w-4 h-4 text-muted-foreground mr-2" />
-                      <span className="text-sm text-muted-foreground">Live Preview</span>
+                  {/* Component Info & Actions */}
+                  <div className="bg-[#1e1e1e] rounded-lg border border-white/10 p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-white/70">Quick Actions</span>
                     </div>
-                    <div className="h-[calc(100%-40px)]">
-                      <LiveHTMLPreview 
-                        code={previewCode}
-                        autoRefresh={true}
-                        className="w-full h-full"
-                      />
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          navigator.clipboard.writeText(editorCode);
+                          toast('Code copied to clipboard!');
+                        }}
+                        className="flex-1 h-8 text-xs"
+                      >
+                        <Copy className="w-3 h-3 mr-1" />
+                        Copy Code
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          setViewMode('code');
+                          toast('Switched to full code view');
+                        }}
+                        className="flex-1 h-8 text-xs"
+                      >
+                        <Maximize2 className="w-3 h-3 mr-1" />
+                        Fullscreen
+                      </Button>
                     </div>
                   </div>
                 </div>

@@ -1,16 +1,17 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, FolderOpen } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { DesignStudio } from "@/components/creatives/DesignStudio";
 import { FileBrowser } from "@/components/creatives/design-studio/FileBrowser";
-import { VisualEditor } from "@/components/creatives/VisualEditor";
+import { WebBuilder } from "@/components/creatives/WebBuilder";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const DesignStudioPage = () => {
   const navigate = useNavigate();
-  const location = useLocation();
   const [fileBrowserOpen, setFileBrowserOpen] = useState(false);
   const designStudioRef = useRef<any>(null);
+  const [activeTab, setActiveTab] = useState<"canvas" | "web">("canvas");
 
   return (
     <div className="h-screen w-full flex flex-col bg-gray-50 overflow-hidden">
@@ -38,9 +39,20 @@ const DesignStudioPage = () => {
         </Button>
       </header>
 
-      <div className="flex-1 overflow-hidden">
-        <DesignStudio ref={designStudioRef} />
-      </div>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "canvas" | "web")} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        <TabsList className="mx-2 sm:mx-4 mt-1 sm:mt-2 w-fit h-8 flex-shrink-0">
+          <TabsTrigger value="canvas" className="text-xs sm:text-sm h-7 px-2 sm:px-3">Canvas Studio</TabsTrigger>
+          <TabsTrigger value="web" className="text-xs sm:text-sm h-7 px-2 sm:px-3">Web Builder</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="canvas" className="flex-1 mt-0 overflow-hidden">
+          <DesignStudio ref={designStudioRef} />
+        </TabsContent>
+        
+        <TabsContent value="web" className="flex-1 mt-0 overflow-hidden">
+          <WebBuilder />
+        </TabsContent>
+      </Tabs>
 
       <FileBrowser 
         open={fileBrowserOpen} 

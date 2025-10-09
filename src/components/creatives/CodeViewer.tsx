@@ -80,16 +80,26 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
     }
 
     try {
+      // Show loading toast
+      toast({
+        title: 'Migrating to canvas...',
+        description: 'Converting live preview to Fabric.js canvas objects',
+      });
+
       await onRender(code);
+      
+      // Switch to canvas view after successful render
+      setActiveTab('preview');
+      
       toast({
         title: 'Rendered successfully!',
-        description: 'Your code is now on the canvas',
+        description: 'Live preview migrated to canvas - view it in the Canvas tab',
       });
     } catch (error) {
       console.error('[CodeViewer] Render error:', error);
       toast({
         title: 'Render failed',
-        description: error instanceof Error ? error.message : 'Failed to execute code',
+        description: error instanceof Error ? error.message : 'Failed to migrate to canvas',
         variant: 'destructive',
       });
     }
@@ -130,7 +140,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
               className="h-8 px-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
             >
               <Play className="w-4 h-4 mr-1" />
-              Render to Canvas
+              Migrate to Canvas
             </Button>
           )}
         </div>
@@ -230,18 +240,24 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
                 <Play className="w-8 h-8 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium mb-2">Canvas Preview</p>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Click "Render to Canvas" to see your component on the Fabric.js canvas
+                <p className="text-sm font-medium mb-2">Migrate to Canvas</p>
+                <p className="text-xs text-muted-foreground mb-4 max-w-md mx-auto">
+                  Convert your live preview into Fabric.js canvas objects. The HTML/component will be rendered as interactive canvas elements on the white canvas space.
                 </p>
                 {onRender && (
                   <Button
                     onClick={handleRender}
+                    size="lg"
                     className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
                   >
                     <Play className="w-4 h-4 mr-2" />
-                    Render Now
+                    Migrate to Canvas
                   </Button>
+                )}
+                {!onRender && (
+                  <p className="text-xs text-muted-foreground italic">
+                    Canvas not connected. Open this from the Design Studio to enable migration.
+                  </p>
                 )}
               </div>
             </div>

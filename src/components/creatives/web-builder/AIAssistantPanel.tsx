@@ -2,13 +2,15 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { X, Send, Sparkles, Loader2 } from 'lucide-react';
+import { X, Send, Sparkles, Loader2, Hammer } from 'lucide-react';
 import { Canvas as FabricCanvas } from 'fabric';
 import { useWebBuilderAI } from '@/hooks/useWebBuilderAI';
+import type { AIGeneratedTemplate } from '@/types/template';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
+  template?: AIGeneratedTemplate; // Attach template to AI responses
 }
 
 interface AIAssistantPanelProps {
@@ -22,14 +24,14 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
-      content: 'Hi! I can help you create web designs. Try saying:\n\n• "Create a hero section with a heading and button"\n• "Add a navigation bar"\n• "Design a contact form"\n• "Create a pricing card"\n• "Add a footer section"'
+      content: 'Hi! I can help you create web designs. Try saying:\n\n• "Create a landing page for a SaaS product"\n• "Generate a portfolio website"\n• "Design a hero section"\n• "Create a pricing section"\n\nClick "Build to Canvas" to make any template editable!'
     }
   ]);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [pendingTemplates, setPendingTemplates] = useState<Map<number, AIGeneratedTemplate>>(new Map());
   const { loading, generateDesign, generateTemplate } = useWebBuilderAI(
-    fabricCanvas,
-    onTemplateGenerated
+    fabricCanvas
   );
 
   useEffect(() => {
@@ -52,22 +54,55 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
     let response;
     if (isTemplateRequest) {
       response = await generateTemplate(userInput);
+      
+      if (response && response.template) {
+        const messageIndex = messages.length + 1; // +1 for user message
+        const assistantMessage: Message = {
+          role: 'assistant',
+          content: `✨ **Template Generated!**\n\n${response.explanation || 'Your template is ready'}\n\n📋 **Template Details:**\n• ${response.template.sections.length} sections\n• ${response.template.name}\n\nClick "Build to Canvas" below to add it as fully editable components!`,
+          template: response.template
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+        
+        // Store template with message index for later building
+        setPendingTemplates(prev => new Map(prev).set(messageIndex, response.template));
+      } else {
+        const errorMessage: Message = {
+          role: 'assistant',
+          content: 'Sorry, I encountered an error creating that template. Please try again with a different prompt.'
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
     } else {
       response = await generateDesign(userInput);
+      
+      if (response) {
+        const assistantMessage: Message = {
+          role: 'assistant',
+          content: response.explanation || 'Design elements added to canvas!'
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        const errorMessage: Message = {
+          role: 'assistant',
+          content: 'Sorry, I encountered an error creating that design. Please try again with a different prompt.'
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
+    }
+  };
+
+  const handleBuildToCanvas = async (messageIndex: number) => {
+    const template = pendingTemplates.get(messageIndex);
+    if (!template) {
+      console.error('Template not found for message index:', messageIndex);
+      return;
     }
 
-    if (response) {
-      const assistantMessage: Message = {
-        role: 'assistant',
-        content: response.explanation || 'Design created successfully!'
-      };
-      setMessages(prev => [...prev, assistantMessage]);
-    } else {
-      const errorMessage: Message = {
-        role: 'assistant',
-        content: 'Sorry, I encountered an error creating that design. Please try again with a different prompt.'
-      };
-      setMessages(prev => [...prev, errorMessage]);
+    console.log('[AIAssistantPanel] Building template to canvas:', template);
+    
+    if (onTemplateGenerated) {
+      await onTemplateGenerated(template);
     }
   };
 
@@ -127,7 +162,7 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
             >
               <div
                 className={`max-w-[80%] rounded-lg p-3 ${
@@ -138,6 +173,18 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
               >
                 <p className="text-sm whitespace-pre-wrap">{message.content}</p>
               </div>
+              
+              {/* Build to Canvas button for template messages */}
+              {message.role === 'assistant' && message.template && (
+                <Button
+                  onClick={() => handleBuildToCanvas(index)}
+                  className="mt-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white"
+                  size="sm"
+                >
+                  <Hammer className="w-4 h-4 mr-2" />
+                  Build to Canvas
+                </Button>
+              )}
             </div>
           ))}
           {loading && (

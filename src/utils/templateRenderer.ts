@@ -120,8 +120,13 @@ export class TemplateRenderer {
           rx: component.style.borderRadius || 0,
           ry: component.style.borderRadius || 0,
           opacity: component.style.opacity ?? 1,
+          selectable: true, // Make fully editable
+          hasControls: true, // Show resize controls
+          hasBorders: true, // Show selection borders
+          lockScalingFlip: false, // Allow flipping
           ...component.fabricProps,
         });
+        shape.set('name', component.name); // Add name for identification
         this.canvas.add(shape);
         break;
       }
@@ -135,8 +140,13 @@ export class TemplateRenderer {
           fill: component.fabricProps?.fill || '#000000',
           fontWeight: component.fabricProps?.fontWeight || 'normal',
           opacity: component.style.opacity ?? 1,
+          selectable: true, // Make fully editable
+          editable: true, // Allow text editing
+          hasControls: true, // Show resize controls
+          hasBorders: true, // Show selection borders
           ...component.fabricProps,
         });
+        text.set('name', component.name); // Add name for identification
         this.canvas.add(text);
         break;
       }
@@ -151,7 +161,12 @@ export class TemplateRenderer {
               scaleX: width / (img.width || 1),
               scaleY: height / (img.height || 1),
               opacity: component.style.opacity ?? 1,
+              selectable: true, // Make fully editable
+              hasControls: true, // Show resize controls
+              hasBorders: true, // Show selection borders
+              lockScalingFlip: false, // Allow flipping
             });
+            img.set('name', component.name); // Add name for identification
             this.canvas.add(img);
           } catch (error) {
             console.error('Error loading image:', error);
@@ -161,7 +176,7 @@ export class TemplateRenderer {
       }
 
       case 'button': {
-        // Render as rectangle + text
+        // Render as rectangle + text (both individually editable)
         const button = new Rect({
           left: x,
           top: y,
@@ -171,7 +186,11 @@ export class TemplateRenderer {
           rx: component.style.borderRadius || 4,
           ry: component.style.borderRadius || 4,
           opacity: component.style.opacity ?? 1,
+          selectable: true, // Make fully editable
+          hasControls: true, // Show resize controls
+          hasBorders: true, // Show selection borders
         });
+        button.set('name', `${component.name} Background`);
         this.canvas.add(button);
 
         const buttonText = new IText(String(value), {
@@ -182,7 +201,12 @@ export class TemplateRenderer {
           fill: component.fabricProps?.fill || '#ffffff',
           originX: 'center',
           originY: 'center',
+          selectable: true, // Make text independently editable
+          editable: true, // Allow text editing
+          hasControls: true,
+          hasBorders: true,
         });
+        buttonText.set('name', `${component.name} Text`);
         this.canvas.add(buttonText);
         break;
       }

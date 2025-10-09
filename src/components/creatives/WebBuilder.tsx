@@ -6,9 +6,11 @@ import {
   Plus, Layout, Type, Square, Eye, Play,
   Monitor, Tablet, Smartphone, ZoomIn, ZoomOut,
   Sparkles, Code, Undo2, Redo2, Save, Keyboard, Zap,
-  ChevronsDown, ChevronsUp, ArrowDown, ArrowUp
+  ChevronsDown, ChevronsUp, ArrowDown, ArrowUp, FileCode
 } from "lucide-react";
 import { toast } from "sonner";
+import Editor from '@monaco-editor/react';
+import { LiveHTMLPreview } from './LiveHTMLPreview';
 import { NavigationPanel } from "./web-builder/NavigationPanel";
 import { WebPropertiesPanel } from "./web-builder/WebPropertiesPanel";
 import { AIAssistantPanel } from "./web-builder/AIAssistantPanel";
@@ -61,6 +63,9 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [showPreview, setShowPreview] = useState(false);
+  const [viewMode, setViewMode] = useState<'canvas' | 'code' | 'split'>('canvas');
+  const [editorCode, setEditorCode] = useState('');
+  const [previewCode, setPreviewCode] = useState('');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // State management - template schema as source of truth
@@ -698,7 +703,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
         {/* Center Canvas Area */}
         <div className="flex-1 flex flex-col bg-[#0a0a0a]">
           {/* Device & Breakpoint Controls */}
-          <div className="h-12 border-b border-white/10 flex items-center justify-center gap-4">
+          <div className="h-12 border-b border-white/10 flex items-center justify-between px-4">
             <div className="flex items-center gap-2">
               <Button
                 variant={device === "desktop" ? "secondary" : "ghost"}
@@ -728,10 +733,42 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
                 Mobile
               </Button>
             </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-2 border border-white/10 rounded-lg p-1">
+              <Button
+                variant={viewMode === "canvas" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("canvas")}
+                className="text-white/70 hover:text-white h-8"
+              >
+                <Square className="h-4 w-4 mr-1" />
+                Canvas
+              </Button>
+              <Button
+                variant={viewMode === "code" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("code")}
+                className="text-white/70 hover:text-white h-8"
+              >
+                <FileCode className="h-4 w-4 mr-1" />
+                Code
+              </Button>
+              <Button
+                variant={viewMode === "split" ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("split")}
+                className="text-white/70 hover:text-white h-8"
+              >
+                <Layout className="h-4 w-4 mr-1" />
+                Split
+              </Button>
+            </div>
+
             <span className="text-sm text-white/50">{getCanvasWidth()}×{getCanvasHeight()}px (dynamic)</span>
           </div>
 
-          {/* Canvas - Scrollable like a real website */}
+          {/* Main Content Area - Canvas/Code/Split View */}
           <div 
             ref={canvasContainerRef}
             className="flex-1 overflow-hidden p-4 flex items-start justify-center bg-[#0a0a0a] relative"
@@ -741,60 +778,180 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             onMouseLeave={handleMouseUp}
             style={{ cursor: isPanning ? 'grabbing' : 'default' }}
           >
-            {/* Scroll Navigation Controls */}
-            <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2">
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={scrollToTop}
-                className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
-                title="Scroll to top"
-              >
-                <ChevronsUp className="h-5 w-5" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={scrollUp}
-                className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
-                title="Scroll up"
-              >
-                <ArrowUp className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={scrollDown}
-                className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
-                title="Scroll down"
-              >
-                <ArrowDown className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="secondary"
-                size="icon"
-                onClick={scrollToBottom}
-                className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
-                title="Scroll to bottom"
-              >
-                <ChevronsDown className="h-5 w-5" />
-              </Button>
-            </div>
+            {/* Scroll Navigation Controls - Only for Canvas/Split Mode */}
+            {(viewMode === 'canvas' || viewMode === 'split') && (
+              <div className="absolute right-6 top-1/2 -translate-y-1/2 z-20 flex flex-col gap-2">
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={scrollToTop}
+                  className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
+                  title="Scroll to top"
+                >
+                  <ChevronsUp className="h-5 w-5" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={scrollUp}
+                  className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
+                  title="Scroll up"
+                >
+                  <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={scrollDown}
+                  className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
+                  title="Scroll down"
+                >
+                  <ArrowDown className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  onClick={scrollToBottom}
+                  className="h-10 w-10 bg-[#1a1a1a] border border-white/10 text-white/70 hover:text-white hover:bg-[#252525] shadow-lg"
+                  title="Scroll to bottom"
+                >
+                  <ChevronsDown className="h-5 w-5" />
+                </Button>
+              </div>
+            )}
             
-            <div 
-              ref={scrollContainerRef}
-              className="bg-white shadow-2xl overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
-              style={{ 
-                width: getCanvasWidth() * zoom,
-                height: '100%',
-                maxHeight: "none",
-                boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)",
-                transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
-                transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-              }}
-            >
-              <canvas ref={canvasRef} />
-            </div>
+            {/* Canvas Mode */}
+            {viewMode === 'canvas' && (
+              <div 
+                ref={scrollContainerRef}
+                className="bg-white shadow-2xl overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
+                style={{ 
+                  width: getCanvasWidth() * zoom,
+                  height: '100%',
+                  maxHeight: "none",
+                  boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)",
+                  transform: `translate(${panOffset.x}px, ${panOffset.y}px)`,
+                  transition: isPanning ? 'none' : 'transform 0.1s ease-out',
+                }}
+              >
+                <canvas ref={canvasRef} />
+              </div>
+            )}
+
+            {/* Code Mode - Monaco Editor + Live Preview */}
+            {viewMode === 'code' && (
+              <div className="w-full h-full flex gap-4">
+                {/* Monaco Editor */}
+                <div className="flex-1 bg-[#1e1e1e] rounded-lg overflow-hidden border border-white/10">
+                  <div className="h-10 bg-[#2d2d2d] border-b border-white/10 flex items-center px-4">
+                    <FileCode className="w-4 h-4 text-white/70 mr-2" />
+                    <span className="text-sm text-white/70">Code Editor</span>
+                  </div>
+                  <Editor
+                    height="calc(100% - 40px)"
+                    defaultLanguage="html"
+                    language="html"
+                    value={editorCode}
+                    onChange={(value) => {
+                      setEditorCode(value || '');
+                      setPreviewCode(value || '');
+                    }}
+                    theme="vs-dark"
+                    options={{
+                      minimap: { enabled: true },
+                      fontSize: 14,
+                      lineNumbers: 'on',
+                      roundedSelection: true,
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                      tabSize: 2,
+                      wordWrap: 'on',
+                      formatOnPaste: true,
+                      formatOnType: true,
+                      padding: { top: 16, bottom: 16 },
+                    }}
+                  />
+                </div>
+
+                {/* Live Preview */}
+                <div className="flex-1 bg-white rounded-lg overflow-hidden border border-white/10">
+                  <div className="h-10 bg-muted border-b flex items-center px-4">
+                    <Eye className="w-4 h-4 text-muted-foreground mr-2" />
+                    <span className="text-sm text-muted-foreground">Live Preview</span>
+                  </div>
+                  <div className="h-[calc(100%-40px)]">
+                    <LiveHTMLPreview 
+                      code={previewCode}
+                      autoRefresh={true}
+                      className="w-full h-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Split Mode - Canvas + Code + Preview */}
+            {viewMode === 'split' && (
+              <div className="w-full h-full flex gap-4">
+                {/* Canvas */}
+                <div 
+                  ref={scrollContainerRef}
+                  className="flex-1 bg-white shadow-2xl overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200 rounded-lg"
+                  style={{ 
+                    maxHeight: "100%",
+                    boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)",
+                  }}
+                >
+                  <canvas ref={canvasRef} />
+                </div>
+
+                {/* Code Editor + Live Preview */}
+                <div className="flex-1 flex flex-col gap-4">
+                  {/* Monaco Editor */}
+                  <div className="flex-1 bg-[#1e1e1e] rounded-lg overflow-hidden border border-white/10">
+                    <div className="h-10 bg-[#2d2d2d] border-b border-white/10 flex items-center px-4">
+                      <FileCode className="w-4 h-4 text-white/70 mr-2" />
+                      <span className="text-sm text-white/70">Code Editor</span>
+                    </div>
+                    <Editor
+                      height="calc(100% - 40px)"
+                      defaultLanguage="html"
+                      language="html"
+                      value={editorCode}
+                      onChange={(value) => {
+                        setEditorCode(value || '');
+                        setPreviewCode(value || '');
+                      }}
+                      theme="vs-dark"
+                      options={{
+                        minimap: { enabled: false },
+                        fontSize: 12,
+                        lineNumbers: 'on',
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        tabSize: 2,
+                        wordWrap: 'on',
+                      }}
+                    />
+                  </div>
+
+                  {/* Live Preview */}
+                  <div className="flex-1 bg-white rounded-lg overflow-hidden border border-white/10">
+                    <div className="h-10 bg-muted border-b flex items-center px-4">
+                      <Eye className="w-4 h-4 text-muted-foreground mr-2" />
+                      <span className="text-sm text-muted-foreground">Live Preview</span>
+                    </div>
+                    <div className="h-[calc(100%-40px)]">
+                      <LiveHTMLPreview 
+                        code={previewCode}
+                        autoRefresh={true}
+                        className="w-full h-full"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Bottom Controls - Zoom and Pan Reset */}

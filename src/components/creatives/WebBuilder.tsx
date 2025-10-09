@@ -466,7 +466,11 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             <Eye className="h-4 w-4 mr-2" />
             {isFullscreen ? 'Exit Preview' : 'Preview'}
           </Button>
-          <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button 
+            size="sm" 
+            className="bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => toast.success('Click Publish in the top right to deploy your website with a custom domain!')}
+          >
             <Play className="h-4 w-4 mr-2" />
             Publish
           </Button>
@@ -527,13 +531,14 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
             <span className="text-sm text-white/50">{getCanvasWidth()}×{getCanvasHeight()}px</span>
           </div>
 
-          {/* Canvas */}
-          <div className="flex-1 overflow-auto p-4 flex items-center justify-center">
+          {/* Canvas - Scrollable like a real website */}
+          <div className="flex-1 overflow-auto p-4 flex items-start justify-center bg-[#0a0a0a]">
             <div 
-              className="bg-white shadow-2xl"
+              className="bg-white shadow-2xl overflow-y-auto overflow-x-hidden"
               style={{ 
                 width: getCanvasWidth() * zoom,
-                height: getCanvasHeight() * zoom,
+                minHeight: getCanvasHeight() * zoom,
+                maxHeight: "none",
                 boxShadow: "0 0 0 1px rgba(255,255,255,0.1), 0 20px 60px rgba(0,0,0,0.5)"
               }}
             >

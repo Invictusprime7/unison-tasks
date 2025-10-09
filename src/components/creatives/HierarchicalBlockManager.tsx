@@ -150,15 +150,15 @@ export const HierarchicalBlockManager = ({ editor }: HierarchicalBlockManagerPro
   }, {} as any);
 
   return (
-    <div className="h-full bg-background border-r border-border flex flex-col">
+    <div className="h-full bg-card border-r border-border flex flex-col">
       {/* Search */}
       <div className="p-3 border-b border-border">
         <input
           type="text"
-          placeholder="Search"
+          placeholder="Search blocks..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-3 py-2 bg-muted/50 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+          className="w-full px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
       </div>
 
@@ -170,10 +170,10 @@ export const HierarchicalBlockManager = ({ editor }: HierarchicalBlockManagerPro
             
             return (
               <AccordionItem key={categoryKey} value={categoryKey} className="border-b border-border/50">
-                <AccordionTrigger className="px-3 py-2.5 hover:bg-muted/50 text-sm font-medium">
+                <AccordionTrigger className="px-3 py-2.5 hover:bg-accent text-sm font-medium text-foreground">
                   <div className="flex items-center gap-2">
-                    {Icon && <Icon className="h-4 w-4 text-muted-foreground shrink-0" style={{ opacity: 1, strokeWidth: 2 }} />}
-                    <span>{category.label}</span>
+                    {Icon && <Icon className="h-4 w-4 text-primary shrink-0" style={{ opacity: 1, strokeWidth: 2.5 }} />}
+                    <span className="font-semibold">{category.label}</span>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="pb-0">
@@ -183,10 +183,10 @@ export const HierarchicalBlockManager = ({ editor }: HierarchicalBlockManagerPro
                       
                       return (
                         <AccordionItem key={subKey} value={subKey} className="border-none">
-                          <AccordionTrigger className="px-6 py-2 hover:bg-muted/30 text-sm">
+                          <AccordionTrigger className="px-6 py-2 hover:bg-accent/50 text-sm">
                             <div className="flex items-center gap-2">
-                              {SubIcon && <SubIcon className="h-3.5 w-3.5 text-muted-foreground shrink-0" style={{ opacity: 1, strokeWidth: 2 }} />}
-                              <span className="text-muted-foreground">{subcategory.label}</span>
+                              {SubIcon && <SubIcon className="h-3.5 w-3.5 text-accent-foreground shrink-0" style={{ opacity: 1, strokeWidth: 2.5 }} />}
+                              <span className="text-foreground font-medium">{subcategory.label}</span>
                             </div>
                           </AccordionTrigger>
                           <AccordionContent className="pb-1">
@@ -195,13 +195,13 @@ export const HierarchicalBlockManager = ({ editor }: HierarchicalBlockManagerPro
                                 <button
                                   key={block.id}
                                   onClick={() => addBlock(block.id)}
-                                  className="w-full px-9 py-2 text-left text-sm hover:bg-muted/50 transition-colors rounded-sm group"
+                                  className="w-full px-9 py-2 text-left text-sm hover:bg-accent/70 transition-colors rounded-sm group"
                                 >
                                   <div className="flex items-center gap-2">
-                                    <div className="w-12 h-8 bg-muted/70 rounded border border-border/50 group-hover:border-primary/30 transition-colors flex items-center justify-center">
-                                      <div className="w-8 h-5 bg-background/80 rounded-sm"></div>
+                                    <div className="w-12 h-8 bg-muted rounded border border-border group-hover:border-primary transition-colors flex items-center justify-center">
+                                      <div className="w-8 h-5 bg-background rounded-sm border border-border/50"></div>
                                     </div>
-                                    <span className="text-muted-foreground group-hover:text-foreground transition-colors">
+                                    <span className="text-foreground/80 group-hover:text-foreground transition-colors">
                                       {block.label}
                                     </span>
                                   </div>

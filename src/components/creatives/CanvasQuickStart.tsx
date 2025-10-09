@@ -6,201 +6,197 @@ import {
   Copy, 
   Sparkles, 
   Square, 
-  Circle, 
   Type, 
-  Image as ImageIcon,
   Palette,
-  Layers
+  Layers,
+  Code
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 const codeExamples = [
   {
-    id: 'basic-shapes',
-    title: 'Basic Shapes',
-    icon: Square,
-    description: 'Rectangle and circle examples',
-    code: `// Create basic shapes
-addRect({
-  x: 100, y: 100,
-  width: 200, height: 150,
-  fill: '#3b82f6',
-  cornerRadius: 8
-});
-
-addCircle({
-  x: 400, y: 175,
-  radius: 75,
-  fill: '#ec4899',
-  borderColor: '#be185d',
-  borderWidth: 2
-});`
-  },
-  {
-    id: 'text-elements',
-    title: 'Text Elements',
-    icon: Type,
-    description: 'Add styled text to canvas',
-    code: `// Add text elements
-addText({
-  text: 'Canvas Heading',
-  x: 100, y: 50,
-  fontSize: 36,
-  color: '#1e40af',
-  fontWeight: 'bold',
-  fontFamily: 'Arial'
-});
-
-addText({
-  text: 'Subtitle text here',
-  x: 100, y: 95,
-  fontSize: 18,
-  color: '#64748b'
-});`
-  },
-  {
-    id: 'card-component',
-    title: 'Card Component',
+    id: 'hero-html',
+    title: 'Hero Section (HTML)',
     icon: Layers,
-    description: 'Create a styled card',
-    code: `// Modern card design
-setBackground('#f8fafc');
+    description: 'Modern hero with gradient background',
+    code: `<section class="hero">
+  <h1>Build Amazing Products</h1>
+  <p>Create stunning web experiences</p>
+  <button class="cta">Get Started Free</button>
+</section>
 
-// Card background
-addRect({
-  x: 100, y: 100,
-  width: 400, height: 250,
-  fill: '#ffffff',
-  cornerRadius: 16,
-  borderColor: '#e2e8f0',
-  borderWidth: 1
-});
-
-// Card header
-addRect({
-  x: 100, y: 100,
-  width: 400, height: 60,
-  fill: '#6366f1',
-  cornerRadius: 16
-});
-
-// Title
-addText({
-  text: 'Card Title',
-  x: 120, y: 120,
-  fontSize: 24,
-  color: '#ffffff',
-  fontWeight: 'bold'
-});
-
-// Content
-addText({
-  text: 'This is the card content area.\\nYou can add multiple lines here.',
-  x: 120, y: 185,
-  fontSize: 16,
-  color: '#334155'
-});`
+<style>
+.hero {
+  padding: 80px 20px;
+  text-align: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-radius: 16px;
+}
+.hero h1 {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.hero p {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  opacity: 0.9;
+}
+.cta {
+  background: white;
+  color: #667eea;
+  padding: 14px 32px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>`
   },
   {
-    id: 'button-design',
-    title: 'Button Design',
+    id: 'pricing-card-html',
+    title: 'Pricing Card (HTML)',
     icon: Square,
-    description: 'Create styled buttons',
-    code: `// Primary button
-addRect({
-  x: 150, y: 200,
-  width: 160, height: 48,
-  fill: '#3b82f6',
-  cornerRadius: 8
-});
+    description: 'Professional pricing card',
+    code: `<div class="pricing-card">
+  <div class="badge">Popular</div>
+  <h3>Pro Plan</h3>
+  <div class="price">
+    <span class="amount">$29</span>
+    <span class="period">/month</span>
+  </div>
+  <ul class="features">
+    <li>✓ Unlimited projects</li>
+    <li>✓ Priority support</li>
+    <li>✓ Advanced analytics</li>
+  </ul>
+  <button class="buy-btn">Choose Plan</button>
+</div>
 
-addText({
-  text: 'Click Me',
-  x: 195, y: 215,
-  fontSize: 16,
-  color: '#ffffff',
-  fontWeight: '600'
-});
-
-// Secondary button
-addRect({
-  x: 330, y: 200,
-  width: 160, height: 48,
-  fill: '#ffffff',
-  cornerRadius: 8,
-  borderColor: '#3b82f6',
-  borderWidth: 2
-});
-
-addText({
-  text: 'Cancel',
-  x: 380, y: 215,
-  fontSize: 16,
-  color: '#3b82f6',
-  fontWeight: '600'
-});`
+<style>
+.pricing-card {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  max-width: 320px;
+  position: relative;
+}
+.badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: #10b981;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.pricing-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #1e293b;
+}
+.price {
+  margin-bottom: 1.5rem;
+}
+.amount {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #6366f1;
+}
+.period {
+  color: #64748b;
+}
+.features {
+  list-style: none;
+  margin-bottom: 1.5rem;
+}
+.features li {
+  padding: 8px 0;
+  color: #475569;
+}
+.buy-btn {
+  width: 100%;
+  background: #6366f1;
+  color: white;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+</style>`
   },
   {
-    id: 'polygon-shapes',
-    title: 'Polygon Shapes',
-    icon: Sparkles,
-    description: 'Create triangles and custom shapes',
-    code: `// Triangle
-addPolygon([
-  { x: 0, y: -60 },
-  { x: -60, y: 60 },
-  { x: 60, y: 60 }
-], {
-  x: 200, y: 200,
-  fill: '#10b981',
-  borderColor: '#059669',
-  borderWidth: 2
-});
-
-// Star shape
-addPolygon([
-  { x: 0, y: -50 },
-  { x: 15, y: -15 },
-  { x: 50, y: -15 },
-  { x: 20, y: 10 },
-  { x: 30, y: 50 },
-  { x: 0, y: 25 },
-  { x: -30, y: 50 },
-  { x: -20, y: 10 },
-  { x: -50, y: -15 },
-  { x: -15, y: -15 }
-], {
-  x: 450, y: 200,
-  fill: '#f59e0b',
-  borderColor: '#d97706',
-  borderWidth: 2
-});`
-  },
-  {
-    id: 'gradient-background',
-    title: 'Styled Background',
+    id: 'feature-section',
+    title: 'Feature Grid (HTML)',
     icon: Palette,
-    description: 'Set canvas background and overlay',
-    code: `// Set background color
-setBackground('#1e293b');
+    description: 'Feature cards with icons',
+    code: `<section class="features">
+  <h2>Amazing Features</h2>
+  <div class="feature-grid">
+    <div class="feature">
+      <div class="icon">⚡</div>
+      <h3>Lightning Fast</h3>
+      <p>Optimized for speed</p>
+    </div>
+    <div class="feature">
+      <div class="icon">🔒</div>
+      <h3>Secure</h3>
+      <p>Enterprise-grade security</p>
+    </div>
+    <div class="feature">
+      <div class="icon">📱</div>
+      <h3>Responsive</h3>
+      <p>Works on all devices</p>
+    </div>
+  </div>
+</section>
 
-// Overlay rectangle with opacity
-addRect({
-  x: 0, y: 0,
-  width: 800, height: 600,
-  fill: '#6366f1',
-  opacity: 0.1
-});
-
-// Center content
-addText({
-  text: 'Beautiful Canvas',
-  x: 250, y: 250,
-  fontSize: 48,
-  color: '#ffffff',
-  fontWeight: 'bold'
-});`
+<style>
+.features {
+  padding: 60px 20px;
+  text-align: center;
+}
+.features h2 {
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: #1e293b;
+}
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.feature {
+  padding: 2rem;
+  background: #f8fafc;
+  border-radius: 12px;
+  transition: transform 0.2s;
+}
+.feature:hover {
+  transform: translateY(-4px);
+}
+.icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+.feature h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: #334155;
+}
+.feature p {
+  color: #64748b;
+}
+</style>`
   }
 ];
 
@@ -236,7 +232,7 @@ export const CanvasQuickStart: React.FC<CanvasQuickStartProps> = ({
       <div className="px-4 py-3 border-b bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950/20 dark:to-blue-950/20">
         <div className="flex items-center gap-2">
           <Sparkles className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-          <h3 className="font-semibold text-sm">Canvas Quick Start</h3>
+          <h3 className="font-semibold text-sm">Component Examples</h3>
         </div>
         <p className="text-xs text-muted-foreground mt-1">
           Click any example to load it into the editor
@@ -291,15 +287,13 @@ export const CanvasQuickStart: React.FC<CanvasQuickStartProps> = ({
 
       <div className="p-4 border-t bg-muted/30">
         <div className="text-xs space-y-2">
-          <p className="font-semibold">Available Functions:</p>
-          <div className="grid grid-cols-2 gap-1 text-muted-foreground">
-            <code>addRect()</code>
-            <code>addCircle()</code>
-            <code>addText()</code>
-            <code>addPolygon()</code>
-            <code>addImage()</code>
-            <code>setBackground()</code>
-          </div>
+          <p className="font-semibold flex items-center gap-1">
+            <Code className="w-3.5 h-3.5" />
+            Supports HTML & React
+          </p>
+          <p className="text-muted-foreground">
+            Generate components that render in both Web Builder and on Canvas
+          </p>
         </div>
       </div>
     </div>

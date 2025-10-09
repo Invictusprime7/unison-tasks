@@ -6,6 +6,8 @@ import { Copy, Download, Play, Code2, Eye, Monitor } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { LiveCodePreview } from './LiveCodePreview';
+import { HTMLComponentPreview } from './HTMLComponentPreview';
+import { parseComponentCode } from '@/utils/componentRenderer';
 
 interface CodeViewerProps {
   code: string;
@@ -21,12 +23,16 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
   className,
 }) => {
   const [code, setCode] = useState(initialCode);
-  const [activeTab, setActiveTab] = useState<'code' | 'preview' | 'live'>('code');
+  const [activeTab, setActiveTab] = useState<'code' | 'preview' | 'live' | 'component'>('code');
   const { toast } = useToast();
+
+  // Parse component for preview
+  const [componentData, setComponentData] = useState(() => parseComponentCode(initialCode));
 
   // Update code when initialCode changes
   React.useEffect(() => {
     setCode(initialCode);
+    setComponentData(parseComponentCode(initialCode));
     console.log('[CodeViewer] Code updated:', initialCode.substring(0, 100));
   }, [initialCode]);
 
@@ -125,18 +131,22 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
 
       {/* Editor with tabs */}
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)} className="flex-1 flex flex-col">
-        <TabsList className="w-full grid grid-cols-3 rounded-none h-10 border-b">
+        <TabsList className="w-full grid grid-cols-4 rounded-none h-10 border-b">
           <TabsTrigger value="code" className="gap-2">
             <Code2 className="w-4 h-4" />
             Code
+          </TabsTrigger>
+          <TabsTrigger value="component" className="gap-2">
+            <Eye className="w-4 h-4" />
+            Component
           </TabsTrigger>
           <TabsTrigger value="live" className="gap-2">
             <Monitor className="w-4 h-4" />
             Live Preview
           </TabsTrigger>
           <TabsTrigger value="preview" className="gap-2">
-            <Eye className="w-4 h-4" />
-            Canvas Preview
+            <Play className="w-4 h-4" />
+            Canvas
           </TabsTrigger>
         </TabsList>
 
@@ -146,7 +156,11 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
             defaultLanguage={language}
             language={language}
             value={code}
-            onChange={(value) => setCode(value || '')}
+            onChange={(value) => {
+              const newCode = value || '';
+              setCode(newCode);
+              setComponentData(parseComponentCode(newCode));
+            }}
             theme="vs-dark"
             options={{
               minimap: { enabled: true },
@@ -172,6 +186,15 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
           />
         </TabsContent>
 
+
+        <TabsContent value="component" className="flex-1 m-0 p-0 data-[state=active]:flex bg-muted/10">
+          <HTMLComponentPreview 
+            html={componentData.html}
+            css={componentData.css}
+            className="w-full h-full"
+          />
+        </TabsContent>
+
         <TabsContent value="live" className="flex-1 m-0 p-0 data-[state=active]:flex">
           <LiveCodePreview code={code} autoRefresh={true} />
         </TabsContent>
@@ -180,7 +203,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-center space-y-4">
               <div className="w-16 h-16 mx-auto bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <Eye className="w-8 h-8 text-white" />
+                <Play className="w-8 h-8 text-white" />
               </div>
               <div>
                 <p className="text-sm font-medium mb-2">Canvas Preview</p>

@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Canvas as FabricCanvas, Rect, Textbox } from 'fabric';
 import Editor from '@monaco-editor/react';
 import { executeCanvasCode, getCanvasCodeExample } from '@/utils/canvasCodeRunner';
+import { parseComponentCode, renderComponentToCanvas, generateHTMLFile, generateReactComponent } from '@/utils/componentRenderer';
 import { Button } from '@/components/ui/button';
 import { CodeViewer } from './CodeViewer';
 import { LiveCodePreview } from './LiveCodePreview';
@@ -80,17 +81,31 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
     }
 
     console.log('[AICodeAssistant] Rendering code to canvas');
-    await executeCanvasCode(
-      code,
-      fabricCanvas,
-      () => {
-        console.log('[AICodeAssistant] Code executed successfully');
-      },
-      (error) => {
-        console.error('[AICodeAssistant] Code execution failed:', error);
-        throw error;
-      }
-    );
+    
+    // Detect code type and render accordingly
+    if (code.includes('addRect') || code.includes('addCircle') || code.includes('addText')) {
+      // Canvas API code
+      await executeCanvasCode(
+        code,
+        fabricCanvas,
+        () => {
+          console.log('[AICodeAssistant] Canvas code executed successfully');
+        },
+        (error) => {
+          console.error('[AICodeAssistant] Canvas code execution failed:', error);
+          throw error;
+        }
+      );
+    } else {
+      // HTML/React component code
+      const component = parseComponentCode(code);
+      await renderComponentToCanvas(component, fabricCanvas);
+      
+      toast({
+        title: 'Component rendered!',
+        description: `${component.type} component added to canvas`,
+      });
+    }
   };
 
   const copyToClipboard = (text: string) => {

@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Canvas as FabricCanvas, Rect, Circle, IText, Textbox, FabricImage } from 'fabric';
 import { toast } from 'sonner';
+import { TemplateRenderer } from '@/utils/templateRenderer';
+import type { AIGeneratedTemplate } from '@/types/template';
 
 export interface AICanvasObject {
   type: 'rect' | 'circle' | 'text' | 'textbox' | 'image' | 'group';
@@ -24,6 +26,11 @@ export interface AICanvasObject {
 
 export interface AIResponse {
   objects: AICanvasObject[];
+  explanation: string;
+}
+
+export interface AITemplateResponse {
+  template: AIGeneratedTemplate;
   explanation: string;
 }
 
@@ -184,9 +191,55 @@ export const useWebBuilderAI = (fabricCanvas: FabricCanvas | null) => {
     fabricCanvas.renderAll();
   };
 
+  const generateTemplate = async (prompt: string): Promise<AITemplateResponse | null> => {
+    if (!fabricCanvas) {
+      toast.error('Canvas not ready');
+      return null;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-ai-template', {
+        body: { 
+          prompt,
+          industry: 'web',
+          goal: 'web-builder-template',
+          format: 'web'
+        }
+      });
+
+      if (error) {
+        if (error.message.includes('429')) {
+          toast.error('Rate limit exceeded. Please try again later.');
+        } else if (error.message.includes('402')) {
+          toast.error('Payment required. Please add credits to your workspace.');
+        } else {
+          toast.error('Failed to generate template: ' + error.message);
+        }
+        return null;
+      }
+
+      const aiTemplateResponse = data as AITemplateResponse;
+      
+      // Render the template on the canvas
+      const renderer = new TemplateRenderer(fabricCanvas);
+      await renderer.renderTemplate(aiTemplateResponse.template);
+
+      toast.success(aiTemplateResponse.explanation || 'Template generated successfully!');
+      return aiTemplateResponse;
+    } catch (error) {
+      console.error('Error generating template:', error);
+      toast.error('An unexpected error occurred');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     loading,
     lastResponse,
     generateDesign,
+    generateTemplate,
   };
 };

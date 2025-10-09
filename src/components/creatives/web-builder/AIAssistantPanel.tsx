@@ -26,7 +26,7 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
   ]);
   const [input, setInput] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { loading, generateDesign } = useWebBuilderAI(fabricCanvas);
+  const { loading, generateDesign, generateTemplate } = useWebBuilderAI(fabricCanvas);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -39,10 +39,18 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
 
     const userMessage: Message = { role: 'user', content: input };
     setMessages(prev => [...prev, userMessage]);
+    const userInput = input;
     setInput('');
 
-    // Generate design using AI
-    const response = await generateDesign(input);
+    // Detect if user wants a full template or individual elements
+    const isTemplateRequest = /\b(template|page|website|landing page|full design|complete design|entire page)\b/i.test(userInput);
+
+    let response;
+    if (isTemplateRequest) {
+      response = await generateTemplate(userInput);
+    } else {
+      response = await generateDesign(userInput);
+    }
 
     if (response) {
       const assistantMessage: Message = {
@@ -67,11 +75,10 @@ export const AIAssistantPanel: React.FC<AIAssistantPanelProps> = ({ isOpen, onCl
   };
 
   const quickPrompts = [
-    'Create a hero section',
-    'Add a button',
-    'Design a card',
-    'Create a form',
-    'Add navigation',
+    'Create a landing page for a SaaS product',
+    'Generate a portfolio website template',
+    'Add a hero section',
+    'Design a pricing card',
   ];
 
   if (!isOpen) return null;

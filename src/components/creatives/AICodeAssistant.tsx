@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Canvas as FabricCanvas, Rect, Textbox } from 'fabric';
 import { Button } from '@/components/ui/button';
 import { CodeViewer } from './CodeViewer';
+import { LiveCodePreview } from './LiveCodePreview';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -315,9 +316,9 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
 
   const quickPrompts = {
     code: [
-      'Create a modern hero section component',
-      'Build a pricing card with hover effects',
-      'Generate a responsive navigation bar',
+      'Create a modern hero section with gradient background',
+      'Build a pricing card with three tiers',
+      'Generate a contact form with validation',
     ],
     design: [
       'Review my color scheme',

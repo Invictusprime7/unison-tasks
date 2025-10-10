@@ -209,12 +209,24 @@ function transpileReactWithBabel(code: string): { javascript: string; html: stri
     cleanCode = cleanCode.replace(/export\s+default\s+/g, '');
     cleanCode = cleanCode.replace(/export\s+/g, '');
     
+    // Extract component name
+    const componentMatch = cleanCode.match(/(?:function|const)\s+(\w+)/);
+    const componentName = componentMatch ? componentMatch[1] : 'App';
+
+    // Try to convert to plain HTML/CSS/JS for better compatibility
+    const convertedToPlain = convertReactToPlainHTML(cleanCode, componentName);
+    if (convertedToPlain.success) {
+      console.log('[CodeBundler] Successfully converted React to plain HTML');
+      return {
+        javascript: convertedToPlain.javascript,
+        html: convertedToPlain.html,
+        css: convertedToPlain.css,
+      };
+    }
+    
+    // Fallback to React rendering if conversion fails
     // Wrap if it's just a component without wrapper
     if (!cleanCode.includes('ReactDOM') && !cleanCode.includes('render')) {
-      // Extract component name if possible
-      const componentMatch = cleanCode.match(/(?:function|const)\s+(\w+)/);
-      const componentName = componentMatch ? componentMatch[1] : 'App';
-      
       cleanCode = `
 ${cleanCode}
 
@@ -262,6 +274,81 @@ if (typeof window !== 'undefined' && document.getElementById('root')) {
   } catch (error) {
     console.error('Babel transpilation error:', error);
     throw error;
+  }
+}
+
+/**
+ * Convert React component to plain HTML/CSS/JS for better compatibility
+ */
+function convertReactToPlainHTML(code: string, componentName: string): { 
+  success: boolean; 
+  html: string; 
+  css: string; 
+  javascript: string;
+} {
+  try {
+    // Extract JSX from return statement
+    const returnMatch = code.match(/return\s*\(([\s\S]*?)\);?\s*}[^}]*$/);
+    if (!returnMatch) {
+      return { success: false, html: '', css: '', javascript: '' };
+    }
+
+    let jsx = returnMatch[1].trim();
+    
+    // Convert JSX to HTML
+    let html = jsx
+      .replace(/className=/g, 'class=')
+      .replace(/htmlFor=/g, 'for=')
+      .replace(/onClick=/g, 'onclick=')
+      .replace(/onChange=/g, 'onchange=')
+      .replace(/onSubmit=/g, 'onsubmit=')
+      .replace(/\{(['"])(.*?)\1\}/g, '$2') // Simple string expressions
+      .replace(/<>/g, '') // Remove fragments
+      .replace(/<\/>/g, '');
+
+    // Extract state and effects to create plain JS
+    const stateMatches = code.matchAll(/useState<[^>]+>\(([^)]+)\)|useState\(([^)]+)\)/g);
+    const states = Array.from(stateMatches).map((match, i) => ({
+      name: `state${i}`,
+      initial: match[1] || match[2] || '""'
+    }));
+
+    // Extract inline styles and Tailwind classes for CSS extraction
+    let css = '';
+    const styleMatch = code.match(/const\s+styles?\s*=\s*`([\s\S]*?)`;/);
+    if (styleMatch) {
+      css = styleMatch[1].trim();
+    }
+
+    // Create plain JavaScript
+    let javascript = '';
+    if (states.length > 0) {
+      javascript = states.map(s => `let ${s.name} = ${s.initial};`).join('\n');
+    }
+
+    // Extract event handlers
+    const handlerMatches = code.matchAll(/const\s+(\w+)\s*=\s*\([^)]*\)\s*=>\s*{([^}]*)}/g);
+    for (const match of handlerMatches) {
+      javascript += `\nfunction ${match[1]}() {\n  ${match[2]}\n}`;
+    }
+
+    // Replace React-specific template expressions with IDs for manipulation
+    let idCounter = 0;
+    html = html.replace(/\{(\w+)\}/g, (match, varName) => {
+      const id = `dynamic-${idCounter++}`;
+      javascript += `\ndocument.getElementById('${id}').textContent = ${varName} || '';`;
+      return `<span id="${id}"></span>`;
+    });
+
+    return {
+      success: true,
+      html,
+      css,
+      javascript: javascript ? `(function() {\n${javascript}\n})();` : ''
+    };
+  } catch (error) {
+    console.warn('Plain HTML conversion failed:', error);
+    return { success: false, html: '', css: '', javascript: '' };
   }
 }
 

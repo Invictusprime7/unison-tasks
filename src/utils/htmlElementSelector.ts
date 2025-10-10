@@ -137,12 +137,32 @@ export const getSelectedElementData = (element: HTMLElement): SelectedElementDat
 };
 
 /**
- * Apply styles to an element
+ * Apply styles to an element in the iframe
  */
 export const applyStylesToElement = (element: HTMLElement, styles: Record<string, string>) => {
   Object.entries(styles).forEach(([property, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      // Convert camelCase to kebab-case for CSS properties
+      const cssProperty = property.replace(/([A-Z])/g, '-$1').toLowerCase();
+      element.style.setProperty(cssProperty, value);
+    }
+  });
+};
+
+/**
+ * Update text content of an element
+ */
+export const updateElementText = (element: HTMLElement, text: string) => {
+  element.textContent = text;
+};
+
+/**
+ * Update attributes of an element
+ */
+export const updateElementAttributes = (element: HTMLElement, attributes: Record<string, string>) => {
+  Object.entries(attributes).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
-      element.style.setProperty(property, value);
+      element.setAttribute(key, value);
     }
   });
 };
@@ -164,50 +184,64 @@ export const removeHighlight = (element: HTMLElement) => {
 };
 
 /**
- * Update code with new element properties
+ * Find element in iframe by selector
+ */
+export const findElementInIframe = (iframe: HTMLIFrameElement, selector: string): HTMLElement | null => {
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!iframeDoc) return null;
+  
+  try {
+    return iframeDoc.querySelector(selector) as HTMLElement;
+  } catch (error) {
+    console.error('Failed to find element with selector:', selector, error);
+    return null;
+  }
+};
+
+/**
+ * Update element directly in the iframe DOM (preferred method)
+ * This avoids code corruption by manipulating the DOM directly
+ */
+export const updateElementInIframe = (
+  iframe: HTMLIFrameElement,
+  selector: string,
+  updates: { styles?: Record<string, string>; textContent?: string; attributes?: Record<string, string> }
+): boolean => {
+  const element = findElementInIframe(iframe, selector);
+  if (!element) {
+    console.error('Element not found with selector:', selector);
+    return false;
+  }
+
+  // Apply style updates
+  if (updates.styles) {
+    applyStylesToElement(element, updates.styles);
+  }
+
+  // Apply text content updates
+  if (updates.textContent !== undefined) {
+    updateElementText(element, updates.textContent);
+  }
+
+  // Apply attribute updates
+  if (updates.attributes) {
+    updateElementAttributes(element, updates.attributes);
+  }
+
+  return true;
+};
+
+/**
+ * DEPRECATED: Update code with new element properties
+ * This function is kept for backward compatibility but should not be used
+ * Use updateElementInIframe instead for direct DOM manipulation
  */
 export const updateCodeWithElementChanges = (
   originalCode: string,
   selector: string,
   updates: { styles?: Record<string, string>; textContent?: string; attributes?: Record<string, string> }
 ): string => {
-  let updatedCode = originalCode;
-
-  // For simple cases, try to find and replace text content
-  if (updates.textContent !== undefined) {
-    // This is a simplified version - would need more robust parsing for production
-    const tagMatch = selector.match(/^(\w+)/);
-    if (tagMatch) {
-      const tagName = tagMatch[1];
-      const regex = new RegExp(`<${tagName}[^>]*>([^<]*)</${tagName}>`, 'g');
-      updatedCode = updatedCode.replace(regex, (match) => {
-        return match.replace(/>(.*?)</, `>${updates.textContent}<`);
-      });
-    }
-  }
-
-  // For styles, we'd need to inject inline styles or update style tags
-  if (updates.styles && Object.keys(updates.styles).length > 0) {
-    // This would require more sophisticated code parsing
-    // For now, we'll inject inline styles
-    const styleString = Object.entries(updates.styles)
-      .map(([key, value]) => `${key.replace(/([A-Z])/g, '-$1').toLowerCase()}: ${value}`)
-      .join('; ');
-    
-    // Try to add style attribute to matching elements
-    const tagMatch = selector.match(/^(\w+)/);
-    if (tagMatch) {
-      const tagName = tagMatch[1];
-      const regex = new RegExp(`<${tagName}([^>]*)>`, 'g');
-      updatedCode = updatedCode.replace(regex, (match, attrs) => {
-        if (attrs.includes('style=')) {
-          return match.replace(/style="([^"]*)"/, `style="$1; ${styleString}"`);
-        } else {
-          return `<${tagName}${attrs} style="${styleString}">`;
-        }
-      });
-    }
-  }
-
-  return updatedCode;
+  console.warn('updateCodeWithElementChanges is deprecated. Use updateElementInIframe for safer updates.');
+  // Return original code unchanged to prevent corruption
+  return originalCode;
 };

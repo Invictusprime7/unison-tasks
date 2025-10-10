@@ -21,6 +21,8 @@ import { ExportDialog } from "./design-studio/ExportDialog";
 import { PerformancePanel } from "./web-builder/PerformancePanel";
 import { DirectEditToolbar } from "./web-builder/DirectEditToolbar";
 import { ArrangementTools } from "./web-builder/ArrangementTools";
+import { HTMLElementPropertiesPanel } from "./web-builder/HTMLElementPropertiesPanel";
+import { updateCodeWithElementChanges } from "@/utils/htmlElementSelector";
 import { SecureIframePreview } from "@/components/SecureIframePreview";
 import { useTemplateState } from "@/hooks/useTemplateState";
 import { sanitizeHTML } from "@/utils/htmlSanitizer";
@@ -73,6 +75,8 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const [previewCode, setPreviewCode] = useState('<!-- AI-generated code will appear here -->\n<div style="padding: 40px; text-align: center;">\n  <h1>Welcome to AI Web Builder</h1>\n  <p>Use the AI Code Assistant to generate components</p>\n</div>');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const monacoRef = useRef<Monaco | null>(null);
+  const [selectedHTMLElement, setSelectedHTMLElement] = useState<any>(null);
+  const [htmlPropertiesPanelOpen, setHtmlPropertiesPanelOpen] = useState(false);
 
   // Configure Monaco for full React/JSX/TypeScript support
   const handleEditorWillMount = (monaco: Monaco) => {
@@ -1084,6 +1088,13 @@ declare global {
                     code={previewCode}
                     autoRefresh={true}
                     className="w-full h-full"
+                    enableSelection={true}
+                    onElementSelect={(elementData) => {
+                      console.log('[WebBuilder] HTML Element selected:', elementData);
+                      setSelectedHTMLElement(elementData);
+                      setHtmlPropertiesPanelOpen(true);
+                      toast.success('Element selected! Edit properties in the panel →');
+                    }}
                   />
                 </div>
               </div>
@@ -1178,6 +1189,13 @@ declare global {
                       code={previewCode}
                       autoRefresh={true}
                       className="w-full h-full"
+                      enableSelection={true}
+                      onElementSelect={(elementData) => {
+                        console.log('[WebBuilder] HTML Element selected:', elementData);
+                        setSelectedHTMLElement(elementData);
+                        setHtmlPropertiesPanelOpen(true);
+                        toast.success('Element selected! Edit properties in the panel →');
+                      }}
                     />
                   </div>
                 </div>
@@ -1341,13 +1359,43 @@ declare global {
           </Button>
         </div>
         
-        {!rightPanelCollapsed && (
+        {/* Show HTML Element Properties Panel when an HTML element is selected */}
+        {htmlPropertiesPanelOpen && selectedHTMLElement ? (
+          <HTMLElementPropertiesPanel
+            selectedElement={selectedHTMLElement}
+            onClose={() => {
+              setHtmlPropertiesPanelOpen(false);
+              setSelectedHTMLElement(null);
+            }}
+            onUpdateElement={(updates) => {
+              console.log('[WebBuilder] Updating element:', updates);
+              
+              // Update the code with the new element properties
+              const updatedCode = updateCodeWithElementChanges(
+                editorCode,
+                selectedHTMLElement.selector,
+                updates
+              );
+              
+              setEditorCode(updatedCode);
+              setPreviewCode(updatedCode);
+              
+              // Update the selected element data
+              setSelectedHTMLElement({
+                ...selectedHTMLElement,
+                ...updates,
+              });
+              
+              toast.success('Element updated');
+            }}
+          />
+        ) : !rightPanelCollapsed ? (
           <WebPropertiesPanel 
             fabricCanvas={fabricCanvas}
             selectedObject={selectedObject}
             onUpdate={() => fabricCanvas?.renderAll()}
           />
-        )}
+        ) : null}
       </div>
 
       {/* AI Assistant Panel */}

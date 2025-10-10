@@ -2,22 +2,85 @@ import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { bundleCode, extractImageSources, resolveAssetPath } from '@/utils/codeBundler';
+import { getSelectedElementData, highlightElement, removeHighlight } from '@/utils/htmlElementSelector';
 
 interface LiveHTMLPreviewProps {
   code: string;
   className?: string;
   autoRefresh?: boolean;
+  onElementSelect?: (elementData: any) => void;
+  enableSelection?: boolean;
 }
 
 export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
   code,
   className,
   autoRefresh = true,
+  onElementSelect,
+  enableSelection = true,
 }) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const updateTimerRef = useRef<NodeJS.Timeout>();
+  const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(null);
+
+
+  // Setup click handlers for element selection
+  useEffect(() => {
+    if (!enableSelection || !iframeRef.current) return;
+
+    const iframe = iframeRef.current;
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!iframeDoc) return;
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && target !== iframeDoc.body && target !== iframeDoc.documentElement) {
+        if (hoveredElement && hoveredElement !== target) {
+          removeHighlight(hoveredElement);
+        }
+        highlightElement(target, '#3b82f6');
+        setHoveredElement(target);
+      }
+    };
+
+    const handleMouseOut = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && hoveredElement === target) {
+        removeHighlight(target);
+        setHoveredElement(null);
+      }
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const target = e.target as HTMLElement;
+      if (target && target !== iframeDoc.body && target !== iframeDoc.documentElement) {
+        const elementData = getSelectedElementData(target);
+        console.log('[LiveHTMLPreview] Element selected:', elementData);
+        onElementSelect?.(elementData);
+        
+        // Keep the element highlighted
+        highlightElement(target, '#10b981');
+      }
+    };
+
+    // Add event listeners to iframe document
+    iframeDoc.addEventListener('mouseover', handleMouseOver);
+    iframeDoc.addEventListener('mouseout', handleMouseOut);
+    iframeDoc.addEventListener('click', handleClick);
+
+    return () => {
+      if (iframeDoc) {
+        iframeDoc.removeEventListener('mouseover', handleMouseOver);
+        iframeDoc.removeEventListener('mouseout', handleMouseOut);
+        iframeDoc.removeEventListener('click', handleClick);
+      }
+    };
+  }, [enableSelection, onElementSelect, hoveredElement]);
 
   const renderPreview = () => {
     // Guard against undefined or empty code

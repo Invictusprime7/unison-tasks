@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Canvas as FabricCanvas, Rect, Textbox } from 'fabric';
 import { supabase } from "@/integrations/supabase/client";
-import Editor, { loader } from '@monaco-editor/react';
+import MonacoEditor from './MonacoEditor';
 import { executeCanvasCode, getCanvasCodeExample } from '@/utils/canvasCodeRunner';
 import { parseComponentCode, renderComponentToCanvas, generateHTMLFile, generateReactComponent } from '@/utils/componentRenderer';
 import { Button } from '@/components/ui/button';
@@ -688,34 +688,30 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                                 </div>
                               </div>
                               <div className="max-h-[400px] overflow-auto">
-                                {typeof Editor === 'function' ? (
-                                  <Editor
-                                    height="auto"
-                                    defaultLanguage={lang || 'typescript'}
-                                    language={lang || 'typescript'}
-                                    value={codeContent}
-                                    theme="vs-dark"
-                                    options={{
-                                      readOnly: true,
-                                      minimap: { enabled: false },
-                                      fontSize: 13,
-                                      lineNumbers: 'on',
-                                      scrollBeyondLastLine: false,
-                                      automaticLayout: true,
-                                      wordWrap: 'on',
-                                      padding: { top: 12, bottom: 12 },
-                                      scrollbar: {
-                                        vertical: 'auto',
-                                        horizontal: 'auto',
-                                      },
-                                      renderLineHighlight: 'none',
-                                      contextmenu: false,
-                                    }}
-                                    loading={null}
-                                  />
-                                ) : (
-                                  <pre className="p-3 text-xs text-muted-foreground">Editor unavailable</pre>
-                                )}
+                                <MonacoEditor
+                                  height="auto"
+                                  defaultLanguage={lang || 'typescript'}
+                                  language={lang || 'typescript'}
+                                  value={codeContent}
+                                  theme="vs-dark"
+                                  options={{
+                                    readOnly: true,
+                                    minimap: { enabled: false },
+                                    fontSize: 13,
+                                    lineNumbers: 'on',
+                                    scrollBeyondLastLine: false,
+                                    automaticLayout: true,
+                                    wordWrap: 'on',
+                                    padding: { top: 12, bottom: 12 },
+                                    scrollbar: {
+                                      vertical: 'auto',
+                                      horizontal: 'auto',
+                                    },
+                                    renderLineHighlight: 'none',
+                                    contextmenu: false,
+                                  }}
+                                  loading={null}
+                                />
                               </div>
                             </div>
                           );

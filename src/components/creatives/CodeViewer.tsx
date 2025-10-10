@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Editor, { loader } from '@monaco-editor/react';
+import MonacoEditor from './MonacoEditor';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Download, Play, Code2, Eye, Monitor, Maximize2, X } from 'lucide-react';
@@ -184,45 +184,39 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
         </TabsList>
 
         <TabsContent value="code" className="flex-1 m-0 p-0 data-[state=active]:flex">
-          {typeof Editor === 'function' ? (
-            <Editor
-              height="100%"
-              defaultLanguage={language}
-              language={language}
-              value={code}
-              onChange={(value) => {
-                const newCode = value || '';
-                setCode(newCode);
-                setComponentData(parseComponentCode(newCode));
-              }}
-              theme="vs-dark"
-              options={{
-                minimap: { enabled: true },
-                fontSize: 14,
-                lineNumbers: 'on',
-                roundedSelection: true,
-                scrollBeyondLastLine: false,
-                automaticLayout: true,
-                tabSize: 2,
-                wordWrap: 'on',
-                formatOnPaste: true,
-                formatOnType: true,
-                padding: { top: 16, bottom: 16 },
-              }}
-              loading={
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                    <p className="text-sm text-muted-foreground">Loading editor...</p>
-                  </div>
+          <MonacoEditor
+            height="100%"
+            defaultLanguage={language}
+            language={language}
+            value={code}
+            onChange={(value) => {
+              const newCode = value || '';
+              setCode(newCode);
+              setComponentData(parseComponentCode(newCode));
+            }}
+            theme="vs-dark"
+            options={{
+              minimap: { enabled: true },
+              fontSize: 14,
+              lineNumbers: 'on',
+              roundedSelection: true,
+              scrollBeyondLastLine: false,
+              automaticLayout: true,
+              tabSize: 2,
+              wordWrap: 'on',
+              formatOnPaste: true,
+              formatOnType: true,
+              padding: { top: 16, bottom: 16 },
+            }}
+            loading={
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-sm text-muted-foreground">Loading editor...</p>
                 </div>
-              }
-            />
-          ) : (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-sm text-muted-foreground">Editor loading...</p>
-            </div>
-          )}
+              </div>
+            }
+          />
         </TabsContent>
 
 

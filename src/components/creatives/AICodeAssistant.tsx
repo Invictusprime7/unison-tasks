@@ -48,9 +48,10 @@ interface AICodeAssistantProps {
   className?: string;
   fabricCanvas?: FabricCanvas | null;
   onCodeGenerated?: (code: string) => void;
+  onSwitchToCanvasView?: () => void;
 }
 
-export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fabricCanvas, onCodeGenerated }) => {
+export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fabricCanvas, onCodeGenerated, onSwitchToCanvasView }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -796,6 +797,20 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
               code={currentCode}
               language="typescript"
               onRender={handleCodeRender}
+              onMigrateToCanvas={(code) => {
+                console.log('[AICodeAssistant] Migrate to Canvas triggered');
+                // Close the code viewer dialog
+                setCodeViewerOpen(false);
+                // Update the preview code
+                onCodeGenerated?.(code);
+                // Switch the main WebBuilder to Canvas view
+                onSwitchToCanvasView?.();
+                // Notify user
+                toast({
+                  title: 'Migrated to Canvas View',
+                  description: 'View your live preview in the Canvas tab',
+                });
+              }}
               className="h-full"
             />
           </div>

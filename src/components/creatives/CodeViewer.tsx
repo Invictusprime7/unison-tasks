@@ -15,6 +15,7 @@ interface CodeViewerProps {
   code: string;
   language?: string;
   onRender?: (code: string) => Promise<void>;
+  onMigrateToCanvas?: (code: string) => void;
   className?: string;
 }
 
@@ -22,6 +23,7 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
   code: initialCode,
   language = 'typescript',
   onRender,
+  onMigrateToCanvas,
   className,
 }) => {
   const [code, setCode] = useState(initialCode || '');
@@ -68,15 +70,19 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
   };
 
   const handleMigrateToCanvas = () => {
-    console.log('[CodeViewer] Migrating to Canvas view');
+    console.log('[CodeViewer] Migrating to Canvas view - exiting panel');
     
-    // Switch to canvas tab to show full live preview
-    setActiveTab('preview');
-    
-    toast({
-      title: 'Switched to Canvas View',
-      description: 'Full live preview now showing in iframe',
-    });
+    if (onMigrateToCanvas) {
+      // Notify parent to close dialog and switch to Canvas view
+      onMigrateToCanvas(code);
+    } else {
+      // Fallback: just switch tabs within the viewer
+      setActiveTab('preview');
+      toast({
+        title: 'Switched to Canvas View',
+        description: 'Full live preview now showing in iframe',
+      });
+    }
   };
 
   const handleRender = async () => {

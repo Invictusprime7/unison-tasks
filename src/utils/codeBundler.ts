@@ -201,8 +201,13 @@ function transpileReactWithBabel(code: string): { javascript: string; html: stri
     // Clean up the code
     let cleanCode = code.trim();
 
-    // Remove imports (they won't work in iframe anyway)
+    // Remove ALL import statements (they won't work in iframe anyway)
     cleanCode = cleanCode.replace(/import\s+.*?from\s+['"][^'"]+['"];?\n?/g, '');
+    cleanCode = cleanCode.replace(/import\s+['"][^'"]+['"];?\n?/g, '');
+    
+    // Remove ALL export statements BEFORE transpilation
+    cleanCode = cleanCode.replace(/export\s+default\s+/g, '');
+    cleanCode = cleanCode.replace(/export\s+/g, '');
     
     // Wrap if it's just a component without wrapper
     if (!cleanCode.includes('ReactDOM') && !cleanCode.includes('render')) {
@@ -215,7 +220,7 @@ ${cleanCode}
 
 // Auto-render
 const root = document.getElementById('root');
-if (root) {
+if (root && typeof ${componentName} !== 'undefined') {
   ReactDOM.render(React.createElement(${componentName}, null), root);
 }
 `;
@@ -230,6 +235,13 @@ if (root) {
       filename: 'component.tsx',
     });
 
+    let transpiledCode = babelResult.code || '';
+    
+    // Post-process: Remove any remaining export statements that Babel might have left
+    transpiledCode = transpiledCode.replace(/export\s+default\s+/g, '');
+    transpiledCode = transpiledCode.replace(/export\s+\{[^}]*\};?\n?/g, '');
+    transpiledCode = transpiledCode.replace(/export\s+/g, '');
+
     // Extract CSS from styled-components or template literals if present
     let css = '';
     const cssMatch = cleanCode.match(/const\s+styles?\s*=\s*`([\s\S]*?)`;/);
@@ -238,7 +250,7 @@ if (root) {
     }
 
     return {
-      javascript: babelResult.code || '',
+      javascript: transpiledCode,
       html: '<div id="root"></div>',
       css,
     };
@@ -254,14 +266,30 @@ if (root) {
 function transpileTypeScript(code: string): string {
   // Try Babel first for better compatibility
   try {
-    const result = Babel.transform(code, {
+    // Remove imports and exports BEFORE Babel
+    let cleanCode = code
+      .replace(/import\s+.*?from\s+['"][^'"]+['"];?\n?/g, '')
+      .replace(/import\s+['"][^'"]+['"];?\n?/g, '')
+      .replace(/export\s+default\s+/g, '')
+      .replace(/export\s+/g, '');
+
+    const result = Babel.transform(cleanCode, {
       presets: [
         ['typescript', { allExtensions: true }]
       ],
       filename: 'code.ts',
     });
-    return result.code || code;
-  } catch {
+    
+    let transpiledCode = result.code || cleanCode;
+    
+    // Post-process: Remove any remaining exports
+    transpiledCode = transpiledCode.replace(/export\s+default\s+/g, '');
+    transpiledCode = transpiledCode.replace(/export\s+\{[^}]*\};?\n?/g, '');
+    transpiledCode = transpiledCode.replace(/export\s+/g, '');
+    
+    return transpiledCode;
+  } catch (error) {
+    console.warn('Babel transpilation failed, using fallback:', error);
     // Fallback to regex-based transpilation
     let js = code
       .replace(/:\s*[\w<>[\]|&]+(\s*[=,;)])/g, '$1') // Remove type annotations
@@ -274,9 +302,12 @@ function transpileTypeScript(code: string): string {
 
     // Remove import statements
     js = js.replace(/import\s+.*?from\s+['"][^'"]+['"];?\n?/g, '');
+    js = js.replace(/import\s+['"][^'"]+['"];?\n?/g, '');
 
-    // Remove export statements
-    js = js.replace(/export\s+(default\s+)?/g, '');
+    // Remove ALL export statements
+    js = js.replace(/export\s+default\s+/g, '');
+    js = js.replace(/export\s+\{[^}]*\};?\n?/g, '');
+    js = js.replace(/export\s+/g, '');
 
     return js.trim();
   }

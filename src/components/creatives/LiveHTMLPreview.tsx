@@ -151,6 +151,9 @@ function buildHTMLDocument(html: string, css: string, javascript: string): strin
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Live Preview</title>
+  <!-- React & ReactDOM from CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -162,6 +165,7 @@ function buildHTMLDocument(html: string, css: string, javascript: string): strin
     }
     img { max-width: 100%; height: auto; }
     button { cursor: pointer; font-family: inherit; }
+    #root { width: 100%; min-height: 100vh; }
     ${safeCss}
   </style>
   <script>

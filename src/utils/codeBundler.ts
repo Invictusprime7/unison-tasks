@@ -1,7 +1,9 @@
 /**
  * Advanced Code Bundler
- * Handles TypeScript, JavaScript, imports, and asset resolution
+ * Handles TypeScript, JavaScript, React/JSX, and asset resolution with Babel transpilation
  */
+
+import * as Babel from '@babel/standalone';
 
 export interface BundledCode {
   html: string;
@@ -26,8 +28,8 @@ export function bundleCode(code: string): BundledCode {
   };
 
   // Detect code type
-  result.hasTypeScript = code.includes(': ') && (code.includes('interface') || code.includes('type '));
-  result.hasReact = code.includes('React') || code.includes('jsx') || code.includes('tsx');
+  result.hasTypeScript = code.includes('interface ') || code.includes('type ') || code.includes(': React.') || code.includes(': string') || code.includes(': number');
+  result.hasReact = code.includes('React') || code.includes('jsx') || code.includes('tsx') || code.includes('useState') || code.includes('useEffect');
 
   // Extract imports
   const imports = extractImports(code);
@@ -42,6 +44,18 @@ export function bundleCode(code: string): BundledCode {
     parseScriptCode(code, result);
   } else if (code.includes('<html') || code.includes('<!DOCTYPE')) {
     parseRawHTML(code, result);
+  } else if (result.hasReact || result.hasTypeScript) {
+    // React/TypeScript component - transpile with Babel
+    try {
+      const transpiled = transpileReactWithBabel(code);
+      result.javascript = transpiled.javascript;
+      result.html = transpiled.html;
+      result.css = transpiled.css;
+    } catch (error) {
+      console.error('Babel transpilation failed:', error);
+      // Fallback to basic transpilation
+      result.javascript = transpileTypeScript(code);
+    }
   } else if (code.includes('function') || code.includes('const ') || code.includes('class ')) {
     // Plain JS/TS code
     result.javascript = transpileTypeScript(code);
@@ -180,26 +194,92 @@ function convertJSXToHTML(jsx: string): string {
 }
 
 /**
+ * Transpile React/TypeScript with Babel
+ */
+function transpileReactWithBabel(code: string): { javascript: string; html: string; css: string } {
+  try {
+    // Clean up the code
+    let cleanCode = code.trim();
+
+    // Remove imports (they won't work in iframe anyway)
+    cleanCode = cleanCode.replace(/import\s+.*?from\s+['"][^'"]+['"];?\n?/g, '');
+    
+    // Wrap if it's just a component without wrapper
+    if (!cleanCode.includes('ReactDOM') && !cleanCode.includes('render')) {
+      // Extract component name if possible
+      const componentMatch = cleanCode.match(/(?:function|const)\s+(\w+)/);
+      const componentName = componentMatch ? componentMatch[1] : 'App';
+      
+      cleanCode = `
+${cleanCode}
+
+// Auto-render
+const root = document.getElementById('root');
+if (root) {
+  ReactDOM.render(React.createElement(${componentName}, null), root);
+}
+`;
+    }
+
+    // Transpile with Babel
+    const babelResult = Babel.transform(cleanCode, {
+      presets: [
+        ['react', { runtime: 'classic' }],
+        ['typescript', { isTSX: true, allExtensions: true }]
+      ],
+      filename: 'component.tsx',
+    });
+
+    // Extract CSS from styled-components or template literals if present
+    let css = '';
+    const cssMatch = cleanCode.match(/const\s+styles?\s*=\s*`([\s\S]*?)`;/);
+    if (cssMatch) {
+      css = cssMatch[1].trim();
+    }
+
+    return {
+      javascript: babelResult.code || '',
+      html: '<div id="root"></div>',
+      css,
+    };
+  } catch (error) {
+    console.error('Babel transpilation error:', error);
+    throw error;
+  }
+}
+
+/**
  * Basic TypeScript to JavaScript transpilation
  */
 function transpileTypeScript(code: string): string {
-  // Remove type annotations
-  let js = code
-    .replace(/:\s*\w+(\[\])?(\s*[=,;)])/g, '$2') // Remove simple type annotations
-    .replace(/interface\s+\w+\s*{[^}]*}/g, '') // Remove interfaces
-    .replace(/type\s+\w+\s*=\s*[^;]+;/g, '') // Remove type aliases
-    .replace(/<\w+>/g, '') // Remove generic type parameters
-    .replace(/as\s+\w+/g, '') // Remove type assertions
-    .replace(/!\./, '.') // Remove non-null assertions
-    .replace(/\?\./g, '?.'); // Keep optional chaining
+  // Try Babel first for better compatibility
+  try {
+    const result = Babel.transform(code, {
+      presets: [
+        ['typescript', { allExtensions: true }]
+      ],
+      filename: 'code.ts',
+    });
+    return result.code || code;
+  } catch {
+    // Fallback to regex-based transpilation
+    let js = code
+      .replace(/:\s*[\w<>[\]|&]+(\s*[=,;)])/g, '$1') // Remove type annotations
+      .replace(/interface\s+\w+\s*{[^}]*}/g, '') // Remove interfaces
+      .replace(/type\s+\w+\s*=\s*[^;]+;/g, '') // Remove type aliases
+      .replace(/<[\w<>[\]|&, ]+>/g, '') // Remove generic type parameters
+      .replace(/as\s+[\w<>[\]|&]+/g, '') // Remove type assertions
+      .replace(/!\./, '.') // Remove non-null assertions
+      .replace(/\?\./g, '?.'); // Keep optional chaining
 
-  // Remove import statements
-  js = js.replace(/import\s+.*?from\s+['"][^'"]+['"];?\n?/g, '');
+    // Remove import statements
+    js = js.replace(/import\s+.*?from\s+['"][^'"]+['"];?\n?/g, '');
 
-  // Remove export statements
-  js = js.replace(/export\s+(default\s+)?/g, '');
+    // Remove export statements
+    js = js.replace(/export\s+(default\s+)?/g, '');
 
-  return js.trim();
+    return js.trim();
+  }
 }
 
 /**

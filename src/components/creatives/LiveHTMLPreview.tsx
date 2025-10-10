@@ -260,10 +260,12 @@ function buildHTMLDocument(html: string, css: string, javascript: string): strin
   </style>
   <script>
     window.addEventListener('error', function(e) {
-      console.error('Error:', e.error);
+      console.error('Preview Error:', e.error || e.message);
       const div = document.createElement('div');
-      div.style.cssText = 'position:fixed;top:10px;left:10px;right:10px;background:#fee;border:2px solid #fcc;padding:16px;border-radius:8px;color:#c33;z-index:999999;';
-      div.textContent = '⚠️ Error: ' + (e.error?.message || e.message);
+      div.style.cssText = 'position:fixed;top:10px;left:10px;right:10px;background:#fee;border:2px solid #fcc;padding:16px;border-radius:8px;color:#c33;z-index:999999;font-family:monospace;font-size:12px;max-height:200px;overflow:auto;';
+      div.innerHTML = '<strong>⚠️ JavaScript Error:</strong><br>' + 
+        (e.error?.message || e.message) + 
+        (e.error?.stack ? '<br><br><small>' + e.error.stack.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</small>' : '');
       document.body.insertBefore(div, document.body.firstChild);
     });
     document.addEventListener('DOMContentLoaded', function() {
@@ -277,7 +279,7 @@ function buildHTMLDocument(html: string, css: string, javascript: string): strin
 </head>
 <body>
   ${bodyContent}
-  ${safeJs ? '<script>\n' + safeJs + '\n</script>' : ''}
+  ${safeJs ? '<script>\ntry {\n' + safeJs.replace(/documejnt/g, 'document') + '\n} catch(e) { console.error("Script execution error:", e); throw e; }\n</script>' : ''}
 </body>
 </html>`;
 

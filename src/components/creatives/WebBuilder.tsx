@@ -1103,15 +1103,82 @@ declare global {
             {/* Code Mode - Full Monaco Editor Only */}
             {viewMode === 'code' && (
               <div className="w-full h-full bg-[#1e1e1e]">
-                <Editor
-                  height="100%"
-                  defaultLanguage="typescript"
-                  language="typescript"
-                  value={editorCode}
-                  onChange={(value) => {
-                    setEditorCode(value || '');
-                    setPreviewCode(value || '');
-                  }}
+                {typeof Editor === 'function' ? (
+                  <Editor
+                    height="100%"
+                    defaultLanguage="typescript"
+                    language="typescript"
+                    value={editorCode}
+                    onChange={(value) => {
+                      setEditorCode(value || '');
+                      setPreviewCode(value || '');
+                    }}
+                    beforeMount={handleEditorWillMount}
+                    theme="vs-dark"
+                    options={{
+                      minimap: { enabled: true },
+                      fontSize: 14,
+                      lineNumbers: 'on',
+                      roundedSelection: true,
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                      tabSize: 2,
+                      wordWrap: 'on',
+                      formatOnPaste: true,
+                      formatOnType: true,
+                      padding: { top: 16, bottom: 16 },
+                      suggestOnTriggerCharacters: true,
+                      quickSuggestions: {
+                        other: true,
+                        comments: true,
+                        strings: true,
+                      },
+                      parameterHints: { enabled: true },
+                      acceptSuggestionOnCommitCharacter: true,
+                      acceptSuggestionOnEnter: 'on',
+                      autoClosingBrackets: 'always',
+                      autoClosingQuotes: 'always',
+                      autoIndent: 'full',
+                      bracketPairColorization: { enabled: true },
+                      colorDecorators: true,
+                      contextmenu: true,
+                      cursorBlinking: 'smooth',
+                      cursorSmoothCaretAnimation: 'on',
+                      smoothScrolling: true,
+                      snippetSuggestions: 'inline',
+                      folding: true,
+                      foldingHighlight: true,
+                      showFoldingControls: 'always',
+                      suggest: {
+                        showWords: true,
+                        showMethods: true,
+                        showFunctions: true,
+                        showConstructors: true,
+                        showFields: true,
+                        showVariables: true,
+                        showClasses: true,
+                        showStructs: true,
+                        showInterfaces: true,
+                        showModules: true,
+                        showProperties: true,
+                        showEvents: true,
+                        showOperators: true,
+                        showUnits: true,
+                        showValues: true,
+                        showConstants: true,
+                        showEnums: true,
+                        showEnumMembers: true,
+                        showKeywords: true,
+                        showSnippets: true,
+                      },
+                    }}
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">Editor unavailable</div>
+                )}
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-sm text-muted-foreground">Editor unavailable</div>
+                )}
                   beforeMount={handleEditorWillMount}
                   theme="vs-dark"
                   options={{
@@ -1219,15 +1286,20 @@ declare global {
                         View in Canvas
                       </Button>
                     </div>
-                    <Editor
-                      height="calc(100% - 40px)"
-                      defaultLanguage="typescript"
-                      language="typescript"
-                      value={editorCode}
-                      onChange={(value) => {
-                        setEditorCode(value || '');
-                        setPreviewCode(value || '');
-                      }}
+                    {typeof Editor === 'function' ? (
+                      <Editor
+                        height="calc(100% - 40px)"
+                        defaultLanguage="typescript"
+                        language="typescript"
+                        value={editorCode}
+                        onChange={(value) => {
+                          setEditorCode(value || '');
+                          setPreviewCode(value || '');
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full h-[calc(100%-40px)] flex items-center justify-center text-sm text-muted-foreground">Editor unavailable</div>
+                    )}
                       beforeMount={handleEditorWillMount}
                       theme="vs-dark"
                       options={{

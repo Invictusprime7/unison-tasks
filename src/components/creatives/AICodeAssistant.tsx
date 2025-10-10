@@ -688,30 +688,34 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
                                 </div>
                               </div>
                               <div className="max-h-[400px] overflow-auto">
-                                <Editor
-                                  height="auto"
-                                  defaultLanguage={lang || 'typescript'}
-                                  language={lang || 'typescript'}
-                                  value={codeContent}
-                                  theme="vs-dark"
-                                  options={{
-                                    readOnly: true,
-                                    minimap: { enabled: false },
-                                    fontSize: 13,
-                                    lineNumbers: 'on',
-                                    scrollBeyondLastLine: false,
-                                    automaticLayout: true,
-                                    wordWrap: 'on',
-                                    padding: { top: 12, bottom: 12 },
-                                    scrollbar: {
-                                      vertical: 'auto',
-                                      horizontal: 'auto',
-                                    },
-                                    renderLineHighlight: 'none',
-                                    contextmenu: false,
-                                  }}
-                                  loading={null}
-                                />
+                                {typeof Editor === 'function' ? (
+                                  <Editor
+                                    height="auto"
+                                    defaultLanguage={lang || 'typescript'}
+                                    language={lang || 'typescript'}
+                                    value={codeContent}
+                                    theme="vs-dark"
+                                    options={{
+                                      readOnly: true,
+                                      minimap: { enabled: false },
+                                      fontSize: 13,
+                                      lineNumbers: 'on',
+                                      scrollBeyondLastLine: false,
+                                      automaticLayout: true,
+                                      wordWrap: 'on',
+                                      padding: { top: 12, bottom: 12 },
+                                      scrollbar: {
+                                        vertical: 'auto',
+                                        horizontal: 'auto',
+                                      },
+                                      renderLineHighlight: 'none',
+                                      contextmenu: false,
+                                    }}
+                                    loading={null}
+                                  />
+                                ) : (
+                                  <pre className="p-3 text-xs text-muted-foreground">Editor unavailable</pre>
+                                )}
                               </div>
                             </div>
                           );

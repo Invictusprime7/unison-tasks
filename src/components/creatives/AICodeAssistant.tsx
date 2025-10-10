@@ -59,14 +59,96 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
   const [learningEnabled, setLearningEnabled] = useState(true);
   const [codeViewerOpen, setCodeViewerOpen] = useState(false);
   const [currentCode, setCurrentCode] = useState('');
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
+  // Load or create conversation on mount
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    loadOrCreateConversation();
+  }, []);
+
+  const loadOrCreateConversation = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Try to get the most recent conversation for this mode
+      const { data: existingConversations } = await supabase
+        .from('chat_conversations')
+        .select('id')
+        .eq('mode', mode)
+        .order('updated_at', { ascending: false })
+        .limit(1);
+
+      let convId: string;
+
+      if (existingConversations && existingConversations.length > 0) {
+        // Use existing conversation
+        convId = existingConversations[0].id;
+        await loadMessages(convId);
+      } else {
+        // Create new conversation
+        const { data: newConv, error } = await supabase
+          .from('chat_conversations')
+          .insert({
+            user_id: user.id,
+            mode,
+            title: `${mode.charAt(0).toUpperCase() + mode.slice(1)} Chat`,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+        convId = newConv.id;
+      }
+
+      setConversationId(convId);
+    } catch (error) {
+      console.error('Error loading conversation:', error);
     }
-  }, [messages]);
+  };
+
+  const loadMessages = async (convId: string) => {
+    try {
+      const { data: chatMessages, error } = await supabase
+        .from('chat_messages')
+        .select('*')
+        .eq('conversation_id', convId)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+
+      if (chatMessages) {
+        const loadedMessages: Message[] = chatMessages.map(msg => ({
+          role: msg.role as 'user' | 'assistant',
+          content: msg.content,
+          timestamp: new Date(msg.created_at),
+          hasCode: msg.has_code || false,
+          componentData: msg.component_data,
+        }));
+        setMessages(loadedMessages);
+      }
+    } catch (error) {
+      console.error('Error loading messages:', error);
+    }
+  };
+
+  const saveMessage = async (message: Message) => {
+    if (!conversationId) return;
+
+    try {
+      await supabase.from('chat_messages').insert({
+        conversation_id: conversationId,
+        role: message.role,
+        content: message.content,
+        has_code: message.hasCode || false,
+        component_data: message.componentData || null,
+      });
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
+  };
 
   const openCodeViewer = (code: string) => {
     console.log('[AICodeAssistant] Opening code viewer with code:', code.substring(0, 100));
@@ -220,7 +302,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || !conversationId) return;
 
     const userMessage: Message = {
       role: 'user',
@@ -231,6 +313,9 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+
+    // Save user message to database
+    await saveMessage(userMessage);
 
     try {
       const response = await fetch(
@@ -363,6 +448,18 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
               }
             }
           }
+        }
+
+        // Save the complete assistant message to database
+        if (assistantContent) {
+          const assistantMessage: Message = {
+            role: 'assistant',
+            content: assistantContent,
+            timestamp: new Date(),
+            hasCode: assistantContent.includes('```'),
+            componentData: toolCallData,
+          };
+          await saveMessage(assistantMessage);
         }
 
         // Auto-render if we got component data and canvas is available

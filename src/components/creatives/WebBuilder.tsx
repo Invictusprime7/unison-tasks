@@ -19,6 +19,8 @@ import { CodePreviewDialog } from "./web-builder/CodePreviewDialog";
 import { IntegrationsPanel } from "./design-studio/IntegrationsPanel";
 import { ExportDialog } from "./design-studio/ExportDialog";
 import { PerformancePanel } from "./web-builder/PerformancePanel";
+import { DirectEditToolbar } from "./web-builder/DirectEditToolbar";
+import { ArrangementTools } from "./web-builder/ArrangementTools";
 import { SecureIframePreview } from "@/components/SecureIframePreview";
 import { useTemplateState } from "@/hooks/useTemplateState";
 import { sanitizeHTML } from "@/utils/htmlSanitizer";
@@ -902,6 +904,19 @@ declare global {
 
         {/* Center Canvas Area */}
         <div className="flex-1 flex flex-col bg-[#0a0a0a]">
+          {/* Direct Edit Toolbar - Typography and Quick Edits */}
+          <DirectEditToolbar 
+            fabricCanvas={fabricCanvas}
+            selectedObject={selectedObject}
+            onPropertyChange={() => history.save()}
+          />
+          
+          {/* Arrangement Tools - Layer Order, Alignment, Actions */}
+          <ArrangementTools 
+            fabricCanvas={fabricCanvas}
+            selectedObject={selectedObject}
+          />
+
           {/* Device & Breakpoint Controls */}
           <div className="h-12 border-b border-white/10 flex items-center justify-between px-4">
             <div className="flex items-center gap-2">

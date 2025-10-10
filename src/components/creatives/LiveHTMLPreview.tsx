@@ -1,8 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useImperativeHandle, forwardRef } from 'react';
 import { cn } from '@/lib/utils';
 import { AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { bundleCode, extractImageSources, resolveAssetPath } from '@/utils/codeBundler';
-import { getSelectedElementData, highlightElement, removeHighlight } from '@/utils/htmlElementSelector';
+import { getSelectedElementData, highlightElement, removeHighlight, updateElementInIframe } from '@/utils/htmlElementSelector';
 
 interface LiveHTMLPreviewProps {
   code: string;
@@ -12,18 +12,37 @@ interface LiveHTMLPreviewProps {
   enableSelection?: boolean;
 }
 
-export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
+export interface LiveHTMLPreviewHandle {
+  updateElement: (selector: string, updates: any) => boolean;
+  getIframe: () => HTMLIFrameElement | null;
+}
+
+export const LiveHTMLPreview = forwardRef<LiveHTMLPreviewHandle, LiveHTMLPreviewProps>(({
   code,
   className,
   autoRefresh = true,
   onElementSelect,
   enableSelection = true,
-}) => {
+}, ref) => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [errorMessage, setErrorMessage] = useState<string>('');
   const updateTimerRef = useRef<NodeJS.Timeout>();
   const [hoveredElement, setHoveredElement] = useState<HTMLElement | null>(null);
+  const selectedElementRef = useRef<HTMLElement | null>(null);
+
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    updateElement: (selector: string, updates: any) => {
+      if (!iframeRef.current) return false;
+      const success = updateElementInIframe(iframeRef.current, selector, updates);
+      if (success) {
+        console.log('[LiveHTMLPreview] Element updated successfully:', selector);
+      }
+      return success;
+    },
+    getIframe: () => iframeRef.current,
+  }));
 
 
   // Setup click handlers for element selection
@@ -59,11 +78,17 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
       
       const target = e.target as HTMLElement;
       if (target && target !== iframeDoc.body && target !== iframeDoc.documentElement) {
+        // Remove previous selection highlight
+        if (selectedElementRef.current && selectedElementRef.current !== target) {
+          removeHighlight(selectedElementRef.current);
+        }
+        
         const elementData = getSelectedElementData(target);
         console.log('[LiveHTMLPreview] Element selected:', elementData);
         onElementSelect?.(elementData);
         
-        // Keep the element highlighted
+        // Store reference to selected element and keep it highlighted
+        selectedElementRef.current = target;
         highlightElement(target, '#10b981');
       }
     };
@@ -186,8 +211,10 @@ export const LiveHTMLPreview: React.FC<LiveHTMLPreviewProps> = ({
         sandbox="allow-scripts allow-same-origin allow-forms allow-modals"
       />
     </div>
-  );
-};
+    );
+});
+
+LiveHTMLPreview.displayName = 'LiveHTMLPreview';
 
 function buildHTMLDocument(html: string, css: string, javascript: string): string {
   // Guard against undefined values

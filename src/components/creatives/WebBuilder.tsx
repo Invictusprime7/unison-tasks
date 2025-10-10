@@ -22,7 +22,6 @@ import { PerformancePanel } from "./web-builder/PerformancePanel";
 import { DirectEditToolbar } from "./web-builder/DirectEditToolbar";
 import { ArrangementTools } from "./web-builder/ArrangementTools";
 import { HTMLElementPropertiesPanel } from "./web-builder/HTMLElementPropertiesPanel";
-import { updateCodeWithElementChanges } from "@/utils/htmlElementSelector";
 import { SecureIframePreview } from "@/components/SecureIframePreview";
 import { useTemplateState } from "@/hooks/useTemplateState";
 import { sanitizeHTML } from "@/utils/htmlSanitizer";
@@ -77,6 +76,7 @@ export const WebBuilder = ({ initialHtml, initialCss, onSave }: WebBuilderProps)
   const monacoRef = useRef<Monaco | null>(null);
   const [selectedHTMLElement, setSelectedHTMLElement] = useState<any>(null);
   const [htmlPropertiesPanelOpen, setHtmlPropertiesPanelOpen] = useState(false);
+  const livePreviewRef = useRef<any>(null);
 
   // Configure Monaco for full React/JSX/TypeScript support
   const handleEditorWillMount = (monaco: Monaco) => {
@@ -1085,6 +1085,7 @@ declare global {
                   className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200"
                 >
                   <LiveHTMLPreview 
+                    ref={livePreviewRef}
                     code={previewCode}
                     autoRefresh={true}
                     className="w-full h-full"
@@ -1186,6 +1187,7 @@ declare global {
                   </div>
                   <div className="h-[calc(100%-40px)] overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
                     <LiveHTMLPreview 
+                      ref={livePreviewRef}
                       code={previewCode}
                       autoRefresh={true}
                       className="w-full h-full"
@@ -1368,25 +1370,29 @@ declare global {
               setSelectedHTMLElement(null);
             }}
             onUpdateElement={(updates) => {
-              console.log('[WebBuilder] Updating element:', updates);
+              console.log('[WebBuilder] Updating element via DOM:', updates);
               
-              // Update the code with the new element properties
-              const updatedCode = updateCodeWithElementChanges(
-                editorCode,
-                selectedHTMLElement.selector,
-                updates
-              );
-              
-              setEditorCode(updatedCode);
-              setPreviewCode(updatedCode);
-              
-              // Update the selected element data
-              setSelectedHTMLElement({
-                ...selectedHTMLElement,
-                ...updates,
-              });
-              
-              toast.success('Element updated');
+              // Update element directly in the iframe DOM (no code modification)
+              if (livePreviewRef.current) {
+                const success = livePreviewRef.current.updateElement(
+                  selectedHTMLElement.selector,
+                  updates
+                );
+                
+                if (success) {
+                  // Update the selected element data for the properties panel
+                  setSelectedHTMLElement({
+                    ...selectedHTMLElement,
+                    ...updates,
+                  });
+                  
+                  toast.success('Element updated successfully');
+                } else {
+                  toast.error('Failed to update element', {
+                    description: 'Element not found in preview'
+                  });
+                }
+              }
             }}
           />
         ) : !rightPanelCollapsed ? (

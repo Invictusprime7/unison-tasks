@@ -67,6 +67,18 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
     });
   };
 
+  const handleMigrateToCanvas = () => {
+    console.log('[CodeViewer] Migrating to Canvas view');
+    
+    // Switch to canvas tab to show full live preview
+    setActiveTab('preview');
+    
+    toast({
+      title: 'Switched to Canvas View',
+      description: 'Full live preview now showing in iframe',
+    });
+  };
+
   const handleRender = async () => {
     console.log('[CodeViewer] Rendering code to canvas:', code.substring(0, 100));
     if (!onRender) {
@@ -132,17 +144,15 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
             <Download className="w-4 h-4 mr-1" />
             Download
           </Button>
-          {onRender && (
-            <Button
-              variant="default"
-              size="sm"
-              onClick={handleRender}
-              className="h-8 px-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-            >
-              <Play className="w-4 h-4 mr-1" />
-              Migrate to Canvas
-            </Button>
-          )}
+          <Button
+            variant="default"
+            size="sm"
+            onClick={handleMigrateToCanvas}
+            className="h-8 px-3 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          >
+            <Play className="w-4 h-4 mr-1" />
+            Migrate to Canvas
+          </Button>
         </div>
       </div>
 
@@ -233,34 +243,29 @@ export const CodeViewer: React.FC<CodeViewerProps> = ({
           </div>
         </TabsContent>
 
-        <TabsContent value="preview" className="flex-1 m-0 p-4 overflow-auto bg-muted/10">
-          <div className="w-full h-full flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 mx-auto bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg flex items-center justify-center">
-                <Play className="w-8 h-8 text-white" />
-              </div>
-              <div>
-                <p className="text-sm font-medium mb-2">Migrate to Canvas</p>
-                <p className="text-xs text-muted-foreground mb-4 max-w-md mx-auto">
-                  Convert your live preview into Fabric.js canvas objects. The HTML/component will be rendered as interactive canvas elements on the white canvas space.
-                </p>
-                {onRender && (
-                  <Button
-                    onClick={handleRender}
-                    size="lg"
-                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-                  >
-                    <Play className="w-4 h-4 mr-2" />
-                    Migrate to Canvas
-                  </Button>
-                )}
-                {!onRender && (
-                  <p className="text-xs text-muted-foreground italic">
-                    Canvas not connected. Open this from the Design Studio to enable migration.
-                  </p>
-                )}
-              </div>
+        <TabsContent value="preview" className="flex-1 m-0 p-0 data-[state=active]:flex flex-col">
+          <div className="flex items-center justify-between px-4 py-2 border-b bg-muted/30">
+            <div className="flex items-center gap-2">
+              <Monitor className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Canvas - Full Live Preview</span>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsPreviewExpanded(true)}
+              className="h-8 px-2"
+            >
+              <Maximize2 className="w-4 h-4 mr-1" />
+              Expand
+            </Button>
+          </div>
+          <div className="flex-1 bg-white">
+            <LiveHTMLPreview 
+              code={code}
+              autoRefresh={true}
+              className="w-full h-full"
+              enableSelection={true}
+            />
           </div>
         </TabsContent>
       </Tabs>

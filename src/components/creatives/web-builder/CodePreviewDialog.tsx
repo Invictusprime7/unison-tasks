@@ -189,20 +189,24 @@ export const CodePreviewDialog = ({
             </div>
             {isEditMode ? (
               <div className="h-[500px] rounded-lg overflow-hidden border border-white/10">
-                <Editor
-                  height="100%"
-                  defaultLanguage="html"
-                  value={htmlCode}
-                  onChange={(value) => setHtmlCode(value || "")}
-                  theme="vs-dark"
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    lineNumbers: "on",
-                    scrollBeyondLastLine: false,
-                    automaticLayout: true,
-                  }}
-                />
+                {typeof Editor === 'function' ? (
+                  <Editor
+                    height="100%"
+                    defaultLanguage="html"
+                    value={htmlCode}
+                    onChange={(value) => setHtmlCode(value || "")}
+                    theme="vs-dark"
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 14,
+                      lineNumbers: "on",
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                    }}
+                  />
+                ) : (
+                  <div className="h-[500px] flex items-center justify-center text-sm text-muted-foreground">Editor unavailable</div>
+                )}
               </div>
             ) : (
               <pre className="bg-[#0a0a0a] p-4 rounded-lg overflow-auto max-h-[500px] text-sm">
@@ -247,20 +251,24 @@ export const CodePreviewDialog = ({
             </div>
             {isEditMode ? (
               <div className="h-[500px] rounded-lg overflow-hidden border border-white/10">
-                <Editor
-                  height="100%"
-                  defaultLanguage="css"
-                  value={cssCode}
-                  onChange={(value) => setCssCode(value || "")}
-                  theme="vs-dark"
-                  options={{
-                    minimap: { enabled: false },
-                    fontSize: 14,
-                    lineNumbers: "on",
-                    scrollBeyondLastLine: false,
-                    automaticLayout: true,
-                  }}
-                />
+                {typeof Editor === 'function' ? (
+                  <Editor
+                    height="100%"
+                    defaultLanguage="css"
+                    value={cssCode}
+                    onChange={(value) => setCssCode(value || "")}
+                    theme="vs-dark"
+                    options={{
+                      minimap: { enabled: false },
+                      fontSize: 14,
+                      lineNumbers: "on",
+                      scrollBeyondLastLine: false,
+                      automaticLayout: true,
+                    }}
+                  />
+                ) : (
+                  <div className="h-[500px] flex items-center justify-center text-sm text-muted-foreground">Editor unavailable</div>
+                )}
               </div>
             ) : (
               <pre className="bg-[#0a0a0a] p-4 rounded-lg overflow-auto max-h-[500px] text-sm">

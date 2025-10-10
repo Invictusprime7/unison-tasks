@@ -15,9 +15,25 @@ export interface BundledCode {
 }
 
 /**
+ * Strip all comments from code
+ */
+function stripComments(code: string): string {
+  // Remove single-line comments but preserve URLs (http://, https://)
+  let cleaned = code.replace(/(?<!:)\/\/(?!\/).*$/gm, '');
+  
+  // Remove multi-line comments (/* ... */)
+  cleaned = cleaned.replace(/\/\*[\s\S]*?\*\//g, '');
+  
+  return cleaned;
+}
+
+/**
  * Parse and bundle code for iframe execution
  */
 export function bundleCode(code: string): BundledCode {
+  // Strip all comments first to avoid render issues
+  const cleanCode = stripComments(code);
+  
   const result: BundledCode = {
     html: '',
     css: '',
@@ -28,40 +44,40 @@ export function bundleCode(code: string): BundledCode {
   };
 
   // Detect code type
-  result.hasTypeScript = code.includes('interface ') || code.includes('type ') || code.includes(': React.') || code.includes(': string') || code.includes(': number');
-  result.hasReact = code.includes('React') || code.includes('jsx') || code.includes('tsx') || code.includes('useState') || code.includes('useEffect');
+  result.hasTypeScript = cleanCode.includes('interface ') || cleanCode.includes('type ') || cleanCode.includes(': React.') || cleanCode.includes(': string') || cleanCode.includes(': number');
+  result.hasReact = cleanCode.includes('React') || cleanCode.includes('jsx') || cleanCode.includes('tsx') || cleanCode.includes('useState') || cleanCode.includes('useEffect');
 
   // Extract imports
-  const imports = extractImports(code);
+  const imports = extractImports(cleanCode);
   result.dependencies = imports;
 
   // Parse based on format
-  if (code.includes('```html')) {
-    parseHTMLBlocks(code, result);
-  } else if (code.includes('```jsx') || code.includes('```tsx')) {
-    parseReactCode(code, result);
-  } else if (code.includes('```javascript') || code.includes('```typescript')) {
-    parseScriptCode(code, result);
-  } else if (code.includes('<html') || code.includes('<!DOCTYPE')) {
-    parseRawHTML(code, result);
+  if (cleanCode.includes('```html')) {
+    parseHTMLBlocks(cleanCode, result);
+  } else if (cleanCode.includes('```jsx') || cleanCode.includes('```tsx')) {
+    parseReactCode(cleanCode, result);
+  } else if (cleanCode.includes('```javascript') || cleanCode.includes('```typescript')) {
+    parseScriptCode(cleanCode, result);
+  } else if (cleanCode.includes('<html') || cleanCode.includes('<!DOCTYPE')) {
+    parseRawHTML(cleanCode, result);
   } else if (result.hasReact || result.hasTypeScript) {
     // React/TypeScript component - transpile with Babel
     try {
-      const transpiled = transpileReactWithBabel(code);
+      const transpiled = transpileReactWithBabel(cleanCode);
       result.javascript = transpiled.javascript;
       result.html = transpiled.html;
       result.css = transpiled.css;
     } catch (error) {
       console.error('Babel transpilation failed:', error);
       // Fallback to basic transpilation
-      result.javascript = transpileTypeScript(code);
+      result.javascript = transpileTypeScript(cleanCode);
     }
-  } else if (code.includes('function') || code.includes('const ') || code.includes('class ')) {
+  } else if (cleanCode.includes('function') || cleanCode.includes('const ') || cleanCode.includes('class ')) {
     // Plain JS/TS code
-    result.javascript = transpileTypeScript(code);
+    result.javascript = transpileTypeScript(cleanCode);
   } else {
     // Assume HTML
-    result.html = code;
+    result.html = cleanCode;
   }
 
   return result;

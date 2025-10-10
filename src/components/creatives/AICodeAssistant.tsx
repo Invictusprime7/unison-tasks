@@ -63,7 +63,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
   const scrollRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Load or create conversation on mount
+  // Load or create conversation on mount (only if authenticated)
   useEffect(() => {
     loadOrCreateConversation();
   }, []);
@@ -71,7 +71,11 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
   const loadOrCreateConversation = async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        // Not authenticated - use in-memory only mode
+        console.log('[AICodeAssistant] Not authenticated - using in-memory chat');
+        return;
+      }
 
       // Try to get the most recent conversation for this mode
       const { data: existingConversations } = await supabase
@@ -104,8 +108,10 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
       }
 
       setConversationId(convId);
+      console.log('[AICodeAssistant] Conversation loaded:', convId);
     } catch (error) {
       console.error('Error loading conversation:', error);
+      // Continue without persistence
     }
   };
 
@@ -135,7 +141,10 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
   };
 
   const saveMessage = async (message: Message) => {
-    if (!conversationId) return;
+    if (!conversationId) {
+      console.log('[AICodeAssistant] No conversation ID - skipping message save');
+      return;
+    }
 
     try {
       await supabase.from('chat_messages').insert({
@@ -145,8 +154,10 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
         has_code: message.hasCode || false,
         component_data: message.componentData || null,
       });
+      console.log('[AICodeAssistant] Message saved to database');
     } catch (error) {
       console.error('Error saving message:', error);
+      // Continue without persistence
     }
   };
 
@@ -302,7 +313,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading || !conversationId) return;
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       role: 'user',
@@ -314,7 +325,7 @@ export const AICodeAssistant: React.FC<AICodeAssistantProps> = ({ className, fab
     setInput('');
     setIsLoading(true);
 
-    // Save user message to database
+    // Save user message to database (if authenticated)
     await saveMessage(userMessage);
 
     try {

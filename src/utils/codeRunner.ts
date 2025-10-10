@@ -109,6 +109,9 @@ export function createHTMLDocument(bundle: CodeBundle): string {
       }
     }
   </script>
+  <!-- React & ReactDOM from CDN -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -120,11 +123,15 @@ export function createHTMLDocument(bundle: CodeBundle): string {
       padding: 20px;
       background: #ffffff;
     }
+    #root {
+      width: 100%;
+      min-height: 100vh;
+    }
     ${css}
   </style>
 </head>
 <body>
-  ${html}
+  <div id="root">${html}</div>
   
   <script>
     // Error handling
@@ -137,7 +144,9 @@ export function createHTMLDocument(bundle: CodeBundle): string {
       setTimeout(() => errorDiv.remove(), 5000);
     });
     
-    ${javascript}
+    (function() {
+      ${javascript}
+    })();
   </script>
 </body>
 </html>`;

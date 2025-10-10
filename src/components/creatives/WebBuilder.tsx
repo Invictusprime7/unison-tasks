@@ -1560,6 +1560,13 @@ declare global {
       <AICodeAssistant 
         fabricCanvas={fabricCanvas}
         onCodeGenerated={handleAICodeGenerated}
+        onSwitchToCanvasView={() => {
+          console.log('[WebBuilder] Switching to Canvas view from AI Assistant');
+          setViewMode('canvas');
+          toast.success('Switched to Canvas View', {
+            description: 'Your live preview is now showing in the Canvas tab',
+          });
+        }}
       />
     </div>
   );

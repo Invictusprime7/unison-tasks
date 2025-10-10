@@ -96,10 +96,23 @@ You create COMPLETE, PRODUCTION-READY components with:
 \`\`\`tsx
 import React, { useState, useEffect } from 'react';
 
+// --- Type Definitions ---
+interface Track {
+  id: string;
+  title: string;
+  artist: string;
+}
+
 interface Props {
   title?: string;
 }
 
+// --- Helper Functions ---
+const getPlaceholderImage = (width: number, height: number, text: string) => {
+  return \`data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="\${width}" height="\${height}"><rect fill="%23333" width="\${width}" height="\${height}"/><text x="50%" y="50%" fill="%23999" text-anchor="middle" dy=".3em">\${text}</text></svg>\`;
+};
+
+// --- Main Component ---
 const ComponentName: React.FC<Props> = ({ title = 'Default Title' }) => {
   const [state, setState] = useState<string>('');
 
@@ -119,6 +132,15 @@ const ComponentName: React.FC<Props> = ({ title = 'Default Title' }) => {
 
 export default ComponentName;
 \`\`\`
+
+**ADVANCED PATTERNS SUPPORTED:**
+- Multiple TypeScript interfaces at the top
+- Helper functions and utilities
+- Complex state management with multiple hooks
+- Nested components within the file
+- Data transformation functions
+- SVG/data URI generators
+- Constants and configuration objects
 
 **ALTERNATIVE FORMAT - HTML WITH TAILWIND:**
 

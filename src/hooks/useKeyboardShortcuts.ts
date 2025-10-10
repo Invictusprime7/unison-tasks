@@ -13,6 +13,19 @@ export interface KeyboardShortcut {
 export const useKeyboardShortcuts = (shortcuts: KeyboardShortcut[]) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Ignore shortcuts when typing in input fields
+      const target = e.target as HTMLElement;
+      const isInputField = 
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        target.closest('[contenteditable="true"]');
+      
+      if (isInputField) {
+        return; // Don't process shortcuts when typing in input fields
+      }
+      
+      // Existing shortcut matching logic continues below...
       for (const shortcut of shortcuts) {
         const ctrlMatch = shortcut.ctrl === undefined || shortcut.ctrl === (e.ctrlKey || e.metaKey);
         const shiftMatch = shortcut.shift === undefined || shortcut.shift === e.shiftKey;

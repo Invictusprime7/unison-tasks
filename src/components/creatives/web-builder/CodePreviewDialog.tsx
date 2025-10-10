@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Check, Upload, Save, Code2 } from "lucide-react";
 import { toast } from "sonner";
-import Editor, { loader } from "@monaco-editor/react";
+import MonacoEditor from "../MonacoEditor";
 
 interface CodePreviewDialogProps {
   isOpen: boolean;
@@ -189,29 +189,23 @@ export const CodePreviewDialog = ({
             </div>
             {isEditMode ? (
               <div className="h-[500px] rounded-lg overflow-hidden border border-white/10">
-                {typeof Editor === 'function' ? (
-                  <Editor
-                    height="100%"
-                    defaultLanguage="html"
-                    value={htmlCode}
-                    onChange={(value) => setHtmlCode(value || "")}
-                    theme="vs-dark"
-                    options={{
-                      minimap: { enabled: false },
-                      fontSize: 14,
-                      lineNumbers: "on",
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                    }}
-                  />
-                ) : (
-                  <div className="h-[500px] flex items-center justify-center text-sm text-muted-foreground">Editor unavailable</div>
-                )}
+                <MonacoEditor
+                  height="100%"
+                  defaultLanguage="html"
+                  value={htmlCode}
+                  onChange={(value) => setHtmlCode(value || "")}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    lineNumbers: "on",
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                  }}
+                />
               </div>
             ) : (
-              <pre className="bg-[#0a0a0a] p-4 rounded-lg overflow-auto max-h-[500px] text-sm">
-                <code className="text-white/80">{htmlCode}</code>
-              </pre>
+              <pre className="bg-[#0a0a0a] p-4 rounded-lg overflow-auto max-h-[500px] text-sm">{htmlCode}</pre>
             )}
           </TabsContent>
 
@@ -251,29 +245,23 @@ export const CodePreviewDialog = ({
             </div>
             {isEditMode ? (
               <div className="h-[500px] rounded-lg overflow-hidden border border-white/10">
-                {typeof Editor === 'function' ? (
-                  <Editor
-                    height="100%"
-                    defaultLanguage="css"
-                    value={cssCode}
-                    onChange={(value) => setCssCode(value || "")}
-                    theme="vs-dark"
-                    options={{
-                      minimap: { enabled: false },
-                      fontSize: 14,
-                      lineNumbers: "on",
-                      scrollBeyondLastLine: false,
-                      automaticLayout: true,
-                    }}
-                  />
-                ) : (
-                  <div className="h-[500px] flex items-center justify-center text-sm text-muted-foreground">Editor unavailable</div>
-                )}
+                <MonacoEditor
+                  height="100%"
+                  defaultLanguage="css"
+                  value={cssCode}
+                  onChange={(value) => setCssCode(value || "")}
+                  theme="vs-dark"
+                  options={{
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    lineNumbers: "on",
+                    scrollBeyondLastLine: false,
+                    automaticLayout: true,
+                  }}
+                />
               </div>
             ) : (
-              <pre className="bg-[#0a0a0a] p-4 rounded-lg overflow-auto max-h-[500px] text-sm">
-                <code className="text-white/80">{cssCode}</code>
-              </pre>
+              <pre className="bg-[#0a0a0a] p-4 rounded-lg overflow-auto max-h-[500px] text-sm">{cssCode}</pre>
             )}
           </TabsContent>
         </Tabs>

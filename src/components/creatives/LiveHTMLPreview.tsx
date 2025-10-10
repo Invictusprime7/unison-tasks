@@ -256,8 +256,8 @@ function buildHTMLDocument(html: string, css: string, javascript: string): strin
     }
   </script>
   <!-- React & ReactDOM from CDN -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -292,8 +292,8 @@ function buildHTMLDocument(html: string, css: string, javascript: string): strin
   </script>
 </head>
 <body>
-  ${bodyContent}
-  ${safeJs ? '<script>\ntry {\n' + safeJs.replace(/documejnt/g, 'document') + '\n} catch(e) { console.error("Script execution error:", e); throw e; }\n</script>' : ''}
+  <div id="root">${bodyContent}</div>
+  ${safeJs ? '<script>\ntry {\n(function() {\n' + safeJs + '\n})();\n} catch(e) { console.error("Script execution error:", e); throw e; }\n</script>' : ''}
 </body>
 </html>`;
 

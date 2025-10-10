@@ -218,10 +218,15 @@ function transpileReactWithBabel(code: string): { javascript: string; html: stri
       cleanCode = `
 ${cleanCode}
 
-// Auto-render
-const root = document.getElementById('root');
-if (root && typeof ${componentName} !== 'undefined') {
-  ReactDOM.render(React.createElement(${componentName}, null), root);
+// Auto-render component
+if (typeof window !== 'undefined' && document.getElementById('root')) {
+  const root = document.getElementById('root');
+  const React = window.React;
+  const ReactDOM = window.ReactDOM;
+  
+  if (root && ReactDOM && typeof ${componentName} !== 'undefined') {
+    ReactDOM.render(React.createElement(${componentName}, null), root);
+  }
 }
 `;
     }

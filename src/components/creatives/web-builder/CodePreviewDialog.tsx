@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Check, Upload, Save, Code2 } from "lucide-react";
 import { toast } from "sonner";
-import Editor from "@monaco-editor/react";
+import Editor, { loader } from "@monaco-editor/react";
 
 interface CodePreviewDialogProps {
   isOpen: boolean;

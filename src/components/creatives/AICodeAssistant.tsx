@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Canvas as FabricCanvas, Rect, Textbox } from 'fabric';
 import { supabase } from "@/integrations/supabase/client";
-import Editor from '@monaco-editor/react';
+import Editor, { loader } from '@monaco-editor/react';
 import { executeCanvasCode, getCanvasCodeExample } from '@/utils/canvasCodeRunner';
 import { parseComponentCode, renderComponentToCanvas, generateHTMLFile, generateReactComponent } from '@/utils/componentRenderer';
 import { Button } from '@/components/ui/button';

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import Editor, { Monaco } from '@monaco-editor/react';
+import * as monaco from 'monaco-editor';
 import { LiveHTMLPreview } from './LiveHTMLPreview';
 import { NavigationPanel } from "./web-builder/NavigationPanel";
 import { WebPropertiesPanel } from "./web-builder/WebPropertiesPanel";

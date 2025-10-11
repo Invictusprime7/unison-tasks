@@ -8,11 +8,24 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: 8080,
+    strictPort: false,
+    open: true,
+    cors: true,
+    hmr: {
+      overlay: true,
+    },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(Boolean),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+  },
+  preview: {
+    host: "::",
+    port: 8080,
+    strictPort: false,
+    open: true,
+    cors: true,
   },
 }));

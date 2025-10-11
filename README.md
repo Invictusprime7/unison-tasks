@@ -34,7 +34,12 @@ npm i
 
 # Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
+
+# Or use the helper script with live preview info
+./scripts/run-live-preview.sh
 ```
+
+> 📖 **For detailed live preview documentation**, see [LIVE_PREVIEW_GUIDE.md](./LIVE_PREVIEW_GUIDE.md)
 
 **Edit a file directly in GitHub**
 

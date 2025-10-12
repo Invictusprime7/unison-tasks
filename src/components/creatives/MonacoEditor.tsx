@@ -1,9 +1,12 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import Editor, { OnMount } from '@monaco-editor/react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-// Enhanced Monaco Editor with React/TypeScript support and live preview capabilities
+// Enhanced Monaco Editor with React/TypeScript support and AI assistance
 const MonacoEditor: React.FC<React.ComponentProps<typeof Editor>> = (props) => {
   const editorRef = useRef<any>(null);
+  const [isAIProcessing, setIsAIProcessing] = useState(false);
 
   const handleEditorDidMount: OnMount = (editor, monaco) => {
     editorRef.current = editor;
@@ -144,9 +147,139 @@ const MonacoEditor: React.FC<React.ComponentProps<typeof Editor>> = (props) => {
       noSyntaxValidation: false,
     });
 
+    // Register AI code completion provider
+    monaco.languages.registerInlineCompletionsProvider('typescript', {
+      provideInlineCompletions: async (model, position, context) => {
+        if (isAIProcessing) return { items: [] };
+        
+        const textBeforeCursor = model.getValueInRange({
+          startLineNumber: Math.max(1, position.lineNumber - 10),
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+
+        // Only trigger on significant context
+        if (textBeforeCursor.trim().length < 20) return { items: [] };
+
+        try {
+          setIsAIProcessing(true);
+          const completion = await getAICompletion(textBeforeCursor);
+          setIsAIProcessing(false);
+
+          if (!completion) return { items: [] };
+
+          return {
+            items: [{
+              insertText: completion,
+              range: {
+                startLineNumber: position.lineNumber,
+                startColumn: position.column,
+                endLineNumber: position.lineNumber,
+                endColumn: position.column,
+              },
+            }],
+          };
+        } catch (error) {
+          setIsAIProcessing(false);
+          return { items: [] };
+        }
+      },
+      freeInlineCompletions: () => {},
+    });
+
+    // Register AI assistant command (Ctrl+Shift+A or Cmd+Shift+A)
+    editor.addAction({
+      id: 'ai-code-assistant',
+      label: 'AI Code Assistant',
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyA,
+      ],
+      contextMenuGroupId: 'navigation',
+      contextMenuOrder: 1.5,
+      run: async (ed) => {
+        const selection = ed.getSelection();
+        const selectedText = selection ? ed.getModel()?.getValueInRange(selection) : '';
+        const prompt = selectedText || ed.getValue();
+
+        if (!prompt.trim()) {
+          toast.error('Please select code or type something first');
+          return;
+        }
+
+        try {
+          setIsAIProcessing(true);
+          toast.loading('AI is thinking...', { id: 'ai-assist' });
+
+          const result = await getAIAssistance(prompt, 'code');
+
+          if (result && selection) {
+            ed.executeEdits('', [{
+              range: selection,
+              text: result,
+            }]);
+          }
+
+          toast.success('AI assistance complete', { id: 'ai-assist' });
+        } catch (error) {
+          toast.error('AI assistance failed', { id: 'ai-assist' });
+        } finally {
+          setIsAIProcessing(false);
+        }
+      },
+    });
+
     // Call original onMount if provided
     if (props.onMount) {
       props.onMount(editor, monaco);
+    }
+  };
+
+  // AI completion helper
+  const getAICompletion = async (context: string): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-code-assistant', {
+        body: {
+          messages: [
+            { role: 'user', content: `Complete this code. Only return the completion text, no explanations:\n\n${context}` }
+          ],
+          mode: 'code',
+          savePattern: false,
+        },
+      });
+
+      if (error) throw error;
+      
+      // Extract code from response
+      const codeMatch = data?.match(/```(?:tsx?|jsx?|html|css)?\n?([\s\S]*?)```/);
+      return codeMatch ? codeMatch[1].trim() : data?.trim() || null;
+    } catch (error) {
+      console.error('AI completion error:', error);
+      return null;
+    }
+  };
+
+  // AI assistance helper
+  const getAIAssistance = async (prompt: string, mode: 'code' | 'design' | 'review'): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-code-assistant', {
+        body: {
+          messages: [
+            { role: 'user', content: prompt }
+          ],
+          mode,
+          savePattern: true,
+        },
+      });
+
+      if (error) throw error;
+      
+      // Extract code from response
+      const codeMatch = data?.match(/```(?:tsx?|jsx?|html|css)?\n?([\s\S]*?)```/);
+      return codeMatch ? codeMatch[1].trim() : data?.trim() || null;
+    } catch (error) {
+      console.error('AI assistance error:', error);
+      throw error;
     }
   };
 
@@ -167,6 +300,7 @@ const MonacoEditor: React.FC<React.ComponentProps<typeof Editor>> = (props) => {
         formatOnType: true,
         suggestOnTriggerCharacters: true,
         quickSuggestions: true,
+        inlineSuggest: { enabled: true },
         ...props.options,
       }}
     />

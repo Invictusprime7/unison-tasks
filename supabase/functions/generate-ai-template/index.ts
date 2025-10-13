@@ -15,7 +15,14 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 
     if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY not configured");
+      console.warn("LOVABLE_API_KEY not configured - AI features unavailable in local development");
+      return new Response(
+        JSON.stringify({ 
+          error: "AI features are not available in local development. Deploy to Lovable Cloud to enable AI capabilities.",
+          isLocalDevelopment: true
+        }),
+        { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const systemPrompt = `You are an expert web template generator for a Web Builder canvas. Create beautiful, production-ready web page templates.

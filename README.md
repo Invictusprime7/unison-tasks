@@ -4,6 +4,15 @@
 
 **URL**: https://lovable.dev/projects/16184d1a-4f96-4f26-972e-cece3891ea55
 
+## 🚀 Quick Start
+
+**New to this project?** Check out the [QUICKSTART.md](QUICKSTART.md) guide for:
+- Easy 3-step setup
+- Live preview instructions
+- Build commands
+- Deployment options
+- Troubleshooting tips
+
 ## How can I edit this code?
 
 There are several ways of editing your application.
@@ -62,7 +71,18 @@ This project is built with:
 
 ## How can I deploy this project?
 
+### Option 1: Via Lovable (Easiest)
 Simply open [Lovable](https://lovable.dev/projects/16184d1a-4f96-4f26-972e-cece3891ea55) and click on Share -> Publish.
+
+### Option 2: Build Locally
+```bash
+# Build for production
+npm run build
+# or use the automated script
+./scripts/build.sh
+```
+
+The production files will be in the `dist/` directory. See [MIGRATION.md](MIGRATION.md) for deployment to Vercel, Netlify, Docker, and more.
 
 ## Can I connect a custom domain to my Lovable project?
 

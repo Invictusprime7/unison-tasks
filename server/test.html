@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OpenAI API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        #response { border: 1px solid #ccc; padding: 20px; margin: 20px 0; min-height: 200px; }
+        button { padding: 10px 20px; font-size: 16px; }
+        input { width: 300px; padding: 10px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <h1>OpenAI API Integration Test</h1>
+    <input type="text" id="messageInput" placeholder="Enter your message" value="Hello! How are you?">
+    <button onclick="testAPI()">Test API</button>
+    <div id="response"></div>
+
+    <script>
+        async function testAPI() {
+            const message = document.getElementById('messageInput').value;
+            const responseDiv = document.getElementById('response');
+            responseDiv.innerHTML = 'Sending request...';
+
+            try {
+                const response = await fetch('/api/respond', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        messages: [{ role: 'user', content: message }]
+                    })
+                });
+
+                if (response.ok) {
+                    const reader = response.body.getReader();
+                    responseDiv.innerHTML = '<strong>Response:</strong><br>';
+                    
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        
+                        const text = new TextDecoder().decode(value);
+                        responseDiv.innerHTML += text;
+                    }
+                } else {
+                    responseDiv.innerHTML = `Error: ${response.status} ${response.statusText}`;
+                }
+            } catch (error) {
+                responseDiv.innerHTML = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

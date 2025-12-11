@@ -1,28 +1,52 @@
-project_id = "rwmbfwjsdwchqiqnqcjo"
+project_id = "oruwtgdjurstvhgqcvbv"
 
-[functions.generate-image]
+[functions.gohighlevel-crm]
 verify_jwt = false
 
-[functions.generate-template-image]
+[functions.template-automation]
+verify_jwt = false
+
+[functions.ai-code-assistant]
 verify_jwt = false
 
 [functions.ai-design-assistant]
 verify_jwt = false
 
-[functions.ai-web-assistant]
+[functions.generate-image]
 verify_jwt = false
 
-[functions.generate-page]
+[functions.generate-ai-template]
 verify_jwt = false
 
 [functions.generate-template]
 verify_jwt = false
 
-[functions.web-builder-ai]
+[functions.generate-template-image]
+verify_jwt = false
+
+[functions.generate-page]
 verify_jwt = false
 
 [functions.copy-rewrite]
 verify_jwt = false
 
-[functions.ai-code-assistant]
+[functions.publish-site]
+verify_jwt = false
+
+[functions.web-builder-ai]
+verify_jwt = false
+
+[functions.ai-web-assistant]
+verify_jwt = false
+
+[functions.workflow-trigger]
+verify_jwt = false
+
+[functions.workflow-cron]
+verify_jwt = false
+
+[functions.workflow-job-processor]
+verify_jwt = false
+
+[functions.form-submit]
 verify_jwt = false
